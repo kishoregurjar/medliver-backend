@@ -17,8 +17,9 @@ const jwt = {
         return jsonwebtoken.sign(payload, SECRET_KEY, options);
     },
 
-    verifyAdminToken: (requiredPermission = null) => {
+    verifyAdminToken: () => {
         return async (req, res, next) => {
+            console.log("verifying token", req.headers.authorization);
             try {
                 let token = req.headers.authorization;
                 if (!token) {
@@ -46,13 +47,8 @@ const jwt = {
                     return next(new CustomError("Admin not found", 401));
                 }
 
-                if (admin.accountStatus !== 'active') {
+                if (admin.isActive !== true) {
                     return next(new CustomError("Admin deactivated", 403));
-                }
-
-                // Check permission if required
-                if (requiredPermission && (!admin.permissions || !admin.permissions.includes(requiredPermission))) {
-                    return next(new CustomError("Access Denied: You don't have permission for this action", 403));
                 }
 
                 req.admin = admin;

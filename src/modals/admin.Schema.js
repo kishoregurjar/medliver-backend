@@ -26,6 +26,10 @@ const adminSchema = new mongoose.Schema({
         default: 'admin',
         required: true
     },
+    avatar: {
+        type: String,
+        default: null
+    },
     isActive: {
         type: Boolean,
         default: true

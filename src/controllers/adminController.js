@@ -6,6 +6,7 @@ const {successRes} = require('../services/response');
 const asyncErrorHandler = require('../utils/asyncErrorHandler');
 // const { assignJwt } = require('../utils/jwtToken');
 const { assignJwt } = require("../utils/jsonWebToken");
+const { forgetPasswordMail } = require('../services/sendMail');
 
 module.exports.login = asyncErrorHandler(async (req, res, next) => {
     let { email, password } = req.body;
@@ -60,3 +61,85 @@ module.exports.login = asyncErrorHandler(async (req, res, next) => {
         token,
     });
 });
+
+
+
+module.exports.getAdminDetails = asyncErrorHandler(async (req, res,next)=>{
+    const admin = req.admin._id;
+    console.log("admin", admin);
+    const findAdmin = await adminSchema.findById(admin).select("-password -__v -createdAt -updatedAt");
+    if (!findAdmin) {
+        return next(new CustomError("Admin not found", 404));
+    }
+
+    const sanitizedAdmin = findAdmin.toObject();
+    delete sanitizedAdmin.password;
+    return successRes(res, 200, true, "Details fetched successfully", sanitizedAdmin);
+})
+
+
+
+module.exports.forgetPassword = asyncErrorHandler(async (req,res,next)=>{
+    const {email}  = req.body;
+    const findAdmin = await adminSchema.findOne({email});
+    if(!findAdmin){
+        return next(new CustomError("Admin not found", 404));
+    }
+    const payload = {
+        _id: findAdmin._id,
+        email: findAdmin.email,
+        role: findAdmin.role,
+        permissions: findAdmin.permissions,
+    };
+
+    const token = assignJwt(payload);
+
+    const resetPasswordLink = `${process.env.FORGET_PASSWORD_LINK}/${token}`;
+
+    const sendMail = forgetPasswordMail(
+        email,
+        findAdmin.name,
+        resetPasswordLink
+      );
+
+    return successRes(res, 200, true, "Password reset link sent successfully", sendMail);
+})
+
+
+module.exports.resetPassword = asyncErrorHandler(async (req,res,next)=>{
+    try {
+      const {resetLink, password} = req.body;
+    
+        let decoded;
+        try {
+          decoded = jsonwebtoken.verify(resetLink, process.env.SECRET_KEY);
+        } catch (err) {
+          if (err.name === "TokenExpiredError") {
+            return next(
+              new CustomError("Reset link expired, please request a new one", 401)
+            );
+          }
+          return next(new CustomError("Invalid token", 400));
+        }
+    
+        const adminId = decoded._id;
+        const findAdmin = await adminSchema.findById(adminId);
+        if (!findAdmin) {
+          return next(new CustomError("Admin not found", 404));
+        }
+    
+       
+        if (!password) {
+          return next(new CustomError("Please provide a new password", 400));
+        }
+    
+        const hashedPassword = await bcrypt.hash(password, 10);
+    
+        findAdmin.password = hashedPassword;
+        await findAdmin.save();
+    
+        return successRes(res, 200, true, "Password reset successfully");
+      } catch (error) {
+        return next(error);
+      }
+})
