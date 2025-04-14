@@ -1,12 +1,13 @@
 const adminSchema = require('../modals/admin.Schema');
 const bcrypt = require('bcrypt');
-// const jsonwebtoken = require('jsonwebtoken');
+const jsonwebtoken = require('jsonwebtoken');
 const CustomError = require('../utils/customError');
 const {successRes} = require('../services/response');
 const asyncErrorHandler = require('../utils/asyncErrorHandler');
 // const { assignJwt } = require('../utils/jwtToken');
 const { assignJwt } = require("../utils/jsonWebToken");
 const { forgetPasswordMail } = require('../services/sendMail');
+const { JsonWebTokenError } = require('jsonwebtoken');
 
 module.exports.login = asyncErrorHandler(async (req, res, next) => {
     let { email, password } = req.body;
@@ -85,11 +86,11 @@ module.exports.forgetPassword = asyncErrorHandler(async (req,res,next)=>{
     if(!findAdmin){
         return next(new CustomError("Admin not found", 404));
     }
+    console.log("findAdmin", findAdmin);
     const payload = {
         _id: findAdmin._id,
         email: findAdmin.email,
-        role: findAdmin.role,
-        permissions: findAdmin.permissions,
+        role: findAdmin.role
     };
 
     const token = assignJwt(payload);
@@ -102,7 +103,7 @@ module.exports.forgetPassword = asyncErrorHandler(async (req,res,next)=>{
         resetPasswordLink
       );
 
-    return successRes(res, 200, true, "Password reset link sent successfully", sendMail);
+    return successRes(res, 200, true, "Password reset link sent successfully", token);
 })
 
 
@@ -113,6 +114,7 @@ module.exports.resetPassword = asyncErrorHandler(async (req,res,next)=>{
         let decoded;
         try {
           decoded = jsonwebtoken.verify(resetLink, process.env.SECRET_KEY);
+          console.log(decoded, "decoded token");    
         } catch (err) {
           if (err.name === "TokenExpiredError") {
             return next(
@@ -143,3 +145,37 @@ module.exports.resetPassword = asyncErrorHandler(async (req,res,next)=>{
         return next(error);
       }
 })
+
+
+module.exports.changedPassword = asyncErrorHandler(async (req,res,next)=>{
+    const {password} = req.body;
+    const adminId = req.admin._id;
+    const findAdmin = await adminSchema.findById(adminId);
+    if (!findAdmin) {
+        return next(new CustomError("Admin not found", 404));
+    }
+
+    if (!password) {
+        return next(new CustomError("Please provide a new password", 400));
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+    findAdmin.password = hashedPassword;
+    await findAdmin.save();
+    return successRes(res, 200, true, "Password changed successfully");
+});
+
+
+
+module.exports.updateAdminProfile = asyncErrorHandler(async (req,res,next)=>{
+    const adminId = req.admin._id;
+    const findAdmin = await adminSchema.findById(adminId);
+    if (!findAdmin) {
+        return next(new CustomError("Admin not found", 404));
+    }
+    const updateAdmin = await adminSchema.findByIdAndUpdate(adminId, req.body, {
+        new: true,
+        runValidators: true,
+    });
+    return successRes(res, 200, true, "Admin updated successfully", updateAdmin);
+
+});
