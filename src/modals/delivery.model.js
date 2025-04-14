@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const deliveryPartnerSchema = new mongoose.Schema({
-  name: {
+  fullname: {
     type: String,
     required: true,
   },
@@ -25,22 +25,34 @@ const deliveryPartnerSchema = new mongoose.Schema({
   documents: {
     aadharNumber: String,
     licenseNumber: String,
-    idProof: String, // URL or file path
+    idProof: String,
     verificationStatus: {
       type: String,
       enum: ["pending", "approved", "rejected"],
       default: "pending",
     },
   },
-  location: {
-    lat: Number,
-    lng: Number,
-  },
   availabilityStatus: {
     type: String,
     enum: ["available", "on-delivery", "offline"],
     default: "offline",
   },
+  location: {
+    lat: { type: Number },
+    long: { type: Number },
+  },
+    pharmacy: {
+      lat: { type: Number },
+      long: { type: Number },
+    },
+    delivery: {
+      lat: { type: Number },
+      long: { type: Number },
+    },
+    pathology: {
+      lat: { type: Number },
+      long: { type: Number },
+    },
   assignedOrders: [
     {
       orderId: { type: mongoose.Schema.Types.ObjectId, ref: "Order" },
@@ -66,14 +78,11 @@ const deliveryPartnerSchema = new mongoose.Schema({
       phone: String,
     },
   ],
-  sosTriggered: {          //for emergency situation he can press. if is true then in admin pannel it should desplay SOS from Ravi Singh (ID: DP104) at 10:45 PM near City Hospital." 
+  sosTriggered: {
     type: Boolean,
     default: false,
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
+ 
+},{ timestamps: true });
 
 module.exports = mongoose.model("DeliveryPartner", deliveryPartnerSchema);

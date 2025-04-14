@@ -20,7 +20,7 @@ const pathologyCenterSchema = new mongoose.Schema({
   },
   address: {
     type: String,
-    required: true, // Address is important for setting collection and testing locations
+    required: true,
   },
   labs: [
     {
@@ -53,7 +53,7 @@ const pathologyCenterSchema = new mongoose.Schema({
           },
           testType: {
             type: String,
-            enum: ['blood', 'urine', 'X-ray', 'ultrasound', 'other'], // Categories of tests
+            enum: ['blood', 'urine', 'X-ray', 'ultrasound', 'other'],
             required: true,
           },
         },
@@ -81,7 +81,7 @@ const pathologyCenterSchema = new mongoose.Schema({
       },
       sampleCollectionDate: {
         type: Date,
-        required: true, // Scheduled collection date
+        required: true,
       },
       status: {
         type: String,
@@ -89,8 +89,8 @@ const pathologyCenterSchema = new mongoose.Schema({
         default: 'pending',
       },
       report: {
-        type: String, // Link to the report (URL or reference to storage)
-        default: null, // If available after processing
+        type: String,
+        default: null,
       },
       paymentStatus: {
         type: String,
@@ -98,7 +98,7 @@ const pathologyCenterSchema = new mongoose.Schema({
         default: 'pending',
       },
       paymentMethod: {
-        type: String, // Can be card, UPI, wallet, etc.
+        type: String,
       },
     },
   ],
@@ -115,11 +115,11 @@ const pathologyCenterSchema = new mongoose.Schema({
       },
       collectionTime: {
         type: Date,
-        required: true, // Date and time when the sample will be collected
+        required: true,
       },
       deliveryAddress: {
         type: String,
-        required: true, // Collection address for home service
+        required: true,
       },
       collectionStatus: {
         type: String,
@@ -130,17 +130,18 @@ const pathologyCenterSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'DeliveryPartner',
       },
+      customerLocation: {
+        lat: { type: Number },
+        long: { type: Number },
+      },
+      deliveryPartnerLocation: {
+        lat: { type: Number },
+        long: { type: Number },
+      },
     },
   ],
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
+
+},{ timestamps: true });
 
 pathologyCenterSchema.pre('save', function(next) {
   this.updatedAt = Date.now();

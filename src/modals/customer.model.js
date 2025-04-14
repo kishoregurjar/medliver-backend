@@ -1,12 +1,7 @@
 const mongoose = require('mongoose');
 
 const customerSchema = new mongoose.Schema({
-  firstName: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  lastName: {
+  fullname: {
     type: String,
     required: true,
     trim: true,
@@ -29,10 +24,10 @@ const customerSchema = new mongoose.Schema({
   },
   address: {
     type: String,
-    required: true, // Customer must have an address for delivery
+    required: true,
   },
   profilePicture: {
-    type: String, // URL to the profile picture (optional)
+    type: String,
   },
   subscriptionPlan: {
     type: String,
@@ -43,10 +38,10 @@ const customerSchema = new mongoose.Schema({
     {
       medicineName: String,
       dosage: String,
-      time: Date, // Time for reminder
+      time: Date,
       active: {
         type: Boolean,
-        default: true, // If the reminder is active or not
+        default: true,
       },
     },
   ],
@@ -87,6 +82,8 @@ const customerSchema = new mongoose.Schema({
       },
     ],
   },
+
+  //  Pathology Bookings with location
   pathologyBookings: [
     {
       testName: String,
@@ -98,7 +95,7 @@ const customerSchema = new mongoose.Schema({
         default: 'pending',
       },
       report: {
-        type: String, // URL or reference to the report
+        type: String,
         default: null,
       },
     },
@@ -112,18 +109,21 @@ const customerSchema = new mongoose.Schema({
       notes: String,
     },
   ],
-  
-  createdAt: {
-    type: Date,
-    default: Date.now,
+  pharmacyLocation: {
+    lat: { type: Number },
+    long: { type: Number },
   },
-  updatedAt: {
-    type: Date,
-    default: Date.now,
+  deliveryLocation: {
+    lat: { type: Number },
+    long: { type: Number },
   },
-});
+  pathologyLocation: {
+    lat: { type: Number },
+    long: { type: Number },
+  },
+},{timestamps:true});
 
-customerSchema.pre('save', function(next) {
+customerSchema.pre('save', function (next) {
   this.updatedAt = Date.now();
   next();
 });
