@@ -17,7 +17,7 @@ const jwt = {
         return jsonwebtoken.sign(payload, SECRET_KEY, options);
     },
 
-    verifyAdminToken: () => {
+    verifyAdminToken: (role=null) => {
         return async (req, res, next) => {
             console.log("verifying token", req.headers.authorization);
             try {
@@ -51,6 +51,9 @@ const jwt = {
                     return next(new CustomError("Admin deactivated", 403));
                 }
 
+                if(role && role !== admin.role){
+                    return next(new CustomError("Access Denied: You do not have permission to access this resource", 403));
+                }
                 req.admin = admin;
                 next();
             } catch (error) {
