@@ -102,40 +102,6 @@ module.exports.getPharmacyById = asyncErrorHandler(async (req, res, next) => {
   });
 
 
-//   module.exports.getMyPharmacy = asyncErrorHandler(async (req, res, next) => {
-//     const admin = req.user;
-  
-//     if (!admin || !admin.pharmacyId) {
-//       return next(new CustomError('Pharmacy not associated with admin', 404));
-//     }
-  
-//     const pharmacy = await Pharmacy.findById(admin.pharmacyId);
-  
-//     if (!pharmacy) {
-//       return next(new CustomError('Pharmacy not found', 404));
-//     }
-  
-//     return successRes(res, 200, true, 'Pharmacy fetched successfully', pharmacy);
-//   });
-
-// module.exports.getMyPharmacy = asyncErrorHandler(async (req, res, next) => {
-//     const admin = req.user; // assuming middleware sets req.user after JWT verification
-  
-//     if (!admin || !admin.pharmacyId) {
-//       return next(new CustomError('Pharmacy not associated with admin', 404));
-//     }
-  
-//     const pharmacy = await Pharmacy.findById(admin.pharmacyId);
-  
-//     if (!pharmacy) {
-//       return next(new CustomError('Pharmacy not found', 404));
-//     }
-  
-//     return successRes(res, 200, true, 'Pharmacy fetched successfully', {
-//       pharmacy,
-//     });
-//   });
-
 module.exports.deletePharmacy = asyncErrorHandler(async (req, res, next) => {
     const { pharmacyId } = req.query;
   
@@ -151,6 +117,7 @@ module.exports.deletePharmacy = asyncErrorHandler(async (req, res, next) => {
   
     return successRes(res, 200, true, 'Pharmacy and associated admin deleted successfully.');
   });
+
 
   module.exports.updatePharmacy = asyncErrorHandler(async (req, res, next) => {
     const { pharmacyId, name, ownerName, phone, address, documents, status } = req.body;
@@ -182,7 +149,6 @@ module.exports.deletePharmacy = asyncErrorHandler(async (req, res, next) => {
 
 
   module.exports.getAllPharmacy=asyncErrorHandler(async (req,res,next)=>{
-
     let {page,limit} = req.query;
 
     page = parseInt(page) || 1;
@@ -207,12 +173,11 @@ module.exports.deletePharmacy = asyncErrorHandler(async (req, res, next) => {
   })
 
   module.exports.searchPharmacy = asyncErrorHandler(async (req, res, next) => {
-    let { page, limit, value } = req.query;
+    let { value } = req.query;
   
     if (!value) {
       return next(new CustomError("Search value is required", 400));
     }
-  
     page = parseInt(page) || 1;
     limit = parseInt(limit) || 10;
     const skip = (page - 1) * limit;
