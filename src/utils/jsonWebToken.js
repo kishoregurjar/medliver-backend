@@ -51,6 +51,8 @@ const jwt = {
                     return next(new CustomError("Admin deactivated", 403));
                 }
 
+                
+
                 req.admin = admin;
                 next();
             } catch (error) {

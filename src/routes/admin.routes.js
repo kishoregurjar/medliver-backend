@@ -13,8 +13,9 @@ router.patch("/update-admin-profile", verifyAdminToken(), indexController.adminC
 
 
 /*=======================================PharmacyRoute=================================== */
-
-
-
+router.post("/create-pharmacy",indexController.pharmacyController.createPharmacy)
+router.get("/get-pharmacy-by-id",verifyAdminToken("superadmin"),indexController.pharmacyController.getPharmacyById)
+router.put("/update-pharmacy",verifyAdminToken("pharmacy"),indexController.pharmacyController.updatePharmacy)
+router.delete("/delete-pharmacy",verifyAdminToken("superadmin"),indexController.pharmacyController.deletePharmacy)
 /*=======================================PathelogyRoute=================================== */
 module.exports = router;
