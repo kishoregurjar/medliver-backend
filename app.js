@@ -50,6 +50,7 @@ initializeSocket(server);
 app.use(helmet());
 app.use(hpp())
 app.use(compression());
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use(
   morgan("combined", {
@@ -70,15 +71,11 @@ app.get("/", (req, res) => {
 
 app.use("/api/v1/", indexRouter);
 
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
-
-
 // Handle unknown routes
-// app.all('*', (req, res, next) => {
-//   const err = new CustomError(`Can't find ${req.originalUrl} on this server!`, 404);
-//   next(err);
-// });
+app.all('/{*any}', (req, res, next) => {
+  const err = new CustomError(`Can't find ${req.originalUrl} on this server!`, 404);
+  next(err);
+});
 
 
 
