@@ -79,6 +79,10 @@ module.exports.createPharmacy = asyncErrorHandler(async (req, res, next) => {
   
 module.exports.getPharmacyById = asyncErrorHandler(async (req, res, next) => {
     const { pharmacyId } = req.query;
+    if(!pharmacyId)
+    {
+        return next(new CustomError('please provide pharmacyID', 404));
+    }
   
     const pharmacy = await Pharmacy.findById(pharmacyId).populate('adminId');
   
@@ -176,6 +180,72 @@ module.exports.deletePharmacy = asyncErrorHandler(async (req, res, next) => {
     return successRes(res, 200, true, "Pharmacy updated successfully", updatedPharmacy);
   });
 
+
+  module.exports.getAllPharmacy=asyncErrorHandler(async (req,res,next)=>{
+
+    let {page,limit} = req.query;
+
+    page = parseInt(page) || 1;
+    limit = parseInt(limit) || 10;
+    const skip = (page-1)*limit;
+
+    const [totalPharmacy,allPharmacy]=await Promise.all([
+        Pharmacy.countDocuments(),
+        Pharmacy.find().populate("adminId").sort({createdAt:-1 }).skip(skip).limit(limit)
+    ])
+
+    if(allPharmacy.length === 0){
+        return successRes(res,200,false,"No Pharmacy Found", []);
+    }
+
+    return successRes(res, 200, true, "pharmacy fetched successfully", {
+        pharmacy: allPharmacy,
+        currentPage: page,
+        totalPages: Math.ceil(totalPharmacy / limit),
+        totalPharmacy
+    })
+  })
+
+  module.exports.searchPharmacy = asyncErrorHandler(async (req, res, next) => {
+    let { page, limit, value } = req.query;
+  
+    if (!value) {
+      return next(new CustomError("Search value is required", 400));
+    }
+  
+    page = parseInt(page) || 1;
+    limit = parseInt(limit) || 10;
+    const skip = (page - 1) * limit;
+  
+    const regex = new RegExp(value, 'i'); // case-insensitive search
+    const searchQuery = {
+      $or: [
+        { email: regex },
+        { name: regex },
+        { ownerName: regex }
+      ]
+    };
+  
+    const [totalPharmacy, allPharmacy] = await Promise.all([
+      Pharmacy.countDocuments(searchQuery),
+      Pharmacy.find(searchQuery)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+    ]);
+  
+    if (allPharmacy.length === 0) {
+      return successRes(res, 200, false, "No Pharmacy Found", []);
+    }
+  
+    return successRes(res, 200, true, "Pharmacy fetched successfully", {
+      pharmacies: allPharmacy,
+      currentPage: page,
+      totalPages: Math.ceil(totalPharmacy / limit),
+      totalPharmacy
+    });
+  });
+    
 // get pharmacy details by id
 //delete pharmacy by id pharmacyId
 //update-pharmacy-detils  
