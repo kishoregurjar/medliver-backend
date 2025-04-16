@@ -7,7 +7,7 @@ const pharmacySchema = new mongoose.Schema(
         ref: "Admin",
         required: true,
       },
-    name: {
+      pharmacyName: {
       type: String,
       required: true,
     },
@@ -82,14 +82,6 @@ const pharmacySchema = new mongoose.Schema(
       type: String,
       enum: ["active", "inactive", "blocked"],
       default: "active",
-    },
-    deliveryLocation: {
-      lat: Number,
-      long: Number,
-    },
-    customerLocation: {
-      lat: Number,
-      long: Number,
     },
   },
   { timestamps: true }

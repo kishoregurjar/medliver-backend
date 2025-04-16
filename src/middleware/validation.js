@@ -2,9 +2,7 @@ const Joi = require("joi");
 
 
 const createPharmacy = Joi.object({
-  name: Joi.string().required().messages({
-    "string.empty": "Pharmacy name is required",
-  }),
+ 
   ownerName: Joi.string().required().messages({
     "string.empty": "Owner name is required",
   }),
@@ -18,10 +16,7 @@ const createPharmacy = Joi.object({
   password: Joi.string().required().messages({
     "string.empty": "Password is required",
   }),
-  role: Joi.string().valid("pharmacy").required().messages({
-    "string.empty": "Role is required",
-    "any.only": "Role must be 'pharmacy'",
-  }),
+
   pharmacyName: Joi.string().required().messages({
     "string.empty": "Pharmacy name is required",
   }),
@@ -30,10 +25,6 @@ const createPharmacy = Joi.object({
     city: Joi.string().required(),
     state: Joi.string().required(),
     pincode: Joi.string().required(),
-    coordinates: Joi.object({
-      lat: Joi.number().required(),
-      lng: Joi.number().required()
-    }).required()
   }).required(),
   documents: Joi.object({
     licenseNumber: Joi.string().required(),
@@ -65,6 +56,48 @@ const createPharmacy = Joi.object({
     })
   });
 
+  const updatePharmacy = Joi.object({
+    pharmacyId: Joi.string()
+      .pattern(/^[0-9a-fA-F]{24}$/)
+      .required()
+      .messages({
+        "string.empty": "Pharmacy ID is required",
+        "string.pattern.base": "Invalid Pharmacy ID format",
+      }),
+  
+    pharmacyName: Joi.string().optional().messages({
+      "string.empty": "Pharmacy name cannot be empty",
+    }),
+  
+    ownerName: Joi.string().optional().messages({
+      "string.empty": "Owner name cannot be empty",
+    }),
+  
+    phone: Joi.string().optional().messages({
+      "string.empty": "Phone number cannot be empty",
+    }),
+  
+    email: Joi.string().email().optional().messages({
+      "string.email": "Invalid email format",
+    }),
+  
+    location: Joi.object({
+      lat: Joi.number().optional().messages({
+        "number.base": "Latitude must be a number",
+      }),
+      long: Joi.number().optional().messages({
+        "number.base": "Longitude must be a number",
+      }),
+    }).optional(),
+  
+    verificationStatus: Joi.string()
+      .valid("pending", "approved", "rejected")
+      .optional()
+      .messages({
+        "any.only": "Verification status must be 'pending', 'approved', or 'rejected'",
+      }),
+  });
+  
 
   const validate = (schema) => {
     return (req, res, next) => {
@@ -97,6 +130,7 @@ module.exports={
     validateQuery,
     createPharmacy,
     getAndDeletePharmacyById,
-    getAllPharmacy
+    getAllPharmacy,
+    updatePharmacy
 
 }

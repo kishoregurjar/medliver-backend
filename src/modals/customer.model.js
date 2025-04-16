@@ -109,18 +109,6 @@ const customerSchema = new mongoose.Schema({
       notes: String,
     },
   ],
-  pharmacyLocation: {
-    lat: { type: Number },
-    long: { type: Number },
-  },
-  deliveryLocation: {
-    lat: { type: Number },
-    long: { type: Number },
-  },
-  pathologyLocation: {
-    lat: { type: Number },
-    long: { type: Number },
-  },
 },{timestamps:true});
 
 customerSchema.pre('save', function (next) {
