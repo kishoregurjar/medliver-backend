@@ -31,6 +31,10 @@ const customerSchema = new mongoose.Schema({
   profilePicture: {
     type: String,
   },
+  isVerified: {
+    type: Boolean,
+    default: false,
+  },
   subscriptionPlan: {
     type: String,
     enum: ['basic', 'silver', 'gold'],
@@ -115,18 +119,7 @@ const customerSchema = new mongoose.Schema({
     lat: { type: Number },
     long: { type: Number },
   },
-  pharmacyLocation: {
-    lat: { type: Number },
-    long: { type: Number },
-  },
-  deliveryLocation: {
-    lat: { type: Number },
-    long: { type: Number },
-  },
-  pathologyLocation: {
-    lat: { type: Number },
-    long: { type: Number },
-  },
+
 },{timestamps:true});
 
 customerSchema.pre('save', function (next) {
