@@ -41,18 +41,10 @@ const deliveryPartnerSchema = new mongoose.Schema({
     lat: { type: Number },
     long: { type: Number },
   },
-    pharmacy: {
-      lat: { type: Number },
-      long: { type: Number },
-    },
-    delivery: {
-      lat: { type: Number },
-      long: { type: Number },
-    },
-    pathology: {
-      lat: { type: Number },
-      long: { type: Number },
-    },
+  pharmacy: {
+    lat: { type: Number },
+    long: { type: Number },
+  },
   assignedOrders: [
     {
       orderId: { type: mongoose.Schema.Types.ObjectId, ref: "Order" },
@@ -70,7 +62,7 @@ const deliveryPartnerSchema = new mongoose.Schema({
   },
   rating: {
     type: Number,
-    default: 5,
+    default: 0,
   },
   emergencyContacts: [
     {
@@ -82,7 +74,14 @@ const deliveryPartnerSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
- 
-},{ timestamps: true });
+
+}, { timestamps: true });
+
+deliveryPartnerSchema.pre('save', function (next) {
+  if (this.email) {
+    this.email = this.email.toLowerCase();
+  }
+  next();
+});
 
 module.exports = mongoose.model("DeliveryPartner", deliveryPartnerSchema);
