@@ -6,6 +6,6 @@ const stockController = require("../controllers/stockController")
 module.exports = {
     adminController,
     pharmacyController,
-    deliveryPartnerController,,
+    deliveryPartnerController,
     stockControllercustomerController,
 }
