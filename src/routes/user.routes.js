@@ -1,10 +1,10 @@
 const express = require("express");
+const indexController = require("../controllers/indexController");
 
 const router = express.Router();
 
 
-router.get("/user", (req, res) => {
-  res.send("User route is working!");
-});
+router.post("/register-user", indexController.customerController.register);
+
 
 module.exports = router;

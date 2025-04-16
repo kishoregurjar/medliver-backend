@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const customerSchema = new mongoose.Schema({
-  fullname: {
+  fullName: {
     type: String,
     required: true,
     trim: true,
@@ -12,6 +12,9 @@ const customerSchema = new mongoose.Schema({
     unique: true,
     trim: true,
     lowercase: true,
+  },
+  otp:{
+    type:Number
   },
   phoneNumber: {
     type: String,
@@ -24,7 +27,6 @@ const customerSchema = new mongoose.Schema({
   },
   address: {
     type: String,
-    required: true,
   },
   profilePicture: {
     type: String,
@@ -109,6 +111,10 @@ const customerSchema = new mongoose.Schema({
       notes: String,
     },
   ],
+  userCoordinates: {
+    lat: { type: Number },
+    long: { type: Number },
+  },
   pharmacyLocation: {
     lat: { type: Number },
     long: { type: Number },

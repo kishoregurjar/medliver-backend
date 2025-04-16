@@ -811,3 +811,7 @@
 2025-04-14T11:50:58.740Z [info]: ::1 - - [14/Apr/2025:11:50:58 +0000] "POST /api/v1/admin/update-admin-profile HTTP/1.1" 404 173 "-" "PostmanRuntime/7.43.3"
 2025-04-14T11:56:04.109Z [info]: ::1 - - [14/Apr/2025:11:56:04 +0000] "PATCH /api/v1/admin/update-admin-profile HTTP/1.1" 404 174 "-" "PostmanRuntime/7.43.3"
 2025-04-14T11:56:21.764Z [info]: ::1 - - [14/Apr/2025:11:56:21 +0000] "PATCH /api/v1/admin/update-admin-profile HTTP/1.1" 200 417 "-" "PostmanRuntime/7.43.3"
+2025-04-15T09:27:05.489Z [info]: ::1 - - [15/Apr/2025:09:27:05 +0000] "POST /api/v1/user/register-user HTTP/1.1" 500 - "-" "PostmanRuntime/7.43.3"
+2025-04-15T09:38:28.016Z [info]: ::1 - - [15/Apr/2025:09:38:28 +0000] "POST /api/v1/user/register-user HTTP/1.1" 500 - "-" "PostmanRuntime/7.43.3"
+2025-04-15T09:39:12.807Z [info]: ::1 - - [15/Apr/2025:09:39:12 +0000] "POST /api/v1/user/register-user HTTP/1.1" 500 1020 "-" "PostmanRuntime/7.43.3"
+2025-04-15T09:39:32.641Z [info]: ::1 - - [15/Apr/2025:09:39:32 +0000] "POST /api/v1/user/register-user HTTP/1.1" 200 448 "-" "PostmanRuntime/7.43.3"
