@@ -2,7 +2,7 @@ const express = require("express");
 const indexController = require("../controllers/indexController");
 const { verifyAdminToken } = require("../utils/jsonWebToken");
 const router = express.Router();
-const {validate,validateQuery,createPharmacy,getAndDeletePharmacyById,getAllPharmacy} = require('../middleware/validation')
+const {validate,validateQuery,createPharmacy,getAndDeletePharmacyById,getAllPharmacy,updatePharmacy} = require('../middleware/validation');
 
 router.post("/admin-login",indexController.adminController.login);
 router.get("/get-admin-details", verifyAdminToken(), indexController.adminController.getAdminDetails);
@@ -14,11 +14,34 @@ router.patch("/update-admin-profile", verifyAdminToken(), indexController.adminC
 
 
 /*=======================================PharmacyRoute=================================== */
-router.post("/create-pharmacy",validate(createPharmacy),indexController.pharmacyController.createPharmacy)
+router.post("/create-pharmacy",verifyAdminToken("superadmin"),validate(createPharmacy),indexController.pharmacyController.createPharmacy)
 router.get("/get-pharmacy-by-id",validateQuery(getAndDeletePharmacyById),verifyAdminToken("superadmin"),indexController.pharmacyController.getPharmacyById)
-router.put("/update-pharmacy",verifyAdminToken("pharmacy"),indexController.pharmacyController.updatePharmacy)
-router.delete("/delete-pharmacy",verifyAdminToken(getAndDeletePharmacyById),verifyAdminToken("superadmin"),indexController.pharmacyController.deletePharmacy)
+router.put("/update-pharmacy",validate(updatePharmacy),verifyAdminToken("pharmacy"),indexController.pharmacyController.updatePharmacy)
+router.delete("/delete-pharmacy",validateQuery(getAndDeletePharmacyById),verifyAdminToken("superadmin"),indexController.pharmacyController.deletePharmacy)
 router.get("/get-all-pharmacy",validateQuery(getAllPharmacy),verifyAdminToken("superadmin"),indexController.pharmacyController.getAllPharmacy);
 router.get("/search-pharmacy",verifyAdminToken("superadmin"),indexController.pharmacyController.searchPharmacy)
+
+/*=======================================StockRoute=================================== */
+router.post("/create-stock",verifyAdminToken("pharmacy"),indexController.stockController.createStock)
+router.get("/get-medicine-by-pharmacy-id",verifyAdminToken("pharmacy"),indexController.stockController.getStockByPharmacyId)
+router.get("/get-all-stock",verifyAdminToken("pharmacy"),indexController.stockController.getAllStock)
+router.put("/update-stock",verifyAdminToken("pharmacy"),indexController.stockController.updateStock)
+
+
+
+
+
+
+
+
+
+
+
+
 /*=======================================PathelogyRoute=================================== */
+
+
+
+
+
 module.exports = router;
