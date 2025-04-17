@@ -259,3 +259,47 @@ module.exports.getPathologyCenterById = asyncErrorHandler(async (req, res, next)
     });
   });
   
+
+  module.exports.searchPathology = asyncErrorHandler(async (req, res, next) => {
+    let { value } = req.query;
+    let page ,limit
+  
+    if (!value) {
+      return next(new CustomError("Search value is required", 400));
+    }
+     page = parseInt(page) || 1;
+     limit = parseInt(limit) || 10;
+    const skip = (page - 1) * limit;
+  
+    const regex = new RegExp(value, 'i'); 
+    const searchQuery = {
+      $or: [
+        { centerName: regex },
+        { email: regex }
+      ]
+    };
+  
+    const [totalPatholody, allPathology] = await Promise.all([
+      PathologyCenter.countDocuments(searchQuery),
+      PathologyCenter.find(searchQuery)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+    ]);
+  
+    if (allPathology.length === 0) {
+      return successRes(res, 200, false, "No Pathology Found", []);
+    }
+  
+    return successRes(res, 200, true, "Pathology fetched successfully", {
+      pathologies: allPathology,
+      currentPage: page,
+      totalPages: Math.ceil(totalPatholody / limit),
+      totalPatholody
+    });
+  });
+    
+
+
+
+

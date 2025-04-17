@@ -118,4 +118,20 @@ module.exports.createStock = asyncErrorHandler(async (req, res, next) => {
   });
   
 
+  module.exports.deleteStock = asyncErrorHandler(async (req, res, next) => {
+    const { stockId } = req.query;
+    if(!stockId){
+      return next(new CustomError("Stock Id Id Is Requiered", 400));
+
+    }
+
+    const stock = await Stock.findById(stockId);
   
+    if (!stock) {
+      return next(new CustomError('stock not found', 404));
+    }
+  
+    await Stock.findByIdAndDelete(stockId);
+  
+    return successRes(res, 200, true, 'stock deleted successfully.');
+  });

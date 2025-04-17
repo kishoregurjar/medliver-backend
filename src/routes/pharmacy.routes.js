@@ -10,7 +10,7 @@ router.post("/create-stock", verifyAdminToken("pharmacy"), indexController.stock
 router.get("/get-medicine-by-pharmacy-id", verifyAdminToken("pharmacy"), indexController.stockController.getStockByPharmacyId)
 router.get("/get-all-stock", verifyAdminToken("pharmacy"), indexController.stockController.getAllStock)
 router.put("/update-stock", verifyAdminToken("pharmacy"), indexController.stockController.updateStock)
-// router.delete("/delete-stock",verifyAdminToken("pharmacy"),indexController.stockController.)
+router.delete("/delete-stock",verifyAdminToken("pharmacy"),indexController.stockController.deleteStock)
 
 
 module.exports = router;

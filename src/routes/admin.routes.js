@@ -20,7 +20,7 @@ router.get("/get-pathology-by-id", verifyAdminToken("superadmin"), indexControll
 router.get("/get-all-pathology", verifyAdminToken("superadmin"), indexController.pathologyController.getAllPathologyCenters)
 router.put("/update-pathology", verifyAdminToken("superadmin"), indexController.pathologyController.updatePathologyCenter)
 router.delete("/delete-pathology", verifyAdminToken("superadmin"), indexController.pathologyController.deletePathologyCenter)
-
+router.get("/search-pathology",verifyAdminToken("superadmin"),indexController.pathologyController.searchPathology)
 /** Super Admin Pharmacy Routes */
 
 
