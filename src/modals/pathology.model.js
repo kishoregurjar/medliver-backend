@@ -1,6 +1,11 @@
 const mongoose = require('mongoose');
 
 const pathologyCenterSchema = new mongoose.Schema({
+    adminId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Admin",
+          required: true,
+        },
   centerName: {
     type: String,
     required: true,

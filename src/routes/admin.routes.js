@@ -26,20 +26,15 @@ router.post("/create-stock",verifyAdminToken("pharmacy"),indexController.stockCo
 router.get("/get-medicine-by-pharmacy-id",verifyAdminToken("pharmacy"),indexController.stockController.getStockByPharmacyId)
 router.get("/get-all-stock",verifyAdminToken("pharmacy"),indexController.stockController.getAllStock)
 router.put("/update-stock",verifyAdminToken("pharmacy"),indexController.stockController.updateStock)
-
-
-
-
-
-
-
-
-
-
+// router.delete("/delete-stock",verifyAdminToken("pharmacy"),indexController.stockController.)
 
 
 /*=======================================PathelogyRoute=================================== */
-
+router.post("/create-pathology",verifyAdminToken("superadmin"),indexController.pathologyController.createPathologyCenter)
+router.get("/get-pathology-by-id",verifyAdminToken("superadmin"),indexController.pathologyController.getPathologyCenterById)
+router.get("/get-all-pathology",verifyAdminToken("superadmin"),indexController.pathologyController.getAllPathologyCenters)
+router.put("/update-pathology",verifyAdminToken("superadmin"),indexController.pathologyController.updatePathologyCenter)
+router.delete("/delete-pathology",verifyAdminToken("superadmin"),indexController.pathologyController.deletePathologyCenter)
 
 
 
