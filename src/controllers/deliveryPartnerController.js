@@ -1,5 +1,7 @@
 const DeliveryPartner = require('../modals/delivery.model');
+const { generateOTPNumber } = require('../services/helper');
 const { successRes } = require('../services/response');
+const { verifyOTPMail } = require('../services/sendMail');
 const asyncErrorHandler = require('../utils/asyncErrorHandler');
 const CustomError = require('../utils/customError');
 const bcrypt = require('bcrypt')
@@ -31,6 +33,7 @@ module.exports.registerDeliveryPartner = asyncErrorHandler(async (req, res, next
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    const otp = generateOTPNumber(4)
 
     const newPartner = new DeliveryPartner({
         fullname: fullName,
@@ -38,6 +41,7 @@ module.exports.registerDeliveryPartner = asyncErrorHandler(async (req, res, next
         phone,
         password: hashedPassword,
         profilePhoto,
+        otp,
         documents: {
             aadharNumber: documents.aadharNumber,
             licenseNumber: documents.licenseNumber,
@@ -46,5 +50,71 @@ module.exports.registerDeliveryPartner = asyncErrorHandler(async (req, res, next
     });
 
     await newPartner.save();
+
+    verifyOTPMail(email.toLowerCase(), fullName, otp)
     return successRes(res, 201, true, "Partner Registered Successfully", newPartner)
 })
+
+module.exports.verifyOtp = asyncErrorHandler(async (req, res, next) => {
+    let { email, otp } = req.body;
+
+    if (!email || !otp) {
+        return next(new CustomError("Email and OTP are required", 400));
+    }
+
+    email = email.toLowerCase();
+
+    const partner = await DeliveryPartner.findOne({ email });
+    if (!partner) {
+        return next(new CustomError("Email not found", 400));
+    }
+
+    if (partner.otp !== otp) {
+        return next(new CustomError("Invalid OTP", 400));
+    }
+
+    partner.isVerified = true;
+    partner.otp = null;
+    await partner.save();
+
+    return successRes(res, 200, true, "Verified successfully");
+});
+
+module.exports.loginDeliveryPartner = asyncErrorHandler(async (req, res, next) => {
+    let { email, password } = req.body;
+    if (!email || !password) {
+        return next(new CustomError("Email and Password Required", 400));
+    }
+    email = email?.toLowerCase();
+    let findPartner = await DeliveryPartner.findOne({ email });
+    if (!findPartner) {
+        return next(new CustomError("Invalid Email or Password", 400))
+    }
+    let comparePassword = await bcrypt.compare(password, findPartner.password)
+    if (!comparePassword) {
+        return next(new CustomError("Invalid Email or Password", 400))
+    }
+    if (!findPartner.isVerified) {
+        return next(new CustomError("Please Verify you Email First", 400))
+    }
+    if (!findPartner.isApproved) {
+        return next(new CustomError("Your Approval is Pending, Please wait!", 400))
+    }
+    const payload = {
+        _id: findPartner._id,
+        email: findPartner.email,
+        role: findPartner.role,
+        permissions: findPartner.permissions,
+    };
+
+    const token = assignJwt(payload);
+    const sanitizedAdmin = findPartner.toObject();
+    delete sanitizedAdmin.password;
+
+    return successRes(res, 200, true, "Logged In Successfully", {
+        ...sanitizedAdmin,
+        token,
+    });
+
+})
+

@@ -1,3 +1,4 @@
+const { string } = require("joi");
 const mongoose = require("mongoose");
 
 const deliveryPartnerSchema = new mongoose.Schema({
@@ -19,8 +20,26 @@ const deliveryPartnerSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  isVerified: {
+    type: Boolean,
+    default: false,
+  },
+  otp: {
+    type: String,
+    default: null
+  },
+  isApproved: {
+    type: Boolean,
+    default: false
+  },
+  role: {
+    type: String,
+    enum: ['delivery_partner'],
+    default: 'delivery_partner',
+    required: true
+  },
   profilePhoto: {
-    type: String, // URL or file path
+    type: String,
   },
   documents: {
     aadharNumber: String,
