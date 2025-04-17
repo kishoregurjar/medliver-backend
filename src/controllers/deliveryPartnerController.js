@@ -4,7 +4,8 @@ const { successRes } = require('../services/response');
 const { verifyOTPMail } = require('../services/sendMail');
 const asyncErrorHandler = require('../utils/asyncErrorHandler');
 const CustomError = require('../utils/customError');
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcrypt');
+const { assignJwt } = require('../utils/jsonWebToken');
 
 
 module.exports.registerDeliveryPartner = asyncErrorHandler(async (req, res, next) => {

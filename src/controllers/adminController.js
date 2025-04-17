@@ -2,12 +2,13 @@ const adminSchema = require('../modals/admin.Schema');
 const bcrypt = require('bcrypt');
 const jsonwebtoken = require('jsonwebtoken');
 const CustomError = require('../utils/customError');
-const {successRes} = require('../services/response');
+const { successRes } = require('../services/response');
 const asyncErrorHandler = require('../utils/asyncErrorHandler');
 // const { assignJwt } = require('../utils/jwtToken');
 const { assignJwt } = require("../utils/jsonWebToken");
 const { forgetPasswordMail } = require('../services/sendMail');
 const { JsonWebTokenError } = require('jsonwebtoken');
+const DeliveryPartner = require('../modals/delivery.model');
 
 module.exports.login = asyncErrorHandler(async (req, res, next) => {
     let { email, password } = req.body;
@@ -42,7 +43,7 @@ module.exports.login = asyncErrorHandler(async (req, res, next) => {
         return next(new CustomError("Account is not active, Contact Administration", 400));
     }
 
-   
+
     const payload = {
         _id: findAdmin._id,
         email: findAdmin.email,
@@ -50,10 +51,10 @@ module.exports.login = asyncErrorHandler(async (req, res, next) => {
         permissions: findAdmin.permissions,
     };
 
-    
+
     const token = assignJwt(payload);
 
-   
+
     const sanitizedAdmin = findAdmin.toObject();
     delete sanitizedAdmin.password;
 
@@ -65,7 +66,7 @@ module.exports.login = asyncErrorHandler(async (req, res, next) => {
 
 
 
-module.exports.getAdminDetails = asyncErrorHandler(async (req, res,next)=>{
+module.exports.getAdminDetails = asyncErrorHandler(async (req, res, next) => {
     const admin = req.admin._id;
     console.log("admin", admin);
     const findAdmin = await adminSchema.findById(admin).select("-password -__v -createdAt -updatedAt");
@@ -80,10 +81,10 @@ module.exports.getAdminDetails = asyncErrorHandler(async (req, res,next)=>{
 
 
 
-module.exports.forgetPassword = asyncErrorHandler(async (req,res,next)=>{
-    const {email}  = req.body;
-    const findAdmin = await adminSchema.findOne({email});
-    if(!findAdmin){
+module.exports.forgetPassword = asyncErrorHandler(async (req, res, next) => {
+    const { email } = req.body;
+    const findAdmin = await adminSchema.findOne({ email });
+    if (!findAdmin) {
         return next(new CustomError("Admin not found", 404));
     }
     console.log("findAdmin", findAdmin);
@@ -101,54 +102,54 @@ module.exports.forgetPassword = asyncErrorHandler(async (req,res,next)=>{
         email,
         findAdmin.name,
         resetPasswordLink
-      );
+    );
 
     return successRes(res, 200, true, "Password reset link sent successfully", token);
 })
 
 
-module.exports.resetPassword = asyncErrorHandler(async (req,res,next)=>{
+module.exports.resetPassword = asyncErrorHandler(async (req, res, next) => {
     try {
-      const {resetLink, password} = req.body;
-    
+        const { resetLink, password } = req.body;
+
         let decoded;
         try {
-          decoded = jsonwebtoken.verify(resetLink, process.env.SECRET_KEY);
-          console.log(decoded, "decoded token");    
+            decoded = jsonwebtoken.verify(resetLink, process.env.SECRET_KEY);
+            console.log(decoded, "decoded token");
         } catch (err) {
-          if (err.name === "TokenExpiredError") {
-            return next(
-              new CustomError("Reset link expired, please request a new one", 401)
-            );
-          }
-          return next(new CustomError("Invalid token", 400));
+            if (err.name === "TokenExpiredError") {
+                return next(
+                    new CustomError("Reset link expired, please request a new one", 401)
+                );
+            }
+            return next(new CustomError("Invalid token", 400));
         }
-    
+
         const adminId = decoded._id;
         const findAdmin = await adminSchema.findById(adminId);
         if (!findAdmin) {
-          return next(new CustomError("Admin not found", 404));
+            return next(new CustomError("Admin not found", 404));
         }
-    
-       
+
+
         if (!password) {
-          return next(new CustomError("Please provide a new password", 400));
+            return next(new CustomError("Please provide a new password", 400));
         }
-    
+
         const hashedPassword = await bcrypt.hash(password, 10);
-    
+
         findAdmin.password = hashedPassword;
         await findAdmin.save();
-    
+
         return successRes(res, 200, true, "Password reset successfully");
-      } catch (error) {
+    } catch (error) {
         return next(error);
-      }
+    }
 })
 
 
-module.exports.changedPassword = asyncErrorHandler(async (req,res,next)=>{
-    const {password} = req.body;
+module.exports.changedPassword = asyncErrorHandler(async (req, res, next) => {
+    const { password } = req.body;
     const adminId = req.admin._id;
     const findAdmin = await adminSchema.findById(adminId);
     if (!findAdmin) {
@@ -166,7 +167,7 @@ module.exports.changedPassword = asyncErrorHandler(async (req,res,next)=>{
 
 
 
-module.exports.updateAdminProfile = asyncErrorHandler(async (req,res,next)=>{
+module.exports.updateAdminProfile = asyncErrorHandler(async (req, res, next) => {
     const adminId = req.admin._id;
     const findAdmin = await adminSchema.findById(adminId);
     if (!findAdmin) {
@@ -178,4 +179,37 @@ module.exports.updateAdminProfile = asyncErrorHandler(async (req,res,next)=>{
     });
     return successRes(res, 200, true, "Admin updated successfully", updateAdmin);
 
+});
+
+/** ----------Delivery Partner ---------------- */
+
+module.exports.approveDeliveryPartner = asyncErrorHandler(async (req, res, next) => {
+    const { partnerId } = req.body;
+    const adminId = req.admin._id;
+    if (!partnerId) {
+        return next(new CustomError("Partner ID is required", 400));
+    }
+
+    const findAdmin = await adminSchema.findById(adminId);
+    if (!findAdmin) {
+        return next(new CustomError("Admin not found", 404));
+    }
+
+    const findPartner = await DeliveryPartner.findById(partnerId);
+    if (!findPartner) {
+        return next(new CustomError("Delivery Partner not found", 404));
+    }
+
+    if (!findPartner.isVerified) {
+        return next(new CustomError("Partner's email is not verified", 400));
+    }
+
+    if (findPartner.isApproved) {
+        return next(new CustomError("Partner is already approved", 400));
+    }
+
+    findPartner.isApproved = true;
+    await findPartner.save();
+
+    return successRes(res, 200, true, "Delivery Partner approved successfully.");
 });

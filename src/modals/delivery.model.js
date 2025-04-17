@@ -38,6 +38,10 @@ const deliveryPartnerSchema = new mongoose.Schema({
     default: 'delivery_partner',
     required: true
   },
+  isBlocked: {
+    type: Boolean,
+    default: false
+  },
   profilePhoto: {
     type: String,
   },

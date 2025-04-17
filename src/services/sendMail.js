@@ -98,7 +98,7 @@ module.exports.forgetPasswordMail = async (email, name, link) => {
 
 module.exports.verifyOTPMail = async (email, name, otp) => {
   const smtpEndpoint = "smtp.gmail.com";
-  const port = 587;
+  const port = 465;
   const senderAddress = process.env.SMTP_USERNAME;
   const toAddresses = email;
 
