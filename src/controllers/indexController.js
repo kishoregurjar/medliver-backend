@@ -10,4 +10,5 @@ module.exports = {
     deliveryPartnerController,
     stockController,
     customerController,
+    pathologyController
 }
