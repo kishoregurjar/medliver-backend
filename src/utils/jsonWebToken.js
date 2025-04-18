@@ -185,7 +185,12 @@ const jwt = {
         if (!partner) {
           return next(new CustomError("Delivery Partner not found", 401));
         }
+            
+         if (partner.isBlocked) {
+      return next(new CustomError("You are blocked. Please contact support.", 403));
+      }
 
+    
         if (partner.isVerified !== true) {
           return next(new CustomError("Delivery Partner not verified", 403));
         }
