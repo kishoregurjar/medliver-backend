@@ -3,6 +3,7 @@ const CustomError = require("./customError");
 const adminModal = require("../modals/admin.Schema");
 const SECRET_KEY = process.env.SECRET_KEY;
 const customerModal = require("../modals/customer.model");
+const deliveryModel = require("../modals/delivery.model");
 
 const jwt = {
   assignJwt: (admin) => {
@@ -72,7 +73,6 @@ const jwt = {
   },
   verifyUserToken: () => {
     return async (req, res, next) => {
-      console.log("verifying token", req.headers.authorization);
       try {
         let token = req.headers.authorization;
         if (!token) {
@@ -82,7 +82,6 @@ const jwt = {
         let decoded;
         try {
           decoded = jsonwebtoken.verify(token, SECRET_KEY);
-          // console.log(decoded, "decoded token");
         } catch (err) {
           if (err.name === "TokenExpiredError") {
             return next(
@@ -107,6 +106,91 @@ const jwt = {
         }
 
         req.user = user;
+        next();
+      } catch (error) {
+        console.log(error, "error");
+        return next(error);
+      }
+    };
+  },
+  verifyUserToken: () => {
+    return async (req, res, next) => {
+      try {
+        let token = req.headers.authorization;
+        if (!token) {
+          return next(new CustomError("Please provide token", 401));
+        }
+
+        let decoded;
+        try {
+          decoded = jsonwebtoken.verify(token, SECRET_KEY);
+        } catch (err) {
+          if (err.name === "TokenExpiredError") {
+            return next(
+              new CustomError("Session timeout: Please login again", 401)
+            );
+          }
+          return next(new CustomError("Access Denied: Invalid Token", 401));
+        }
+
+        if (!decoded) {
+          return next(new CustomError("Access Denied: Invalid Token", 401));
+        }
+
+        // Fetch admin from database
+        const user = await customerModal.findById(decoded._id);
+        if (!user) {
+          return next(new CustomError("User not found", 401));
+        }
+
+        if (user.isVerified !== true) {
+          return next(new CustomError("User not verified", 403));
+        }
+
+        req.user = user;
+        next();
+      } catch (error) {
+        console.log(error, "error");
+        return next(error);
+      }
+    };
+  },
+
+  verifyDeliveryPartnerToken: () => {
+    return async (req, res, next) => {
+      try {
+        let token = req.headers.authorization;
+        if (!token) {
+          return next(new CustomError("Please provide token", 401));
+        }
+
+        let decoded;
+        try {
+          decoded = jsonwebtoken.verify(token, SECRET_KEY);
+        } catch (err) {
+          if (err.name === "TokenExpiredError") {
+            return next(
+              new CustomError("Session timeout: Please login again", 401)
+            );
+          }
+          return next(new CustomError("Access Denied: Invalid Token", 401));
+        }
+
+        if (!decoded) {
+          return next(new CustomError("Access Denied: Invalid Token", 401));
+        }
+
+        // Fetch admin from database
+        const partner = await deliveryModel.findById(decoded._id);
+        if (!partner) {
+          return next(new CustomError("Delivery Partner not found", 401));
+        }
+
+        if (partner.isVerified !== true) {
+          return next(new CustomError("Delivery Partner not verified", 403));
+        }
+
+        req.partner = partner;
         next();
       } catch (error) {
         console.log(error, "error");

@@ -119,3 +119,15 @@ module.exports.loginDeliveryPartner = asyncErrorHandler(async (req, res, next) =
 
 })
 
+module.exports.viewProfile = asyncErrorHandler(async (req, res, next) => {
+    let partnerId = req.partner._id;
+    let findPartner = await DeliveryPartner.findById(partnerId);
+    if (!findPartner) {
+        return next(new CustomError("Partner Not Found", 401));
+    };
+    let senitizeData = findPartner.toObject();
+    delete senitizeData.password;
+    return successRes(res, 200, true, "Partner Profile", senitizeData)
+
+})
+
