@@ -18,24 +18,34 @@ const medicineSchema = new mongoose.Schema(
             type: Number,
             required: true,
         },
-        stock: {
-            type: Number,
-            default: 0,
-        },
         isPrescriptionRequired: {
             type: Boolean,
             default: false,
-        },
-        expiryDate: {
-            type: Date,
         },
         category: {
             type: String,
             enum: ["Antibiotic", "Analgesic", "Antipyretic", "Others"],
         },
+        packSizeLabel: {
+            type: String,
+            default: null
+        },
+        short_composition1: {
+            type: String,
+            default: null
+        },
+        short_composition2: {
+            type: String,
+            default: null
+        },
         image: {
             type: String,
+            default: null
         },
+        type: {
+            type: String,
+            default: null
+        }
     },
     { timestamps: true }
 );

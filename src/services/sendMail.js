@@ -143,7 +143,7 @@ module.exports.forgetPasswordMailDeliverypartner = async (email, name, otp) => {
 
 module.exports.verifyOTPMail = async (email, name, otp) => {
   const smtpEndpoint = "smtp.gmail.com";
-  const port = 465;
+  const port = 587;
   const senderAddress = process.env.SMTP_USERNAME;
   const toAddresses = email;
 
@@ -158,9 +158,6 @@ module.exports.verifyOTPMail = async (email, name, otp) => {
     auth: {
       user: process.env.SMTP_USERNAME,
       pass: process.env.SMTP_PASSWORD,
-    },
-    tls: {
-      rejectUnauthorized: false,
     }
   });
 
@@ -178,7 +175,7 @@ module.exports.verifyOTPMail = async (email, name, otp) => {
     console.log("OTP mail sent:", info.messageId);
     return true;
   } catch (error) {
-    console.log("Error sending OTP mail:", error.message);
+    console.log("Error sending OTP mail:", error);
     return false;
   }
 };
