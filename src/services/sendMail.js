@@ -12,7 +12,7 @@ module.exports.forgetPasswordMail = async (email, name, link) => {
   let template;
   let subject;
   let body_text;
-  template = ForgetPasswordTemplate(name, link);
+  template = ForgetPasswordTemplateDeliveryPartner(name, link);
   subject = "Forget Password";
   body_text = `Please reset your password on below given link`;
 

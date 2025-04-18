@@ -34,7 +34,11 @@ router.get("/search-pharmacy", verifyAdminToken("superadmin"), indexController.p
 /** Super Admin Delivery Partner Routes */
 
 router.put('/approve-delivery-partner', verifyAdminToken('superadmin'), indexController.adminController.approveDeliveryPartner)
-
-
-
+router.get('/get-all-delivery-partner',verifyAdminToken('superadmin'),indexController.adminController.getAllDeliveryPartners);
+router.get('/get-delivery-partner-by-id',verifyAdminToken('superadmin'),indexController.adminController.getDeliveryPartnerById);
+router.put('/update-delivery-partner',verifyAdminToken('superadmin'),indexController.adminController.updateDeliveryPartner)
+router.put('/update-availability-status',verifyAdminToken('superadmin'),indexController.adminController.updateAvailabilityStatus);
+router.delete('/delete-delivery-patner',verifyAdminToken('superadmin'),indexController.adminController.deleteDeliveryPartner)
+router.put('/block-delivery-partner',verifyAdminToken('superadmin'),indexController.adminController.blockDeliveryPartner)
+router.put('/unblock-delivery-partner',verifyAdminToken('superadmin'),indexController.adminController.unblockDeliveryPartner)
 module.exports = router;
