@@ -66,32 +66,36 @@ module.exports.updateMedicine = asyncErrorHandler(async (req, res, next) => {
 });
 
 module.exports.getAllMedicines = asyncErrorHandler(async (req, res, next) => {
-    let sort = req?.query?.sort === 'desc' ? -1 : 1; // default ascending
-    let startFrom = req?.query?.startFrom || null;
-    let page = parseInt(req.query.page) || 1;
-    let limit = 30;
-    let skip = (page - 1) * limit;
+    const sort = req?.query?.sort === 'desc' ? -1 : 1; // default ascending
+    const startFrom = req?.query?.startFrom || null;
+    const page = parseInt(req.query.page) || 1;
+    const limit = 30;
+    const skip = (page - 1) * limit;
 
     let filter = {};
 
     if (startFrom) {
+        // Filter medicines starting with a specific letter (case-insensitive)
         filter.name = new RegExp('^' + startFrom, 'i');
     }
 
-    const medicines = await medicineModel
-        .find(filter)
-        .sort({ name: sort })
-        .skip(skip)
-        .limit(limit);
+    const [medicines, totalCount] = await Promise.all([
+        medicineModel
+            .find(filter)
+            .sort({ name: sort })
+            .skip(skip)
+            .limit(limit),
+        medicineModel.countDocuments(filter)
+    ]);
 
-    const totalCount = await medicineModel.countDocuments(filter);
     return successRes(res, 200, true, "Medicines fetched successfully", {
         currentPage: page,
         totalPages: Math.ceil(totalCount / limit),
         totalMedicines: totalCount,
         data: medicines
-    })
+    });
 });
+
 
 module.exports.getMedicineById = asyncErrorHandler(async (req, res, next) => {
     let { medicineId } = req.query;
@@ -104,4 +108,36 @@ module.exports.getMedicineById = asyncErrorHandler(async (req, res, next) => {
     }
     return successRes(res, 200, true, "Medicine Details", medicine)
 })
+
+module.exports.searchMedicine = asyncErrorHandler(async (req, res, next) => {
+    const { query, page = 1 } = req.query;
+
+    const limit = 30;
+    const skip = (parseInt(page) - 1) * limit;
+
+    if (!query) {
+        return next(new CustomError("Search query is required", 400));
+    }
+
+    const filter = {
+        name: { $regex: query, $options: 'i' } // Case-insensitive partial match
+    };
+
+    const [medicines, totalCount] = await Promise.all([
+        medicineModel
+            .find(filter)
+            .skip(skip)
+            .limit(limit),
+        medicineModel.countDocuments(filter)
+    ]);
+
+    return successRes(res, 200, true, "Medicines search results", {
+        query,
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(totalCount / limit),
+        totalResults: totalCount,
+        data: medicines
+    });
+});
+
 

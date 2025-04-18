@@ -49,4 +49,5 @@ router.post('/create-medicine', verifyAdminToken('superadmin'), indexController.
 router.put('/update-medicine', verifyAdminToken('superadmin'), indexController.medicineController.updateMedicine)
 router.get('/get-all-medicines', verifyAdminToken('superadmin'), indexController.medicineController.getAllMedicines)
 router.get('/get-medicine-by-id', verifyAdminToken('superadmin'), indexController.medicineController.getMedicineById)
+router.get('/search-medicine', verifyAdminToken('superadmin'), indexController.medicineController.searchMedicine)
 module.exports = router;
