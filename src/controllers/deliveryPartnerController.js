@@ -1,7 +1,7 @@
 const DeliveryPartner = require('../modals/delivery.model');
 const { generateOTPNumber } = require('../services/helper');
 const { successRes } = require('../services/response');
-const { verifyOTPMail } = require('../services/sendMail');
+const { verifyOTPMail, forgetPasswordMail, forgetPasswordMailDeliverypartner } = require('../services/sendMail');
 const asyncErrorHandler = require('../utils/asyncErrorHandler');
 const CustomError = require('../utils/customError');
 const bcrypt = require('bcrypt');
@@ -130,4 +130,105 @@ module.exports.viewProfile = asyncErrorHandler(async (req, res, next) => {
     return successRes(res, 200, true, "Partner Profile", senitizeData)
 
 })
+
+module.exports.editDeliveryPartner = asyncErrorHandler(async (req, res, next) => {
+    const partnerId = req.partner._id;
+    const { fullName, phone, email, profilePhoto } = req.body;
+
+    const findPartner = await DeliveryPartner.findById(partnerId);
+    if (!findPartner) {
+        return next(new CustomError("Delivery Partner not found", 404));
+    }
+
+    // Update fields if provided
+    if (fullName) findPartner.fullname = fullName;
+    if (phone) findPartner.phone = phone;
+    if (email) findPartner.email = email.toLowerCase();
+    if (profilePhoto) findPartner.profilePhoto = profilePhoto;
+
+    await findPartner.save();
+
+    return successRes(res, 200, true, "Delivery Partner updated successfully");
+});
+
+module.exports.changePassword = asyncErrorHandler(async (req, res, next) => {
+    const partnerId = req.partner._id;
+    const { oldPassword, newPassword } = req.body;
+
+    if (!oldPassword || !newPassword) {
+        return next(new CustomError("Old password and new password are required", 400));
+    }
+
+    const partner = await DeliveryPartner.findById(partnerId);
+    if (!partner) {
+        return next(new CustomError("Delivery Partner not found", 404));
+    }
+
+    const isMatch = await bcrypt.compare(oldPassword, partner.password);
+    if (!isMatch) {
+        return next(new CustomError("Old password is incorrect", 401));
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    partner.password = hashedPassword;
+    await partner.save();
+
+    return successRes(res, 200, true, "Password changed successfully");
+});
+
+module.exports.forgetPassword = asyncErrorHandler(async (req, res, next) => {
+    const { email } = req.body;
+    if (!email) {
+        return next(new CustomError("Email is required", 400))
+    }
+    const findPartner = await DeliveryPartner.findOne({ email });
+    if (!findPartner) {
+        return next(new CustomError("Partner not found", 404));
+    }
+
+    let otp = generateOTPNumber(4);
+
+    forgetPasswordMailDeliverypartner(
+        email,
+        findPartner.fullname,
+        otp
+    );
+
+    findPartner.otp = otp;
+    await findPartner.save()
+
+    return successRes(res, 200, true, "Otp sent successfully", otp);
+})
+
+module.exports.resetPassword = asyncErrorHandler(async (req, res, next) => {
+    let { email, otp, newPassword } = req.body;
+
+    // Basic validation
+    if (!email?.trim() || !otp?.trim() || !newPassword?.trim()) {
+        return next(new CustomError("Email, OTP & Password are required", 400));
+    }
+
+    email = email.trim().toLowerCase(); // normalize email
+    otp = otp.trim();
+    newPassword = newPassword.trim();
+
+    const partner = await DeliveryPartner.findOne({ email });
+
+    if (!partner) {
+        return next(new CustomError("Partner not found", 404));
+    }
+
+    if (partner.otp != otp) {
+        return next(new CustomError("Incorrect OTP", 400));
+    }
+
+    partner.password = await bcrypt.hash(newPassword, 10);
+    partner.otp = null;
+    await partner.save();
+
+    return successRes(res, 200, true, "Password reset successfully");
+});
+
 

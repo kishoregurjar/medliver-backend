@@ -20,19 +20,19 @@ const hpp = require('hpp');
 const app = express();
 const server = http.createServer(app);
 
-const logger = createLogger({
-  level: "info",
-  format: format.combine(
-    format.timestamp(),
-    format.printf(
-      ({ timestamp, level, message }) => `${timestamp} [${level}]: ${message}`
-    )
-  ),
-  transports: [
-    new transports.Console(),
-    new transports.File({ filename: "server.log" }),
-  ],
-});
+// const logger = createLogger({
+//   level: "info",
+//   format: format.combine(
+//     format.timestamp(),
+//     format.printf(
+//       ({ timestamp, level, message }) => `${timestamp} [${level}]: ${message}`
+//     )
+//   ),
+//   transports: [
+//     new transports.Console(),
+//     new transports.File({ filename: "server.log" }),
+//   ],
+// });
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -52,11 +52,11 @@ app.use(hpp())
 app.use(compression());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-app.use(
-  morgan("combined", {
-    stream: { write: (message) => logger.info(message.trim()) },
-  })
-);
+// app.use(
+//   morgan("combined", {
+//     stream: { write: (message) => logger.info(message.trim()) },
+//   })
+// );
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
