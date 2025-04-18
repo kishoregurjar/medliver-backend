@@ -8,7 +8,7 @@ const medicineSchema = new mongoose.Schema(
         },
         description: {
             type: String,
-            required: true,
+            // required: true,
         },
         manufacturer: {
             type: String,
@@ -44,7 +44,7 @@ const medicineSchema = new mongoose.Schema(
         },
         type: {
             type: String,
-            default: null
+            default: "allopathy"
         }
     },
     { timestamps: true }

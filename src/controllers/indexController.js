@@ -3,6 +3,7 @@ const pharmacyController = require('./pharmacyController'); const customerContro
 const deliveryPartnerController = require('./deliveryPartnerController')
 const stockController = require("../controllers/stockController")
 const pathologyController = require('../controllers/pathologyController');
+const medicineController = require("../controllers/medicineController")
 
 module.exports = {
     adminController,
@@ -10,5 +11,6 @@ module.exports = {
     deliveryPartnerController,
     stockController,
     customerController,
-    pathologyController
+    pathologyController,
+    medicineController
 }

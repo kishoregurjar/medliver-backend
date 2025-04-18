@@ -20,7 +20,7 @@ router.get("/get-pathology-by-id", verifyAdminToken("superadmin"), indexControll
 router.get("/get-all-pathology", verifyAdminToken("superadmin"), indexController.pathologyController.getAllPathologyCenters)
 router.put("/update-pathology", verifyAdminToken("superadmin"), indexController.pathologyController.updatePathologyCenter)
 router.delete("/delete-pathology", verifyAdminToken("superadmin"), indexController.pathologyController.deletePathologyCenter)
-router.get("/search-pathology",verifyAdminToken("superadmin"),indexController.pathologyController.searchPathology)
+router.get("/search-pathology", verifyAdminToken("superadmin"), indexController.pathologyController.searchPathology)
 /** Super Admin Pharmacy Routes */
 
 
@@ -34,11 +34,19 @@ router.get("/search-pharmacy", verifyAdminToken("superadmin"), indexController.p
 /** Super Admin Delivery Partner Routes */
 
 router.put('/approve-delivery-partner', verifyAdminToken('superadmin'), indexController.adminController.approveDeliveryPartner)
-router.get('/get-all-delivery-partner',verifyAdminToken('superadmin'),indexController.adminController.getAllDeliveryPartners);
-router.get('/get-delivery-partner-by-id',verifyAdminToken('superadmin'),indexController.adminController.getDeliveryPartnerById);
-router.put('/update-delivery-partner',verifyAdminToken('superadmin'),indexController.adminController.updateDeliveryPartner)
-router.put('/update-availability-status',verifyAdminToken('superadmin'),indexController.adminController.updateAvailabilityStatus);
-router.delete('/delete-delivery-patner',verifyAdminToken('superadmin'),indexController.adminController.deleteDeliveryPartner)
-router.put('/block-delivery-partner',verifyAdminToken('superadmin'),indexController.adminController.blockDeliveryPartner)
-router.put('/unblock-delivery-partner',verifyAdminToken('superadmin'),indexController.adminController.unblockDeliveryPartner)
+router.get('/get-all-delivery-partner', verifyAdminToken('superadmin'), indexController.adminController.getAllDeliveryPartners);
+router.get('/get-delivery-partner-by-id', verifyAdminToken('superadmin'), indexController.adminController.getDeliveryPartnerById);
+router.put('/update-delivery-partner', verifyAdminToken('superadmin'), indexController.adminController.updateDeliveryPartner)
+router.put('/update-availability-status', verifyAdminToken('superadmin'), indexController.adminController.updateAvailabilityStatus);
+router.delete('/delete-delivery-patner', verifyAdminToken('superadmin'), indexController.adminController.deleteDeliveryPartner)
+router.put('/block-delivery-partner', verifyAdminToken('superadmin'), indexController.adminController.blockDeliveryPartner)
+router.put('/unblock-delivery-partner', verifyAdminToken('superadmin'), indexController.adminController.unblockDeliveryPartner)
+
+
+/** Medicines Routes Superadmin */
+
+router.post('/create-medicine', verifyAdminToken('superadmin'), indexController.medicineController.createMedicine)
+router.put('/update-medicine', verifyAdminToken('superadmin'), indexController.medicineController.updateMedicine)
+router.get('/get-all-medicines', verifyAdminToken('superadmin'), indexController.medicineController.getAllMedicines)
+router.get('/get-medicine-by-id', verifyAdminToken('superadmin'), indexController.medicineController.getMedicineById)
 module.exports = router;
