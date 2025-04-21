@@ -170,6 +170,7 @@ module.exports.createPathologyCenter = asyncErrorHandler(async (req, res, next) 
 
 module.exports.getPathologyCenterById = asyncErrorHandler(async (req, res, next) => {
     const { pathologyCenterId } = req.query;
+    
     if (!pathologyCenterId) {
       return next(new CustomError('Please provide pathologyCenterId', 404));
     }

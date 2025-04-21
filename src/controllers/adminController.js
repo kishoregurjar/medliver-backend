@@ -8,7 +8,9 @@ const asyncErrorHandler = require('../utils/asyncErrorHandler');
 const { assignJwt } = require("../utils/jsonWebToken");
 const { forgetPasswordMail } = require('../services/sendMail');
 const { JsonWebTokenError } = require('jsonwebtoken');
-const DeliveryPartner = require('../modals/delivery.model');
+const DeliveryPartner = require('../modals/delivery.model')
+const Customer = require('../modals/customer.model');
+
 
 module.exports.login = asyncErrorHandler(async (req, res, next) => {
     let { email, password } = req.body;
@@ -219,10 +221,10 @@ module.exports.approveDeliveryPartner = asyncErrorHandler(async (req, res, next)
 module.exports.getDeliveryPartnerById = asyncErrorHandler(async (req, res, next) => {
     const { deliveryPartnerId } = req.query;
 
-   if (!deliveryPartnerId) {
+   if(!deliveryPartnerId) {
       return next(new CustomError("Delivery Partner Id is required", 400));
     }
-    const partner = await DeliveryPartner.findById(deliveryPartnerId);
+    const partner = await DeliveryPartner.findById(deliveryPartnerId).select("-password -otp");
   
     if (!partner) {
       return next(new CustomError("Delivery Partner not found", 404));
@@ -246,7 +248,7 @@ module.exports.getDeliveryPartnerById = asyncErrorHandler(async (req, res, next)
   
     const [total, partners] = await Promise.all([
       DeliveryPartner.countDocuments(),
-      DeliveryPartner.find().sort({ createdAt: -1 }).skip(skip).limit(limit)
+      DeliveryPartner.find().select("-password -otp").sort({ createdAt: -1 }).skip(skip).limit(limit)
     ]);
 
     if(partners.length === 0){
@@ -338,7 +340,6 @@ module.exports.updateDeliveryPartner = asyncErrorHandler(async (req, res, next) 
   return successRes(res, 200, true, "Delivery Partner updated successfully", updatedPartner);
 });
 
-
 //update status
 module.exports.updateAvailabilityStatus = asyncErrorHandler(async (req, res, next) => {
     const { deliveryPartnerId, availabilityStatus } = req.body;
@@ -391,7 +392,6 @@ module.exports.updateAvailabilityStatus = asyncErrorHandler(async (req, res, nex
       { new: true, runValidators: true }
     );
 
-
     if (!updatedPartner) {
       return next(new CustomError("Delivery Partner not found", 404));
     }
@@ -428,6 +428,103 @@ module.exports.updateAvailabilityStatus = asyncErrorHandler(async (req, res, nex
     await partner.save();
   
     return successRes(res, 200, true, "Delivery Partner unblocked successfully", partner);
+  });
+
+  module.exports.getAllCustomers = asyncErrorHandler(async (req, res, next) => {
+    let { page, limit } = req.query;
+  
+    page = parseInt(page) || 1;
+    limit = parseInt(limit) || 10;
+    const skip = (page - 1) * limit;
+  
+    const [total, customers] = await Promise.all([
+      Customer.countDocuments(),
+      Customer.find().select("-password -otp").sort({ createdAt: -1 }).skip(skip).limit(limit)
+    ]);
+  
+    if (customers.length === 0) {
+      return successRes(res, 200, false, "No Customers Found", []);
+    }
+  
+    return successRes(res, 200, true, "Customers fetched successfully", {
+      customers,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      total
+    });
+  });
+  
+  module.exports.getCustomerById = asyncErrorHandler(async (req, res, next) => {
+    const { customerId } = req.query;
+  
+    if (!customerId) {
+      return next(new CustomError("Customer ID is required", 400));
+    }
+  
+    const customer = await Customer.findById(customerId).select("-password -otp");
+  
+    if (!customer) {
+      return next(new CustomError("Customer not found", 404));
+    }
+  
+    return successRes(res, 200, true, "Customer fetched successfully", customer);
+  });
+  
+  module.exports.blockCustomer = asyncErrorHandler(async (req, res, next) => {
+    const { customerId } = req.body;
+    const admin = req.admin;
+  
+    if (!admin || admin.role !== "superadmin") {
+      return next(new CustomError("Only superadmin can block customers", 403));
+    }
+  
+    if (!customerId) {
+      return next(new CustomError("Customer ID is required", 400));
+    }
+  
+    const customer = await Customer.findById(customerId);
+  
+    if (!customer) {
+      return next(new CustomError("Customer not found", 404));
+    }
+  
+    if (customer.isBlocked) {
+      return next(new CustomError("Customer is already blocked", 400));
+    }
+  
+    customer.isBlocked = true;
+    await customer.save();
+  
+    return successRes(res, 200, true, "Customer blocked successfully", customer);
+  });
+
+  
+  module.exports.unblockCustomer = asyncErrorHandler(async (req, res, next) => {
+    const { customerId } = req.body;
+    const admin = req.admin;
+  
+    if (!admin || admin.role !== "superadmin") {
+      return next(new CustomError("Only superadmin can unblock customers", 403));
+    }
+  
+    if (!customerId) {
+      return next(new CustomError("Customer ID is required", 400));
+    }
+  
+    const customer = await Customer.findById(customerId);
+  
+    if (!customer) {
+      return next(new CustomError("Customer not found", 404));
+    }
+  
+    if (!customer.isBlocked) {
+      return next(new CustomError("Customer is already unblocked", 400));
+    }
+  
+    customer.isBlocked = false;
+    await customer.save();
+  
+    return successRes(res, 200, true, "Customer unblocked successfully", customer);
   });
   
   

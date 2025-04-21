@@ -22,6 +22,7 @@ const customerSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
+
   password: {
     type: String,
     required: true,
@@ -31,6 +32,10 @@ const customerSchema = new mongoose.Schema({
   },
   profilePicture: {
     type: String,
+  },
+  isBlocked: {
+    type: Boolean,
+    default: false
   },
   isVerified: {
     type: Boolean,
