@@ -262,3 +262,25 @@ module.exports.uploadLicence = asyncErrorHandler(async (req, res, next) => {
 
     return successRes(res, 200, true, "Licence Uploaded Successfully", filePath);
 })
+
+module.exports.updateDeliveryPartnerStatus = asyncErrorHandler(async (req, res, next) => {
+    const { status } = req.body;
+    const partnerId = req.partner?._id;
+
+    const validStatuses = ["available", "on-delivery", "offline"];
+    if (!validStatuses.includes(status)) {
+        return next(new CustomError("Invalid status provided", 400));
+    }
+
+    const updatedPartner = await DeliveryPartner.findByIdAndUpdate(
+        partnerId,
+        { availabilityStatus: status },
+        { new: true }
+    );
+
+    if (!updatedPartner) {
+        return next(new CustomError("Failed to update status", 500));
+    }
+
+    return successRes(res, 200, true, "Status updated successfully", updatedPartner);
+});
