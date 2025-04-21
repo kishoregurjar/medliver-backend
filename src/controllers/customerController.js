@@ -108,7 +108,7 @@ module.exports.verifyOtp = asyncErrorHandler(async (req, res, next) => {
     return next(new CustomError("User already verified", 400));
   }
 
-  if (findUser.otp !== otp) {
+  if (findUser.otp != otp) {
     return next(new CustomError("Invalid OTP", 400));
   }
   findUser.isVerified = true;
@@ -179,7 +179,7 @@ module.exports.verifyForgetPasswordOtp = asyncErrorHandler(
       return next(new CustomError("User not found", 404));
     }
 
-    if (findUser.otp !== otp) {
+    if (findUser.otp != otp) {
       return next(new CustomError("Invalid OTP", 400));
     }
     findUser.otp = null;
@@ -214,3 +214,12 @@ module.exports.resetPassword = asyncErrorHandler(async (req, res, next) => {
 
 
 
+
+module.exports.getUserDetails = asyncErrorHandler(async (req, res, next)=>{
+  const userId = req.user._id;
+  const findUser = await customerModel.findById(userId).select("-password -otp").populate("previousOrders.orderId").populate("medicineReminders.medicineName").populate("userCoordinates");
+  if (!findUser) {
+    return next(new CustomError("User not found", 404));
+  }
+  return successRes(res, 200, true, "Details fetched successfully", findUser);
+});

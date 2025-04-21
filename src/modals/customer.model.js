@@ -14,7 +14,8 @@ const customerSchema = new mongoose.Schema({
     lowercase: true,
   },
   otp:{
-    type:Number
+    type:String ,
+    default:null
   },
   phoneNumber: {
     type: String,
