@@ -231,4 +231,34 @@ module.exports.resetPassword = asyncErrorHandler(async (req, res, next) => {
     return successRes(res, 200, true, "Password reset successfully");
 });
 
+module.exports.uploadDeliveryProfile = asyncErrorHandler(async (req, res, next) => {
+    if (!req.file) {
+        return next(new CustomError("No File Uploaded", 400))
+    }
 
+    const filePath = `${process.env.DELIVERY_PARTNER_PROFILE_PIC}${req.file.filename}`;
+
+    return successRes(res, 200, true, "Image Uploaded Successfully", filePath);
+})
+
+module.exports.uploadDeliveryAdharCardImages = asyncErrorHandler(async (req, res, next) => {
+    if (!req.files) {
+        return next(new CustomError("No File Uploaded", 400))
+    }
+    const frontPic = `${process.env.DELIVERY_PARTNER_ADHARCARD}${req.files[1].filename}`
+    const backPic = `${process.env.DELIVERY_PARTNER_ADHARCARD}${req.files[0].filename}`
+
+    return successRes(res, 200, true, "Image Uploaded Successfully", {
+        frontPic, backPic
+    });
+})
+
+module.exports.uploadLicence = asyncErrorHandler(async (req, res, next) => {
+    if (!req.file) {
+        return next(new CustomError("No File Uploaded", 400))
+    }
+
+    const filePath = `${process.env.DELIVERY_PARTNER_LICENCE}${req.file.filename}`;
+
+    return successRes(res, 200, true, "Licence Uploaded Successfully", filePath);
+})

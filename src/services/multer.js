@@ -138,5 +138,24 @@ module.exports.uploadInvoice = uploadSingleFile("files", {
   folder: "uploads",
 });
 
+/* Delivery Partner Section */
+module.exports.uploadDeliveryProfile = uploadSingleFile("image", {
+  fileTypes: /jpeg|jpg|png/,
+  fileSize: 3000000,
+  folder: "uploads/deliveryPartnerProfile",
+});
+
+module.exports.uploadAdharcardImages = uploadMultipleFiles("files", 2, {
+  fileTypes: /jpeg|jpg|png/,
+  fileSize: 3000000,
+  folder: "uploads/deliveryPartnerDocuments",
+})
+
+module.exports.uploadLicenceImage = uploadSingleFile("image", {
+  fileTypes: /jpeg|jpg|png/,
+  fileSize: 3000000,
+  folder: "uploads/deliveryPartnerDocuments",
+});
+
 module.exports.uploadSingleFile = uploadSingleFile;
 module.exports.uploadMultipleFiles = uploadMultipleFiles;
