@@ -157,5 +157,11 @@ module.exports.uploadLicenceImage = uploadSingleFile("image", {
   folder: "uploads/deliveryPartnerDocuments",
 });
 
+module.exports.uploadUserProfilePic = uploadSingleFile("image", {
+  fileTypes: /jpeg|jpg|png/,
+  fileSize: 3000000,
+  folder: "uploads/userProfilePic",
+});
+
 module.exports.uploadSingleFile = uploadSingleFile;
 module.exports.uploadMultipleFiles = uploadMultipleFiles;

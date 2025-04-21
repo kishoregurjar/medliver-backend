@@ -141,10 +141,24 @@ module.exports.loginUser = asyncErrorHandler(async (req, res, next) => {
     return next(new CustomError("Invalid Email or Password", 401));
   }
 
+  if( findUser.isVerified == false) {
+    return next(new CustomError("User not verified", 301));
+  }
+
   let isMatch = await bcrypt.compare(password, findUser.password);
   if (!isMatch) {
     return next(new CustomError("Invalid Email or Password", 401));
   }
+
+  const payload = {
+    _id: findUser._id,
+    email: findUser.email,
+  }
+
+  const token = await assignJwt(payload);
+  findUser = findUser.toObject();
+  delete findUser.password;
+  findUser.token = token;
 
   return successRes(res, 200, true, "Login successfully", findUser);
 });
@@ -158,6 +172,12 @@ module.exports.forgetPassword = asyncErrorHandler(async (req, res, next) => {
   const findUser = await customerModel.findOne({ email });
   if (!findUser) {
     return next(new CustomError("User not found", 404));
+  }
+  if( findUser.isVerified == false) {
+    return next(new CustomError("User not verified", 301));
+  }
+  if(findUser.isBlocked == true){
+    return next(new CustomError("User is blocked", 400));
   }
   let otp = generateOTPNumber(4);
   findUser.otp = otp;
@@ -225,4 +245,51 @@ module.exports.getUserDetails = asyncErrorHandler(async (req, res, next)=>{
     return next(new CustomError("User not found", 404));
   }
   return successRes(res, 200, true, "Details fetched successfully", findUser);
+});
+
+
+module.exports.changeUserPassword = asyncErrorHandler(async (req,res,next)=>{
+  const userId = req.user._id;
+  const {password} = req.body;
+  if (!password) {
+    return next(new CustomError("Password is required", 400));
+  }
+  const findUser = await customerModel.findById(userId);
+  if (!findUser) {
+    return next(new CustomError("User not found", 404));
+  }
+  const hashedPassword = await bcrypt.hash(password, 12);
+  findUser.password = hashedPassword;
+  await findUser.save();
+  const sanitizedUser = findUser.toObject();
+  delete sanitizedUser.password;
+  delete sanitizedUser.otp;
+  return successRes(res, 200, true, "Password changed successfully", sanitizedUser);
+});
+
+
+module.exports.updateUserProfile = asyncErrorHandler(async (req,res,next)=>{
+  const userId = req.user._id;
+  const  findUser = await customerModel.findById(userId);
+  if (!findUser) {
+    return next(new CustomError("User not found", 404));
+  }
+  const updateUser = await customerModel.findByIdAndUpdate(userId, req.body, { new: true });
+  if (!updateUser) {
+    return next(new CustomError("User not found", 404));
+  }
+  const sanitizedUser = updateUser.toObject();
+  delete sanitizedUser.password;
+  delete sanitizedUser.otp;
+  return successRes(res, 200, true, "Profile updated successfully", sanitizedUser);
+})
+
+module.exports.updateUserProfilePicture = asyncErrorHandler(async (req,res,next)=>{
+  if (!req.file) {
+          return next(new CustomError("No File Uploaded", 400))
+      }
+  
+      const filePath = `${process.env.USER_PROFILE_PIC}${req.file.filename}`;
+  
+      return successRes(res, 200, true, "Licence Uploaded Successfully", filePath);
 });
