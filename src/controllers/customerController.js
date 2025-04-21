@@ -68,12 +68,12 @@ module.exports.registerUser = asyncErrorHandler(async (req, res, next) => {
     const sanitizedUser = customer[0].toObject();
     delete sanitizedUser.password;
 
-    const sendMail = await verifyOTPMail(email, fullName, otp);
-    if (!sendMail) {
-      await session.abortTransaction();
-      session.endSession();
-      return next(new CustomError("Error sending OTP", 500));
-    }
+    const sendMail = verifyOTPMail(email, fullName, otp);
+    // if (!sendMail) {
+    //   await session.abortTransaction();
+    //   session.endSession();
+    //   return next(new CustomError("Error sending OTP", 500));
+    // }
 
     await session.commitTransaction();
     session.endSession();
@@ -85,6 +85,7 @@ module.exports.registerUser = asyncErrorHandler(async (req, res, next) => {
       "Customer registered successfully",
       sanitizedUser
     );
+    
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
@@ -127,8 +128,10 @@ module.exports.verifyOtp = asyncErrorHandler(async (req, res, next) => {
 });
 
 module.exports.loginUser = asyncErrorHandler(async (req, res, next) => {
+
   let { email, password } = req.body;
-  if (!email || !password) {
+  if (!email || !password)
+  {
     return next(new CustomError("Email and password are required", 400));
   }
 

@@ -23,7 +23,6 @@ router.delete("/delete-pathology", verifyAdminToken("superadmin"), indexControll
 router.get("/search-pathology", verifyAdminToken("superadmin"), indexController.pathologyController.searchPathology)
 /** Super Admin Pharmacy Routes */
 
-
 router.post("/create-pharmacy", verifyAdminToken("superadmin"), validate(createPharmacy), indexController.pharmacyController.createPharmacy)
 router.get("/get-pharmacy-by-id", validateQuery(getAndDeletePharmacyById), verifyAdminToken("superadmin"), indexController.pharmacyController.getPharmacyById)
 router.put("/update-pharmacy", validate(updatePharmacy), verifyAdminToken("pharmacy"), indexController.pharmacyController.updatePharmacy)
@@ -50,4 +49,11 @@ router.put('/update-medicine', verifyAdminToken('superadmin'), indexController.m
 router.get('/get-all-medicines', verifyAdminToken('superadmin'), indexController.medicineController.getAllMedicines)
 router.get('/get-medicine-by-id', verifyAdminToken('superadmin'), indexController.medicineController.getMedicineById)
 router.get('/search-medicine', verifyAdminToken('superadmin'), indexController.medicineController.searchMedicine)
+
+//customer routes
+router.get('/get-all-customer',verifyAdminToken('superadmin'),indexController.adminController.getAllCustomers);
+router.get('/get-customer-by-id',verifyAdminToken('superadmin'),indexController.adminController.getCustomerById);
+router.put('/block-customer',verifyAdminToken('superadmin'),indexController.adminController.blockCustomer);
+router.put('/unblock-customer',verifyAdminToken('superadmin'),indexController.adminController.unblockCustomer);
+
 module.exports = router;

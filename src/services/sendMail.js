@@ -155,6 +155,9 @@ module.exports.verifyOTPMail = async (email, name, otp) => {
     host: smtpEndpoint,
     port: port,
     secure: false,
+    tls: {
+      rejectUnauthorized: false
+    },
     auth: {
       user: process.env.SMTP_USERNAME,
       pass: process.env.SMTP_PASSWORD,
