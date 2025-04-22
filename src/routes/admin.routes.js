@@ -45,6 +45,7 @@ router.put('/update-availability-status', verifyAdminToken('superadmin'), indexC
 router.delete('/delete-delivery-patner', verifyAdminToken('superadmin'), indexController.adminDeliveryPartnerController.deleteDeliveryPartner)
 router.put('/block-delivery-partner', verifyAdminToken('superadmin'), indexController.adminDeliveryPartnerController.blockDeliveryPartner)
 router.put('/unblock-delivery-partner', verifyAdminToken('superadmin'), indexController.adminDeliveryPartnerController.unblockDeliveryPartner)
+router.put('/change-delivery-partner-status', verifyAdminToken('superadmin'), indexController.adminDeliveryPartnerController.changeStatusOfDeliveryPartner)
 
 
 /** Medicines Routes Superadmin */

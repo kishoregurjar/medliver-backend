@@ -254,3 +254,31 @@ module.exports.unblockDeliveryPartner = asyncErrorHandler(async (req, res, next)
 
     return successRes(res, 200, true, "Delivery Partner unblocked successfully", partner);
 });
+
+module.exports.changeStatusOfDeliveryPartner = asyncErrorHandler(async (req, res, next) => {
+    const { partnerId, status } = req.body;
+
+    const validStatuses = ["available", "on-delivery", "offline"];
+    if (!validStatuses.includes(status)) {
+        return next(new CustomError("Please provide a valid status", 400));
+    }
+
+    if (!partnerId) {
+        return next(new CustomError("Delivery partner ID is required", 400));
+    }
+
+    const updatedPartner = await DeliveryPartner.findByIdAndUpdate(
+        partnerId,
+        { availabilityStatus: status },
+        { new: true }
+    );
+
+    if (!updatedPartner) {
+        return next(new CustomError("Delivery partner not found", 404));
+    }
+
+    return successRes(res, 200, true, "Status updated successfully", {
+        partnerId: updatedPartner._id,
+        status: updatedPartner.availabilityStatus
+    });
+});
