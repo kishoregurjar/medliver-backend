@@ -293,3 +293,44 @@ module.exports.updateUserProfilePicture = asyncErrorHandler(async (req,res,next)
   
       return successRes(res, 200, true, "Licence Uploaded Successfully", filePath);
 });
+
+
+
+
+module.exports.signUPSignInWithGoogle = asyncErrorHandler(async (req, res, next) => {
+  const { email, fullName, profilePicture } = req.body;
+
+  try {
+    let user = await Customer.findOne({ email });
+
+    if (!user) {
+      
+      user = await Customer.create({
+        fullName,
+        email,
+        profilePicture,
+        password: null,      
+        phoneNumber: null,   
+        isVerified: true,
+        loginType: 'google',
+      });
+    }
+
+    const payload = {
+      _id: user._id,
+      email: user.email,
+    };
+    const token = await assignJwt(payload);
+    user = user.toObject();
+    delete user.password;
+    user.token = token;
+    user.isVerified = true; 
+
+    return successRes(res, 200, true, "Login successful", {
+      user,
+      token
+    });
+  } catch (err) {
+    return next(new CustomError("Something went wrong", 500));
+  }
+});
