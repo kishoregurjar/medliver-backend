@@ -85,7 +85,7 @@ module.exports.registerUser = asyncErrorHandler(async (req, res, next) => {
       "Customer registered successfully",
       sanitizedUser
     );
-    
+
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
@@ -130,8 +130,7 @@ module.exports.verifyOtp = asyncErrorHandler(async (req, res, next) => {
 module.exports.loginUser = asyncErrorHandler(async (req, res, next) => {
 
   let { email, password } = req.body;
-  if (!email || !password)
-  {
+  if (!email || !password) {
     return next(new CustomError("Email and password are required", 400));
   }
 
@@ -141,7 +140,7 @@ module.exports.loginUser = asyncErrorHandler(async (req, res, next) => {
     return next(new CustomError("Invalid Email or Password", 401));
   }
 
-  if( findUser.isVerified == false) {
+  if (findUser.isVerified == false) {
     return next(new CustomError("User not verified", 301));
   }
 
@@ -173,10 +172,10 @@ module.exports.forgetPassword = asyncErrorHandler(async (req, res, next) => {
   if (!findUser) {
     return next(new CustomError("User not found", 404));
   }
-  if( findUser.isVerified == false) {
+  if (findUser.isVerified == false) {
     return next(new CustomError("User not verified", 301));
   }
-  if(findUser.isBlocked == true){
+  if (findUser.isBlocked == true) {
     return next(new CustomError("User is blocked", 400));
   }
   let otp = generateOTPNumber(4);
@@ -235,10 +234,7 @@ module.exports.resetPassword = asyncErrorHandler(async (req, res, next) => {
   return successRes(res, 200, true, "Password reset successfully");
 });
 
-
-
-
-module.exports.getUserDetails = asyncErrorHandler(async (req, res, next)=>{
+module.exports.getUserDetails = asyncErrorHandler(async (req, res, next) => {
   const userId = req.user._id;
   const findUser = await customerModel.findById(userId).select("-password -otp").populate("previousOrders.orderId").populate("medicineReminders.medicineName").populate("userCoordinates");
   if (!findUser) {
@@ -247,10 +243,9 @@ module.exports.getUserDetails = asyncErrorHandler(async (req, res, next)=>{
   return successRes(res, 200, true, "Details fetched successfully", findUser);
 });
 
-
-module.exports.changeUserPassword = asyncErrorHandler(async (req,res,next)=>{
+module.exports.changeUserPassword = asyncErrorHandler(async (req, res, next) => {
   const userId = req.user._id;
-  const {password} = req.body;
+  const { password } = req.body;
   if (!password) {
     return next(new CustomError("Password is required", 400));
   }
@@ -267,10 +262,9 @@ module.exports.changeUserPassword = asyncErrorHandler(async (req,res,next)=>{
   return successRes(res, 200, true, "Password changed successfully", sanitizedUser);
 });
 
-
-module.exports.updateUserProfile = asyncErrorHandler(async (req,res,next)=>{
+module.exports.updateUserProfile = asyncErrorHandler(async (req, res, next) => {
   const userId = req.user._id;
-  const  findUser = await customerModel.findById(userId);
+  const findUser = await customerModel.findById(userId);
   if (!findUser) {
     return next(new CustomError("User not found", 404));
   }
@@ -284,18 +278,15 @@ module.exports.updateUserProfile = asyncErrorHandler(async (req,res,next)=>{
   return successRes(res, 200, true, "Profile updated successfully", sanitizedUser);
 })
 
-module.exports.updateUserProfilePicture = asyncErrorHandler(async (req,res,next)=>{
+module.exports.updateUserProfilePicture = asyncErrorHandler(async (req, res, next) => {
   if (!req.file) {
-          return next(new CustomError("No File Uploaded", 400))
-      }
-  
-      const filePath = `${process.env.USER_PROFILE_PIC}${req.file.filename}`;
-  
-      return successRes(res, 200, true, "Licence Uploaded Successfully", filePath);
+    return next(new CustomError("No File Uploaded", 400))
+  }
+
+  const filePath = `${process.env.USER_PROFILE_PIC}${req.file.filename}`;
+
+  return successRes(res, 200, true, "Licence Uploaded Successfully", filePath);
 });
-
-
-
 
 module.exports.signUPSignInWithGoogle = asyncErrorHandler(async (req, res, next) => {
   const { email, fullName, profilePicture } = req.body;
@@ -304,13 +295,13 @@ module.exports.signUPSignInWithGoogle = asyncErrorHandler(async (req, res, next)
     let user = await Customer.findOne({ email });
 
     if (!user) {
-      
+
       user = await Customer.create({
         fullName,
         email,
         profilePicture,
-        password: null,      
-        phoneNumber: null,   
+        password: null,
+        phoneNumber: null,
         isVerified: true,
         loginType: 'google',
       });
@@ -324,7 +315,7 @@ module.exports.signUPSignInWithGoogle = asyncErrorHandler(async (req, res, next)
     user = user.toObject();
     delete user.password;
     user.token = token;
-    user.isVerified = true; 
+    user.isVerified = true;
 
     return successRes(res, 200, true, "Login successful", {
       user,
