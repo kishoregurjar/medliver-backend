@@ -16,5 +16,6 @@ router.get("/get-user-details", verifyUserToken(), indexController.customerContr
 router.post("/change-password", verifyUserToken(), indexController.customerController.changeUserPassword);
 router.patch("/update-user-profile", verifyUserToken(), indexController.customerController.updateUserProfile);
 router.post("/update-user-profile-picture", verifyUserToken(), uploadUserProfilePic, indexController.customerController.updateUserProfilePicture);
+router.post("signup-signin-with-google", indexController.customerController.signUPSignInWithGoogle);
 
 module.exports = router;
