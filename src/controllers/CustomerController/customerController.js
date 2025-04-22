@@ -1,12 +1,12 @@
-const customerModel = require("../modals/customer.model");
+const customerModel = require("../../modals/customer.model");
 const bcrypt = require("bcrypt");
 const jsonwebtoken = require("jsonwebtoken");
-const CustomError = require("../utils/customError");
-const { successRes } = require("../services/response");
-const asyncErrorHandler = require("../utils/asyncErrorHandler");
-const { assignJwt } = require("../utils/jsonWebToken");
-const { forgetPasswordMail, verifyOTPMail } = require("../services/sendMail");
-const { generateOTPNumber } = require("../services/helper");
+const CustomError = require("../../utils/customError");
+const { successRes } = require("../../services/response");
+const asyncErrorHandler = require("../../utils/asyncErrorHandler");
+const { assignJwt } = require("../../utils/jsonWebToken");
+const { forgetPasswordMail, verifyOTPMail } = require("../../services/sendMail");
+const { generateOTPNumber } = require("../../services/helper");
 
 module.exports.registerUser = asyncErrorHandler(async (req, res, next) => {
   const session = await customerModel.startSession();

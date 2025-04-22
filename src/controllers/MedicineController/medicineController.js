@@ -1,7 +1,7 @@
-const medicineModel = require("../modals/medicine.model");
-const { successRes } = require("../services/response");
-const asyncErrorHandler = require("../utils/asyncErrorHandler");
-const CustomError = require("../utils/customError");
+const medicineModel = require("../../modals/medicine.model");
+const { successRes } = require("../../services/response");
+const asyncErrorHandler = require("../../utils/asyncErrorHandler");
+const CustomError = require("../../utils/customError");
 
 
 const capitalizeWords = (str) => {
@@ -95,7 +95,6 @@ module.exports.getAllMedicines = asyncErrorHandler(async (req, res, next) => {
         data: medicines
     });
 });
-
 
 module.exports.getMedicineById = asyncErrorHandler(async (req, res, next) => {
     let { medicineId } = req.query;

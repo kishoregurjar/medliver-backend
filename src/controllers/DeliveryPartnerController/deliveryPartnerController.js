@@ -1,11 +1,11 @@
-const DeliveryPartner = require('../modals/delivery.model');
-const { generateOTPNumber } = require('../services/helper');
-const { successRes } = require('../services/response');
-const { verifyOTPMail, forgetPasswordMail, forgetPasswordMailDeliverypartner } = require('../services/sendMail');
-const asyncErrorHandler = require('../utils/asyncErrorHandler');
-const CustomError = require('../utils/customError');
+const DeliveryPartner = require('../../modals/delivery.model');
+const { generateOTPNumber } = require('../../services/helper');
+const { successRes } = require('../../services/response');
+const { verifyOTPMail, forgetPasswordMail, forgetPasswordMailDeliverypartner } = require('../../services/sendMail');
+const asyncErrorHandler = require('../../utils/asyncErrorHandler');
+const CustomError = require('../../utils/customError');
 const bcrypt = require('bcrypt');
-const { assignJwt } = require('../utils/jsonWebToken');
+const { assignJwt } = require('../../utils/jsonWebToken');
 
 
 module.exports.registerDeliveryPartner = asyncErrorHandler(async (req, res, next) => {
