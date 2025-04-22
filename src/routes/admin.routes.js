@@ -3,7 +3,7 @@ const indexController = require("../controllers/indexController");
 const { verifyAdminToken } = require("../utils/jsonWebToken");
 const { validate, validateQuery, createPharmacy, getAndDeletePharmacyById, getAllPharmacy, updatePharmacy } = require('../middleware/validation');
 const router = express.Router();
-const { uploadAdminProfile, uploadLicenceImagePharmacy } = require('../services/multer')
+const { uploadAdminProfile, uploadLicenceImagePharmacy, uploadMedicineImages } = require('../services/multer')
 
 /** Super Admin Auth Routes */
 
@@ -52,6 +52,8 @@ router.put('/update-medicine', verifyAdminToken('superadmin'), indexController.m
 router.get('/get-all-medicines', verifyAdminToken('superadmin'), indexController.medicineController.getAllMedicines)
 router.get('/get-medicine-by-id', verifyAdminToken('superadmin'), indexController.medicineController.getMedicineById)
 router.get('/search-medicine', verifyAdminToken('superadmin'), indexController.medicineController.searchMedicine)
+router.delete('/delete-medicine', verifyAdminToken('superadmin'), indexController.medicineController.deleteMedicine)
+router.post('/upload-medicine-images', verifyAdminToken('superadmin'), uploadMedicineImages, indexController.medicineController.uploadMedicineImages)
 
 //customer routes
 router.get('/get-all-customer', verifyAdminToken('superadmin'), indexController.adminCustomerController.getAllCustomers);
