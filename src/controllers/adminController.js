@@ -10,6 +10,7 @@ const { forgetPasswordMail } = require('../services/sendMail');
 const { JsonWebTokenError } = require('jsonwebtoken');
 const DeliveryPartner = require('../modals/delivery.model')
 const Customer = require('../modals/customer.model');
+require('dotenv').config();
 
 
 module.exports.login = asyncErrorHandler(async (req, res, next) => {
@@ -431,15 +432,21 @@ module.exports.updateAvailabilityStatus = asyncErrorHandler(async (req, res, nex
   });
 
   module.exports.getAllCustomers = asyncErrorHandler(async (req, res, next) => {
-    let { page, limit } = req.query;
+    let { page, limit, sortOrder } = req.query;
   
     page = parseInt(page) || 1;
     limit = parseInt(limit) || 10;
     const skip = (page - 1) * limit;
   
+    const sortDir = sortOrder?.toLowerCase() === 'asc' ? 1 : -1; //default desc
+  
     const [total, customers] = await Promise.all([
       Customer.countDocuments(),
-      Customer.find().select("-password -otp").sort({ createdAt: -1 }).skip(skip).limit(limit)
+      Customer.find()
+        .select("-password -otp")
+        .sort({ createdAt: sortDir })
+        .skip(skip)
+        .limit(limit)
     ]);
   
     if (customers.length === 0) {
@@ -453,6 +460,7 @@ module.exports.updateAvailabilityStatus = asyncErrorHandler(async (req, res, nex
       total
     });
   });
+  
   
   module.exports.getCustomerById = asyncErrorHandler(async (req, res, next) => {
     const { customerId } = req.query;
@@ -470,62 +478,67 @@ module.exports.updateAvailabilityStatus = asyncErrorHandler(async (req, res, nex
     return successRes(res, 200, true, "Customer fetched successfully", customer);
   });
   
-  module.exports.blockCustomer = asyncErrorHandler(async (req, res, next) => {
+  module.exports.BlockUnblockCustomer = asyncErrorHandler(async (req, res, next) => {
     const { customerId } = req.body;
-    const admin = req.admin;
-  
-    if (!admin || admin.role !== "superadmin") {
-      return next(new CustomError("Only superadmin can block customers", 403));
-    }
-  
+    
     if (!customerId) {
       return next(new CustomError("Customer ID is required", 400));
     }
   
-    const customer = await Customer.findById(customerId);
+    
+   const customer = await Customer.findById(customerId);
+  
   
     if (!customer) {
       return next(new CustomError("Customer not found", 404));
     }
-  
-    if (customer.isBlocked) {
-      return next(new CustomError("Customer is already blocked", 400));
+
+
+    if (customer.isBlocked === true) {
+      customer.isBlocked = false; 
+      await customer.save();
+      return successRes(
+        res,
+        200,
+        true,
+        "Customer unblocked successfully",
+        customer
+      );
     }
   
-    customer.isBlocked = true;
-    await customer.save();
+    if (customer.isBlocked === false) {
+      customer.isBlocked = true;
+      await customer.save();
+      return successRes(
+        res,
+        200,
+        true,
+        "Customer blocked successfully",
+        customer
+      );
+    }
+  });
   
-    return successRes(res, 200, true, "Customer blocked successfully", customer);
+  
+  
+  
+  module.exports.uploadAdminAvatar = asyncErrorHandler(async (req, res, next) => {
+    if (!req.file) {
+      return next(new CustomError("No file uploaded.", 400));
+    }
+
+    const imageUrl = `${process.env.UPLOAD_ADMIN}${req.file.filename}`;
+    return successRes(res, 200, true, "File Uploaded Successfully", { imageUrl });
+
   });
 
   
-  module.exports.unblockCustomer = asyncErrorHandler(async (req, res, next) => {
-    const { customerId } = req.body;
-    const admin = req.admin;
+module.exports.uploadPharmacyDocument = asyncErrorHandler(async (req,res,next)=>{
+  if (!req.file) {
+          return next(new CustomError("No File Uploaded", 400))
+      }
   
-    if (!admin || admin.role !== "superadmin") {
-      return next(new CustomError("Only superadmin can unblock customers", 403));
-    }
+      const imagePath = `${process.env.PHARMACY_LICENCE}${req.file.filename}`;
   
-    if (!customerId) {
-      return next(new CustomError("Customer ID is required", 400));
-    }
-  
-    const customer = await Customer.findById(customerId);
-  
-    if (!customer) {
-      return next(new CustomError("Customer not found", 404));
-    }
-  
-    if (!customer.isBlocked) {
-      return next(new CustomError("Customer is already unblocked", 400));
-    }
-  
-    customer.isBlocked = false;
-    await customer.save();
-  
-    return successRes(res, 200, true, "Customer unblocked successfully", customer);
-  });
-  
-  
-  
+      return successRes(res, 200, true, "Licence Uploaded Successfully", imagePath);
+});

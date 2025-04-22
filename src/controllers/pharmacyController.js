@@ -301,4 +301,3 @@ module.exports.deletePharmacy = asyncErrorHandler(async (req, res, next) => {
 
 
 
-

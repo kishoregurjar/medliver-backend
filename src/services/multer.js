@@ -135,9 +135,14 @@ const uploadMultipleFiles = (fieldName, maxCount, options) => {
 module.exports.uploadInvoice = uploadSingleFile("files", {
   fileTypes: /jpeg|jpg|png/,
   fileSize: 3000000,
-  folder: "uploads",
+  folder: "uploads/adminProfile",
 });
 
+module.exports.uploadAdminProfile = uploadSingleFile("files", {
+  fileTypes: /jpeg|jpg|png/,
+  fileSize: 3000000,
+  folder: "uploads/adminProfilePicture",
+});
 /* Delivery Partner Section */
 module.exports.uploadDeliveryProfile = uploadSingleFile("image", {
   fileTypes: /jpeg|jpg|png/,
@@ -157,10 +162,17 @@ module.exports.uploadLicenceImage = uploadSingleFile("image", {
   folder: "uploads/deliveryPartnerDocuments",
 });
 
+
 module.exports.uploadUserProfilePic = uploadSingleFile("image", {
   fileTypes: /jpeg|jpg|png/,
   fileSize: 3000000,
   folder: "uploads/userProfilePic",
+});
+
+module.exports.uploadLicenceImagePharmacy = uploadSingleFile("image", {
+  fileTypes: /jpeg|jpg|png/,
+  fileSize: 3000000,
+  folder: "uploads/pharmacyDocuments",
 });
 
 module.exports.uploadSingleFile = uploadSingleFile;

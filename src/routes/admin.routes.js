@@ -3,6 +3,7 @@ const indexController = require("../controllers/indexController");
 const { verifyAdminToken } = require("../utils/jsonWebToken");
 const { validate, validateQuery, createPharmacy, getAndDeletePharmacyById, getAllPharmacy, updatePharmacy } = require('../middleware/validation');
 const router = express.Router();
+const {uploadAdminProfile,uploadLicenceImagePharmacy} = require('../services/multer')
 
 /** Super Admin Auth Routes */
 
@@ -12,6 +13,9 @@ router.post("/forget-password", indexController.adminController.forgetPassword);
 router.post("/reset-password", indexController.adminController.resetPassword);
 router.post("/changed-password", verifyAdminToken(), indexController.adminController.changedPassword);
 router.patch("/update-admin-profile", verifyAdminToken(), indexController.adminController.updateAdminProfile);
+
+/** Upload files */
+router.post('/upload-image',uploadAdminProfile,verifyAdminToken(),indexController.adminController.uploadAdminAvatar);
 
 /** Super Admin Pathology Routes */
 
@@ -28,7 +32,8 @@ router.get("/get-pharmacy-by-id", validateQuery(getAndDeletePharmacyById), verif
 router.put("/update-pharmacy", validate(updatePharmacy), verifyAdminToken("pharmacy"), indexController.pharmacyController.updatePharmacy)
 router.delete("/delete-pharmacy", validateQuery(getAndDeletePharmacyById), verifyAdminToken("superadmin"), indexController.pharmacyController.deletePharmacy)
 router.get("/get-all-pharmacy", validateQuery(getAllPharmacy), verifyAdminToken("superadmin"), indexController.pharmacyController.getAllPharmacy);
-router.get("/search-pharmacy", verifyAdminToken("superadmin"), indexController.pharmacyController.searchPharmacy)
+router.get("/search-pharmacy", verifyAdminToken("superadmin"), indexController.pharmacyController.searchPharmacy);
+router.post('/upload-pharmacy-licence',uploadLicenceImagePharmacy,verifyAdminToken("superadmin"),indexController.adminController.uploadPharmacyDocument);
 
 /** Super Admin Delivery Partner Routes */
 
@@ -53,7 +58,6 @@ router.get('/search-medicine', verifyAdminToken('superadmin'), indexController.m
 //customer routes
 router.get('/get-all-customer',verifyAdminToken('superadmin'),indexController.adminController.getAllCustomers);
 router.get('/get-customer-by-id',verifyAdminToken('superadmin'),indexController.adminController.getCustomerById);
-router.put('/block-customer',verifyAdminToken('superadmin'),indexController.adminController.blockCustomer);
-router.put('/unblock-customer',verifyAdminToken('superadmin'),indexController.adminController.unblockCustomer);
+router.put('/block-unblock-customer',verifyAdminToken('superadmin'),indexController.adminController.BlockUnblockCustomer);
 
 module.exports = router;
