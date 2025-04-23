@@ -1,0 +1,17 @@
+const mongoose = require('mongoose');
+
+const bestSellerModel = new mongoose.Schema({
+    product: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Medicine',
+      required: true,
+      unique: true
+    },
+    soldCount: {
+      type: Number,
+      default: 0
+    },
+  }, { timestamps: true });
+  
+  module.exports = mongoose.model('BestSellerProduct', bestSellerModel);
+  

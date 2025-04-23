@@ -60,4 +60,11 @@ router.get('/get-all-customer', verifyAdminToken('superadmin'), indexController.
 router.get('/get-customer-by-id', verifyAdminToken('superadmin'), indexController.adminCustomerController.getCustomerById);
 router.put('/block-unblock-customer', verifyAdminToken('superadmin'), indexController.adminCustomerController.BlockUnblockCustomer);
 
+
+
+
+//** Special Offer Routes */
+
+router.post("/create-special-offer", verifyAdminToken("superadmin"), indexController.adminSpecialOfferController.createSpecialOffer)
+
 module.exports = router;
