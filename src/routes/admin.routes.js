@@ -61,10 +61,11 @@ router.get('/get-customer-by-id', verifyAdminToken('superadmin'), indexControlle
 router.put('/block-unblock-customer', verifyAdminToken('superadmin'), indexController.adminCustomerController.BlockUnblockCustomer);
 
 
-
-
 //** Special Offer Routes */
-
 router.post("/create-special-offer", verifyAdminToken("superadmin"), indexController.adminSpecialOfferController.createSpecialOffer)
 
+//** Feature Product Routes */
+router.post("/create-feature-product",verifyAdminToken("superadmin"),indexController.adminFeatureProductController.createFeaturedProduct);
+router.get("/get-all-feature-product",verifyAdminToken("superadmin"),indexController.adminFeatureProductController.getAllFeaturedProducts);
+router.delete("/delete-feature-product",verifyAdminToken("superadmin"),indexController.adminFeatureProductController.deleteFeaturedProduct)
 module.exports = router;
