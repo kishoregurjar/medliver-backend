@@ -81,5 +81,8 @@ router.delete("/delete-best-selling-product", verifyAdminToken("superadmin"), in
 router.post("/create-feature-product",verifyAdminToken("superadmin"),indexController.adminFeatureProductController.createFeaturedProduct);
 router.get("/get-all-feature-product",verifyAdminToken("superadmin"),indexController.adminFeatureProductController.getAllFeaturedProducts);
 router.delete("/delete-feature-product",verifyAdminToken("superadmin"),indexController.adminFeatureProductController.deleteFeaturedProduct);
+router.get("/get-feature-product-by-id",verifyAdminToken("superadmin"),indexController.adminFeatureProductController.getFeatureProductById);
+router.put("/update-feature-product-status",verifyAdminToken("superadmin"),indexController.adminFeatureProductController.updateFeaturedProductStatus);
+
 
 module.exports = router;

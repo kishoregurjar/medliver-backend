@@ -236,6 +236,7 @@ module.exports.updateAvailabilityStatus = asyncErrorHandler(
     );
   }
 );
+
 module.exports.BlockUnblockDeliveryPartner = asyncErrorHandler(
   async (req, res, next) => {
     const { partnerId } = req.body;
