@@ -67,4 +67,13 @@ router.put('/block-unblock-customer', verifyAdminToken('superadmin'), indexContr
 
 router.post("/create-special-offer", verifyAdminToken("superadmin"), indexController.adminSpecialOfferController.createSpecialOffer)
 
+
+/** Best Selling Product */
+
+router.post("/create-best-selling-product", verifyAdminToken("superadmin"), indexController.adminBestSellingController.createBestSellingProduct)
+router.get("/get-all-best-selling-product", verifyAdminToken("superadmin"), indexController.adminBestSellingController.getAllBestSellingProduct);
+router.put("/change-active-non-active-best-selling", verifyAdminToken("superadmin"), indexController.adminBestSellingController.updateStatus);
+router.delete("/delete-best-selling-product", verifyAdminToken("superadmin"), indexController.adminBestSellingController.deleteBestSellingProduct);
+
+
 module.exports = router;
