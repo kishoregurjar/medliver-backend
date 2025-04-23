@@ -18,6 +18,10 @@ const specialOfferModel = new mongoose.Schema({
     validTill: {
       type: Date,
       required: true
+    },
+    isActive:{
+      type: Boolean,
+      default: true 
     }
   }, { timestamps: true });
   
