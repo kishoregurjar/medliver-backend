@@ -60,9 +60,6 @@ router.get('/get-all-customer', verifyAdminToken('superadmin'), indexController.
 router.get('/get-customer-by-id', verifyAdminToken('superadmin'), indexController.adminCustomerController.getCustomerById);
 router.put('/block-unblock-customer', verifyAdminToken('superadmin'), indexController.adminCustomerController.BlockUnblockCustomer);
 
-
-
-
 //** Special Offer Routes */
 
 router.post("/create-special-offer", verifyAdminToken("superadmin"), indexController.adminSpecialOfferController.createSpecialOffer)
@@ -71,9 +68,6 @@ router.get("/get-all-special-offer", verifyAdminToken("superadmin"), indexContro
 router.put("/update-special-offer", verifyAdminToken("superadmin"), indexController.adminSpecialOfferController.updateSpecialOffer)
 router.delete("/delete-special-offer", verifyAdminToken("superadmin"), indexController.adminSpecialOfferController.deleteSpecialOffer)
 router.put("/update-special-offer-status", verifyAdminToken("superadmin"), indexController.adminSpecialOfferController.activeDeactiveSpecialOffer)
-
-
-
 
 /** Best Selling Product */
 
