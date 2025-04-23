@@ -66,6 +66,13 @@ router.put('/block-unblock-customer', verifyAdminToken('superadmin'), indexContr
 //** Special Offer Routes */
 
 router.post("/create-special-offer", verifyAdminToken("superadmin"), indexController.adminSpecialOfferController.createSpecialOffer)
+router.get("/get-special-offer-by-id", verifyAdminToken("superadmin"), indexController.adminSpecialOfferController.getSpecialOfferById)
+router.get("/get-all-special-offer", verifyAdminToken("superadmin"), indexController.adminSpecialOfferController.getAllSpecialOffers)
+router.put("/update-special-offer", verifyAdminToken("superadmin"), indexController.adminSpecialOfferController.updateSpecialOffer)
+router.delete("/delete-special-offer", verifyAdminToken("superadmin"), indexController.adminSpecialOfferController.deleteSpecialOffer)
+router.put("/update-special-offer-status", verifyAdminToken("superadmin"), indexController.adminSpecialOfferController.activeDeactiveSpecialOffer)
+
+
 
 
 /** Best Selling Product */
