@@ -6,8 +6,6 @@ const CustomError = require('../../utils/customError');
 const { successRes } = require('../../services/response');
 const mongoose = require("mongoose")
 
-
-
 module.exports.createPharmacy = asyncErrorHandler(async (req, res, next) => {
     const admin = req.admin;
     const {
@@ -33,55 +31,56 @@ module.exports.createPharmacy = asyncErrorHandler(async (req, res, next) => {
     try {
         await session.startTransaction();
 
-        const [existingPharmacy, existingAdmin] = await Promise.all([
-            Pharmacy.findOne({ $or: [{ email }, { phone }] }).session(session),
-            Admin.findOne({ email }).session(session),
-        ]);
+        // Check if email or phone already exist in the Pharmacy and Admin collection
+        const existingPharmacy = await Pharmacy.findOne({ $or: [{ email }, { phone }] }).session(session);
+        const existingAdmin = await Admin.findOne({ email }).session(session);
 
         if (existingPharmacy || existingAdmin) {
             throw new CustomError("Email or phone already exists", 400);
         }
 
+        // Hash the password for admin
         const hashedPassword = await bcrypt.hash(password, 12);
 
-        const newAdmin = await Admin.create(
-            [{
-                name: ownerName,
-                email,
-                password: hashedPassword,
-                role: "pharmacy",
-                avatar: null,
-                isActive: true,
-            }],
-            { session }
-        );
+        // Create admin and save it using session
+        const newAdmin = new Admin({
+            name: ownerName,
+            email,
+            password: hashedPassword,
+            role: "pharmacy",
+            avatar: null,
+            isActive: true,
+        });
 
-        const newPharmacy = await Pharmacy.create(
-            [{
-                pharmacyName,
-                ownerName,
-                email,
-                phone,
-                password: hashedPassword,
-                address,
-                documents,
-                status: "active",
-                adminId: newAdmin[0]._id,
-            }],
-            { session }
-        );
+        await newAdmin.save({ session });
 
-        newAdmin[0].pharmacyId = newPharmacy[0]._id;
-        await newAdmin[0].save({ session });
+        // Create pharmacy using session
+        const newPharmacy = new Pharmacy({
+            pharmacyName,
+            ownerName,
+            email,
+            phone,
+            address,
+            documents,
+            status: "active",
+            adminId: newAdmin._id,
+        });
 
+        await newPharmacy.save({ session });
+
+        // Link admin to pharmacy
+        newAdmin.pharmacyId = newPharmacy._id;
+        await newAdmin.save({ session });
+
+        // Commit transaction
         await session.commitTransaction();
 
-        const sanitizedAdmin = newAdmin[0].toObject();
+        const sanitizedAdmin = newAdmin.toObject();
         delete sanitizedAdmin.password;
 
         return successRes(res, 201, true, "Pharmacy and Admin created successfully", {
             admin: sanitizedAdmin,
-            pharmacy: newPharmacy[0],
+            pharmacy: newPharmacy,
         });
     } catch (error) {
         await session.abortTransaction();
