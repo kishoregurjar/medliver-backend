@@ -139,4 +139,29 @@ module.exports.searchMedicine = asyncErrorHandler(async (req, res, next) => {
     });
 });
 
+module.exports.deleteMedicine = asyncErrorHandler(async (req, res, next) => {
+    let { medicineId } = req.query;
+    if (!medicineId) {
+        return next(new CustomError("Medicine Id Required", 400))
+    }
+    let medicine = await medicineModel.findByIdAndDelete(medicineId);
+    if (!medicine) {
+        return next(new CustomError("Medicines Not Found", 404))
+    }
+    return successRes(res, 200, true, "Medicine Deleted Successfully", medicine)
+})
+
+module.exports.uploadMedicineImages = asyncErrorHandler(async (req, res, next) => {
+    if (!req.files || req.files.length === 0) {
+        return next(new CustomError("No File Uploaded", 400));
+    }
+
+    // Extract image paths
+    const imagePaths = req.files.map(file => `${process.env.MEDICINE_IMAGE}/${file.filename}`);
+
+    return successRes(res, 200, true, "Images Uploaded Successfully", {
+        images: imagePaths
+    });
+});
+
 

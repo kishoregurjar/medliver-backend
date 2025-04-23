@@ -175,5 +175,11 @@ module.exports.uploadLicenceImagePharmacy = uploadSingleFile("image", {
   folder: "uploads/pharmacyDocuments",
 });
 
+module.exports.uploadMedicineImages = uploadMultipleFiles("images", 3, {
+  fileTypes: /jpeg|jpg|png/,
+  fileSize: 3000000,
+  folder: "uploads/medicineImages",
+});
+
 module.exports.uploadSingleFile = uploadSingleFile;
 module.exports.uploadMultipleFiles = uploadMultipleFiles;

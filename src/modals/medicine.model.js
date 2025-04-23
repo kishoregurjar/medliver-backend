@@ -38,7 +38,7 @@ const medicineSchema = new mongoose.Schema(
             type: String,
             default: null
         },
-        image: {
+        images: {
             type: String,
             default: null
         },
