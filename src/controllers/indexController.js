@@ -10,6 +10,9 @@ const adminDeliveryPartnerController = require('./AdminController/adminDeliveryp
 const adminPharmacyController = require('./AdminController/adminPharmacyController');
 const adminSpecialOfferController = require('./AdminController/adminSpecialOfferController');
 const adminFeatureProductController = require("./AdminController/adminFeatureProductController");
+const adminBestSellingController = require('./AdminController/adminBestSellingProdudct');
+const adminFeatureProductController = require("./AdminController/adminFeatureProductController");
+
 
 module.exports = {
     adminAuthController,
@@ -23,5 +26,6 @@ module.exports = {
     adminDeliveryPartnerController,
     adminPharmacyController,
     adminSpecialOfferController,
-    adminFeatureProductController
+    adminFeatureProductController,
+    adminBestSellingController
 }

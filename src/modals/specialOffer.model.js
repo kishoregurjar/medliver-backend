@@ -11,13 +11,21 @@ const specialOfferModel = new mongoose.Schema({
       type: Number,
       required: true
     },
+    offerPercentage:{
+      type: Number,
+      required: true
+    },
     originalPrice: {
       type: Number,
       required: true
     },
     validTill: {
-      type: Date,
+      type: String,
       required: true
+    },
+    isActive:{
+      type: Boolean,
+      default: true 
     }
   }, { timestamps: true });
   

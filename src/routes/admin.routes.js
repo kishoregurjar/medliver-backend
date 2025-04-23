@@ -62,10 +62,24 @@ router.put('/block-unblock-customer', verifyAdminToken('superadmin'), indexContr
 
 
 //** Special Offer Routes */
+
 router.post("/create-special-offer", verifyAdminToken("superadmin"), indexController.adminSpecialOfferController.createSpecialOffer)
+router.get("/get-special-offer-by-id", verifyAdminToken("superadmin"), indexController.adminSpecialOfferController.getSpecialOfferById)
+router.get("/get-all-special-offer", verifyAdminToken("superadmin"), indexController.adminSpecialOfferController.getAllSpecialOffers)
+router.put("/update-special-offer", verifyAdminToken("superadmin"), indexController.adminSpecialOfferController.updateSpecialOffer)
+router.delete("/delete-special-offer", verifyAdminToken("superadmin"), indexController.adminSpecialOfferController.deleteSpecialOffer)
+router.put("/update-special-offer-status", verifyAdminToken("superadmin"), indexController.adminSpecialOfferController.activeDeactiveSpecialOffer)
+
+/** Best Selling Product */
+
+router.post("/create-best-selling-product", verifyAdminToken("superadmin"), indexController.adminBestSellingController.createBestSellingProduct)
+router.get("/get-all-best-selling-product", verifyAdminToken("superadmin"), indexController.adminBestSellingController.getAllBestSellingProduct);
+router.put("/change-active-non-active-best-selling", verifyAdminToken("superadmin"), indexController.adminBestSellingController.updateStatus);
+router.delete("/delete-best-selling-product", verifyAdminToken("superadmin"), indexController.adminBestSellingController.deleteBestSellingProduct);
 
 //** Feature Product Routes */
 router.post("/create-feature-product",verifyAdminToken("superadmin"),indexController.adminFeatureProductController.createFeaturedProduct);
 router.get("/get-all-feature-product",verifyAdminToken("superadmin"),indexController.adminFeatureProductController.getAllFeaturedProducts);
-router.delete("/delete-feature-product",verifyAdminToken("superadmin"),indexController.adminFeatureProductController.deleteFeaturedProduct)
+router.delete("/delete-feature-product",verifyAdminToken("superadmin"),indexController.adminFeatureProductController.deleteFeaturedProduct);
+
 module.exports = router;
