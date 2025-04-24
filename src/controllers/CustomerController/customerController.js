@@ -43,7 +43,7 @@ module.exports.registerUser = asyncErrorHandler(async (req, res, next) => {
         session.endSession();
         return successRes(
           res,
-          204,
+          200,
           true,
           "Customer not verified",
           findCustomer
