@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const cartItemSchema = new mongoose.Schema({
     item_type: {
         type: String,
-        enum: ["Medicine", "test"],
+        enum: ["medicine", "test"],
         required: true
     },
     item_id: {
