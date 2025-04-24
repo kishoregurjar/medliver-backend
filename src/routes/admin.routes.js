@@ -1,9 +1,10 @@
 const express = require("express");
 const indexController = require("../controllers/indexController");
 const { verifyAdminToken } = require("../utils/jsonWebToken");
-const { validate, validateQuery, createPharmacy, getAndDeletePharmacyById, getAllPharmacy, updatePharmacy ,createPathologyCenter,getAndDeletePathologyCenterById,updatePathologyCenter,searchPathologyCenter,createFeature, getOrDeleteFeatureById,updateFeatureStatus,getAllFeatures,registerDeliveryPartner,getOrDeleteDeliveryPartner,updateDeliveryPartner,updateDeliveryPartnerStatus,getAllDeliveryPartners,blockUnblockDeliveryPartner,getAllCustomersValidation, getCustomerByIdValidation} = require('../middleware/validation');
+const { validate, validateQuery, createPharmacy, getAndDeletePharmacyById, getAllPharmacy, updatePharmacy ,createPathologyCenter,getAndDeletePathologyCenterById,updatePathologyCenter,searchPathologyCenter,createFeature, getOrDeleteFeatureById,updateFeatureStatus,getAllFeatures,registerDeliveryPartner,getOrDeleteDeliveryPartner,updateDeliveryPartner,updateDeliveryPartnerStatus,getAllDeliveryPartners,blockUnblockDeliveryPartner,getAllCustomersValidation, getCustomerByIdValidation,createTestValidation,getTestdeleteAndById, getAllApiValidation, searchTestValidation, updateTestValidation} = require('../middleware/validation');
 const router = express.Router();
-const { uploadAdminProfile, uploadLicenceImagePharmacy, uploadMedicineImages } = require('../services/multer')
+const { uploadAdminProfile, uploadLicenceImagePharmacy, uploadMedicineImages } = require('../services/multer');
+const { updateTest } = require("../controllers/AdminController/adminTestController");
 
 /** Super Admin Auth Routes */
 
@@ -83,6 +84,14 @@ router.get("/get-all-feature-product",validateQuery(getAllFeatures),verifyAdminT
 router.delete("/delete-feature-product",validateQuery(getOrDeleteFeatureById),verifyAdminToken("superadmin"),indexController.adminFeatureProductController.deleteFeaturedProduct);
 router.get("/get-feature-product-by-id",validateQuery(getOrDeleteFeatureById),verifyAdminToken("superadmin"),indexController.adminFeatureProductController.getFeatureProductById);
 router.put("/update-feature-product-status",validate(updateFeatureStatus),verifyAdminToken("superadmin"),indexController.adminFeatureProductController.updateFeaturedProductStatus);
+
+//Test Routes
+router.post("/create-test",validate(createTestValidation),verifyAdminToken("superadmin"),indexController.adminTestController.createTest)
+router.get("/get-all-test",validateQuery(getAllApiValidation),verifyAdminToken("superadmin"),indexController.adminTestController.getAllTests);
+router.get("/get-test-by-id",validateQuery(getTestdeleteAndById),verifyAdminToken("superadmin"),indexController.adminTestController.getTestById);
+router.delete("/delete-test",validateQuery(getTestdeleteAndById),verifyAdminToken("superadmin"),indexController.adminTestController.deleteTest);
+router.get("/search-test",validateQuery(searchTestValidation),verifyAdminToken("superadmin"),indexController.adminTestController.searchTest);
+router.put("/update-test",validate(updateTestValidation),verifyAdminToken("superadmin"),indexController.adminTestController.updateTest);
 
 
 module.exports = router;
