@@ -1,0 +1,43 @@
+const mongoose = require('mongoose');
+
+const testSchema = new mongoose.Schema({
+    name: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    description: {
+        type: String
+    },
+    test_code: {
+        type: String,
+        unique: true
+    },
+    price: {
+        type: Number,
+        required: true
+    },
+    sample_required: {
+        type: String // e.g. 'Blood', 'Urine', 'Swab'
+    },
+    preparation: {
+        type: String // e.g. 'Fasting for 8 hours'
+    },
+    delivery_time: {
+        type: String // e.g. '24 hours', 'Same day'
+    },
+    available: {
+        type: Boolean,
+        default: true
+    },
+    available_at_home: {
+        type: Boolean,
+        default: false
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
+});
+
+module.exports = mongoose.model('Test', testSchema);

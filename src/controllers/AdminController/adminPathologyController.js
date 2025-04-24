@@ -13,10 +13,7 @@ module.exports.createPathologyCenter = asyncErrorHandler(async (req, res, next) 
     email,
     phoneNumber,
     address,
-    labs,
     password,
-    bookings,
-    sampleCollection,
   } = req.body;
 
   if (!admin.role || admin.role !== "superadmin") {
@@ -32,10 +29,12 @@ module.exports.createPathologyCenter = asyncErrorHandler(async (req, res, next) 
   try {
     await session.startTransaction();
 
-    const [existingCenter, existingAdmin] = await Promise.all([
-      PathologyCenter.findOne({ $or: [{ email }, { phoneNumber }] }).session(session),
-      Admin.findOne({ email }).session(session),
-    ]);
+    // Sequentially check for existing email or phone
+    const existingCenter = await PathologyCenter.findOne({
+      $or: [{ email }, { phoneNumber }]
+    }).session(session);
+
+    const existingAdmin = await Admin.findOne({ email }).session(session);
 
     if (existingCenter || existingAdmin) {
       throw new CustomError("Email or phone already exists", 400);
@@ -43,43 +42,41 @@ module.exports.createPathologyCenter = asyncErrorHandler(async (req, res, next) 
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    const newAdmin = await Admin.create(
-      [{
-        name: centerName,
-        email,
-        password: hashedPassword,
-        role: "pathology",
-        avatar: null,
-        isActive: true,
-      }],
-      { session }
-    );
+    // Create new admin
+    const newAdmin = new Admin({
+      name: centerName,
+      email,
+      password: hashedPassword,
+      role: "pathology",
+      avatar: null,
+      isActive: true,
+    });
 
-    const newCenter = await PathologyCenter.create(
-      [{
-        centerName,
-        email,
-        phoneNumber,
-        address,
-        labs,
-        bookings: bookings || [],
-        sampleCollection: sampleCollection || [],
-        adminId: newAdmin[0]._id,
-      }],
-      { session }
-    );
+    await newAdmin.save({ session });
 
-    newAdmin[0].pathologyCenterId = newCenter[0]._id;
-    await newAdmin[0].save({ session });
+    // Create new pathology center
+    const newCenter = new PathologyCenter({
+      centerName,
+      email,
+      phoneNumber,
+      address,
+      adminId: newAdmin._id,
+    });
+
+    await newCenter.save({ session });
+
+    // Link pathology center to admin
+    newAdmin.pathologyCenterId = newCenter._id;
+    await newAdmin.save({ session });
 
     await session.commitTransaction();
 
-    const sanitizedAdmin = newAdmin[0].toObject();
+    const sanitizedAdmin = newAdmin.toObject();
     delete sanitizedAdmin.password;
 
     return successRes(res, 201, true, "Pathology Center and Admin created successfully", {
       admin: sanitizedAdmin,
-      pathologyCenter: newCenter[0],
+      pathologyCenter: newCenter,
     });
   } catch (error) {
     await session.abortTransaction();
@@ -88,6 +85,8 @@ module.exports.createPathologyCenter = asyncErrorHandler(async (req, res, next) 
     session.endSession();
   }
 });
+
+
 
 module.exports.getPathologyCenterById = asyncErrorHandler(async (req, res, next) => {
   const { pathologyCenterId } = req.query;

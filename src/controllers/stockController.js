@@ -5,8 +5,6 @@ const asyncErrorHandler = require("../utils/asyncErrorHandler");
 const CustomError = require("../utils/customError")
 const { successRes } = require('../services/response');
 
-
-
 module.exports.createStock = asyncErrorHandler(async (req, res, next) => {
     const { pharmacyId, medicines } = req.body;
   
