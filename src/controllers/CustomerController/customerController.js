@@ -1,11 +1,10 @@
 const customerModel = require("../../modals/customer.model");
 const bcrypt = require("bcrypt");
-const jsonwebtoken = require("jsonwebtoken");
 const CustomError = require("../../utils/customError");
 const { successRes } = require("../../services/response");
 const asyncErrorHandler = require("../../utils/asyncErrorHandler");
 const { assignJwt } = require("../../utils/jsonWebToken");
-const { forgetPasswordMail, verifyOTPMail } = require("../../services/sendMail");
+const { verifyOTPMail } = require("../../services/sendMail");
 const { generateOTPNumber } = require("../../services/helper");
 const FeaturedProduct = require("../../modals/featuredProduct.model");
 const BestSellerModel = require("../../modals/bestSeller.model");
@@ -329,17 +328,6 @@ module.exports.signUPSignInWithGoogle = asyncErrorHandler(async (req, res, next)
   }
 });
 
-// module.exports.getAllFeaturedProducts = asyncErrorHandler(async (req, res, next) => {
-//   const featuredProducts = await featuredProductModel
-//     .find({ isActive: true }) // only active featured products
-//     .sort({ featuredAt: -1 }) 
-//     .populate({
-//       path: "product",
-//       model: "Medicine",
-//     });
-
-//   return successRes(res, 200, true, "Featured products fetched successfully", featuredProducts);
-// });
 module.exports.getAllFeaturedProducts = asyncErrorHandler(async (req, res, next) => {
   let { page, limit, sortOrder } = req.query;
 
@@ -370,71 +358,70 @@ module.exports.getAllFeaturedProducts = asyncErrorHandler(async (req, res, next)
   });
 });
 
+module.exports.getAllSellingProduct = asyncErrorHandler(async (req, res, next) => {
+  let { page = 1, limit = 10 } = req.query;
 
-module.exports.getAllBestSellingProduct = asyncErrorHandler(async (req, res, next) => {
-    let { page = 1, limit = 10 } = req.query;
+  page = parseInt(page);
+  limit = parseInt(limit);
 
-    page = parseInt(page);
-    limit = parseInt(limit);
+  const skip = (page - 1) * limit;
 
-    const skip = (page - 1) * limit;
+  const adminProducts = await BestSellerModel.find({
+    isActive: true,
+    isCreatedByAdmin: true
+  })
+    .populate('product')
+    .sort({ soldCount: -1 })
+    .skip(skip)
+    .limit(limit);
 
-    const adminProducts = await BestSellerModel.find({
-        isActive: true,
-        isCreatedByAdmin: true
+  const remainingLimit = limit - adminProducts.length;
+
+  let nonAdminProducts = [];
+
+  if (remainingLimit > 0) {
+    const excludedIds = adminProducts.map(item => item._id);
+
+    nonAdminProducts = await BestSellerModel.find({
+      isActive: true,
+      isCreatedByAdmin: false,
+      _id: { $nin: excludedIds }
     })
-        .populate('product')
-        .sort({ soldCount: -1 })
-        .skip(skip)
-        .limit(limit);
+      .populate('product')
+      .sort({ soldCount: -1 })
+      .limit(remainingLimit);
+  }
 
-    const remainingLimit = limit - adminProducts.length;
+  const combinedResults = [...adminProducts, ...nonAdminProducts];
 
-    let nonAdminProducts = [];
+  const total = await BestSellerModel.countDocuments({
+    isActive: true
+  });
 
-    if (remainingLimit > 0) {
-        const excludedIds = adminProducts.map(item => item._id);
-
-        nonAdminProducts = await BestSellerModel.find({
-            isActive: true,
-            isCreatedByAdmin: false,
-            _id: { $nin: excludedIds }
-        })
-            .populate('product')
-            .sort({ soldCount: -1 })
-            .limit(remainingLimit);
-    }
-
-    const combinedResults = [...adminProducts, ...nonAdminProducts];
-
-    const total = await BestSellerModel.countDocuments({
-        isActive: true
-    });
-
-    return successRes(res, 200, true, "Best selling products fetched successfully", {
-        total,
-        currentPage: page,
-        totalPages: Math.ceil(total / limit),
-        products: combinedResults
-    });
+  return successRes(res, 200, true, "Best selling products fetched successfully", {
+    total,
+    currentPage: page,
+    totalPages: Math.ceil(total / limit),
+    products: combinedResults
+  });
 });
 
 module.exports.getallSpecialOffers = asyncErrorHandler(
   async (req, res, next) => {
     let { page, limit, sortOrder } = req.query;
-    
+
     page = parseInt(page) || 1;
     limit = parseInt(limit) || 10;
     const skip = (page - 1) * limit;
 
-    const sortDir = sortOrder?.toLowerCase() === "asc" ? 1 : -1; 
+    const sortDir = sortOrder?.toLowerCase() === "asc" ? 1 : -1;
 
     const [totalSpecialOffers, specialOffers] = await Promise.all([
       specialOfferModel.countDocuments(),
       specialOfferModel
         .find()
         .populate("product", "name image price")
-        .sort({ createdAt: sortDir })  
+        .sort({ createdAt: sortDir })
         .skip(skip)
         .limit(limit),
     ]);

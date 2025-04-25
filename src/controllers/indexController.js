@@ -14,6 +14,7 @@ const adminBestSellingController = require('./AdminController/adminBestSellingPr
 const adminTestController = require("./AdminController/adminTestController");
 const customerCartController = require('./CustomerController/customerCartController');
 const adminTestCatgController = require("./AdminController/adminTestCatgController");
+const customerSpecialProductController = require('./CustomerController/customerSpecialProductController')
 
 module.exports = {
     adminAuthController,
@@ -31,6 +32,7 @@ module.exports = {
     adminBestSellingController,
     customerCartController,
     adminTestController,
-    adminTestCatgController
+    adminTestCatgController,
+    customerSpecialProductController
 
 }
