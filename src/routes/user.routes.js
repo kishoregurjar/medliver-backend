@@ -21,6 +21,14 @@ router.patch("/update-user-profile", verifyUserToken(), indexController.customer
 router.post("/update-user-profile-picture", verifyUserToken(), uploadUserProfilePic, indexController.customerController.updateUserProfilePicture);
 router.post("signup-signin-with-google", indexController.customerController.signUPSignInWithGoogle);
 
+/** Address Routes */
+router.post("/add-address", verifyUserToken(), indexController.customerController.addAddress);
+router.get("/get-all-address", verifyUserToken(), indexController.customerController.getAllAddress);
+router.put("/edit-address", verifyUserToken(), indexController.customerController.editAddress);
+router.delete("/delete-address", verifyUserToken(), indexController.customerController.deleteAddress);
+router.get('/get-address-by-id', verifyUserToken(), indexController.customerController.getAddressById);
+router.put('/set-default-address', verifyUserToken(), indexController.customerController.setDefaultAddress);
+
 /** Featue and selling and special offer Routes */
 
 router.get("/get-all-feature-product", validateQuery(getAllFeatureProductValidation), verifyUserToken(), indexController.customerSpecialProductController.getAllFeaturedProducts)
