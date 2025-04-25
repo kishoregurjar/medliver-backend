@@ -3,6 +3,7 @@ const asyncErrorHandler = require("../../utils/asyncErrorHandler");
 const CustomError = require("../../utils/customError")
 const { successRes } = require("../../services/response")
 require('dotenv').config();
+const mongoose = require("mongoose")
 
 module.exports.createTestCategory = asyncErrorHandler(async (req, res, next) => {
   const { name, description, image_url,tests  } = req.body;
@@ -71,8 +72,9 @@ module.exports.getTestCategoryById = asyncErrorHandler(async (req, res, next) =>
   return successRes(res, 200, true, "Category fetched successfully", category);
 });
 
+
 module.exports.updateTestCategory = asyncErrorHandler(async (req, res, next) => {
-  const { testCatgId, name, description, image_url,tests } = req.body;
+  const { testCatgId, name, description, image_url, tests } = req.body;
 
   if (!testCatgId) {
     return next(new CustomError("Category ID is required", 400));
@@ -82,20 +84,29 @@ module.exports.updateTestCategory = asyncErrorHandler(async (req, res, next) => 
   if (name) updateFields.name = name;
   if (description) updateFields.description = description;
   if (image_url) updateFields.image_url = image_url;
+  
   if (tests) {
     if (!Array.isArray(tests)) {
       return next(new CustomError("Tests should be an array of IDs", 400));
     }
-    updateFields.tests = tests;
+
+    // Use $addToSet to add unique tests without duplicates, or use $push if duplicates are allowed
+    updateFields.$addToSet = { tests: { $each: tests } };
   }
+
   updateFields.updated_at = new Date();
 
-  const updated = await TestCategory.findByIdAndUpdate(testCatgId, { $set: updateFields }, { new: true,runValidators: true });
-  if (!updated) {
-    return next(new CustomError("Category not found", 404));
+  const updatedCategory = await TestCategory.findByIdAndUpdate(
+    testCatgId,
+    { $set: updateFields },
+    { new: true, runValidators: true }
+  );
+
+  if (!updatedCategory) {
+    return next(new CustomError("Test Category not found", 404));
   }
 
-  return successRes(res, 200, true, "Category updated successfully", updated);
+  return successRes(res, 200, true, "Test Category updated successfully", updatedCategory);
 });
 
 module.exports.deleteTestCategoryById = asyncErrorHandler(async (req, res, next) => {

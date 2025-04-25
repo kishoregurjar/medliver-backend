@@ -8,6 +8,8 @@ const { verifyOTPMail } = require("../../services/sendMail");
 const { generateOTPNumber } = require("../../services/helper");
 const CustomerAddress = require('../../modals/customerAddress.model'); // Adjust path as needed
 
+
+
 module.exports.registerUser = asyncErrorHandler(async (req, res, next) => {
   const session = await customerModel.startSession();
   session.startTransaction();
@@ -506,8 +508,5 @@ module.exports.setDefaultAddress = asyncErrorHandler(async (req, res, next) => {
 
   return successRes(res, 200, true, "Address set as default successfully", address);
 });
-
-
-
 
 

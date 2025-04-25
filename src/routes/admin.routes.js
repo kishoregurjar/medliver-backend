@@ -103,4 +103,17 @@ router.put("/update-test-Category", verifyAdminToken("superadmin"), indexControl
 router.post('/upload-test-category', verifyAdminToken('superadmin'), uploadTestCatgPic, indexController.adminTestCatgController.uploadTestCatgImg)
 router.put("/remove-test-from-category", verifyAdminToken("superadmin"), indexController.adminTestCatgController.removeTestFromCategory)
 
+// Insurance routes
+router.get("/get-all-insurance",verifyAdminToken("superadmin"),indexController.adminInsuranceController.getAllInsuranceLeads);
+router.get("/get-insurance-by-id",verifyAdminToken("superadmin"),indexController.adminInsuranceController.getInsuranceById)
+router.put("/archieve-insurence-by-id",verifyAdminToken("superadmin"),indexController.adminInsuranceController.archiveInsuranceById);
+
+
+//vehicle Route
+router.get("/get-all-vehicle-request",verifyAdminToken("superadmin"),indexController.adminVehicleController.getAllVehicleRequests);
+router.get("/get-vehicle-by-id",verifyAdminToken("superadmin"),indexController.adminVehicleController.getVehicleRequestById)
+router.put("/update-vehicle-request",verifyAdminToken("superadmin"),indexController.adminVehicleController.updateVehicleRequest)
+router.put("/archieve-vehicle-request-by-id",verifyAdminToken("superadmin"),indexController.adminVehicleController.archiveVehicleRequest)
+
+
 module.exports = router;

@@ -188,12 +188,15 @@ const updatePathologyCenter = Joi.object({
   centerName: Joi.string().optional().messages({
     "string.empty": "Center name cannot be empty",
   }),
-
-  email: Joi.string().email().optional().messages({
-    "string.email": "Email must be a valid format",
+  ownerName: Joi.string().optional().messages({
+    "string.empty": "Owner namecannot be empty",
   }),
 
-  phone: Joi.string()
+  email: Joi.string().email().required().messages({
+    "string.empty": "Email is required",
+    "string.email": "Email must be a valid format",
+  }),
+  phoneNumber: Joi.string()
     .pattern(/^[0-9]{10}$/)
     .optional()
     .messages({
