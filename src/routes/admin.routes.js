@@ -30,7 +30,7 @@ router.get("/search-pathology", validateQuery(searchPathologyCenter),verifyAdmin
 
 router.post("/create-pharmacy", verifyAdminToken("superadmin"), validate(createPharmacy), indexController.adminPharmacyController.createPharmacy)
 router.get("/get-pharmacy-by-id", validateQuery(getAndDeletePharmacyById), verifyAdminToken("superadmin"), indexController.adminPharmacyController.getPharmacyById)
-router.put("/update-pharmacy", validate(updatePharmacy), verifyAdminToken("pharmacy"), indexController.adminPharmacyController.updatePharmacy)
+router.put("/update-pharmacy", validate(updatePharmacy), verifyAdminToken("superadmin"), indexController.adminPharmacyController.updatePharmacy)
 router.delete("/delete-pharmacy", validateQuery(getAndDeletePharmacyById), verifyAdminToken("superadmin"), indexController.adminPharmacyController.deletePharmacy)
 router.get("/get-all-pharmacy", validateQuery(getAllPharmacy), verifyAdminToken("superadmin"), indexController.adminPharmacyController.getAllPharmacy);
 router.get("/search-pharmacy", verifyAdminToken("superadmin"), indexController.adminPharmacyController.searchPharmacy);
@@ -100,6 +100,6 @@ router.get("/get-test-Category-by-id",verifyAdminToken("superadmin"),indexContro
 router.delete("/delete-test-Category",verifyAdminToken("superadmin"),indexController.adminTestCatgController.deleteTestCategoryById);
 router.put("/update-test-Category",verifyAdminToken("superadmin"),indexController.adminTestCatgController.updateTestCategory);
 router.post('/upload-test-category', verifyAdminToken('superadmin'), uploadTestCatgPic, indexController.adminTestCatgController.uploadTestCatgImg)
-
+router.put("/remove-test-from-category",verifyAdminToken("superadmin"),indexController.adminTestCatgController.removeTestFromCategory)
 
 module.exports = router;

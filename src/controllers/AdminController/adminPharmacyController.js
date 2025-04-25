@@ -130,32 +130,66 @@ module.exports.deletePharmacy = asyncErrorHandler(async (req, res, next) => {
 });
 
 module.exports.updatePharmacy = asyncErrorHandler(async (req, res, next) => {
-    const { pharmacyId, name, ownerName, phone, address, documents, status } = req.body;
+    const { pharmacyId, pharmacyName, ownerName, phone, email, address, documents, status } = req.body;
 
     if (!pharmacyId) {
         return next(new CustomError("Pharmacy Id is required", 400));
     }
 
     const updateFields = {};
-    if (name) updateFields.name = name;
+
+    if (pharmacyName) updateFields.pharmacyName = pharmacyName;
     if (ownerName) updateFields.ownerName = ownerName;
     if (phone) updateFields.phone = phone;
-    if (address) updateFields.address = address;
-    if (documents) updateFields.documents = documents;
+    if (email) updateFields.email = email;
     if (status) updateFields.status = status;
 
+    // Handle address update (only update subfields that are provided)
+    if (address) {
+        const addressUpdate = {};
+        if (address.street) addressUpdate.street = address.street;
+        if (address.city) addressUpdate.city = address.city;
+        if (address.state) addressUpdate.state = address.state;
+        if (address.pincode) addressUpdate.pincode = address.pincode;
+        if (address.coordinates) addressUpdate.coordinates = address.coordinates;
+
+        if (Object.keys(addressUpdate).length > 0) {
+            updateFields.address = addressUpdate;
+        }
+    }
+
+    // Handle documents update (only update subfields that are provided)
+    if (documents) {
+        const documentsUpdate = {};
+        if (documents.licenseNumber) documentsUpdate.licenseNumber = documents.licenseNumber;
+        if (documents.gstNumber) documentsUpdate.gstNumber = documents.gstNumber;
+        if (documents.licenseDocument) documentsUpdate.licenseDocument = documents.licenseDocument;
+        if (documents.verificationStatus) documentsUpdate.verificationStatus = documents.verificationStatus;
+
+        if (Object.keys(documentsUpdate).length > 0) {
+            updateFields.documents = documentsUpdate;
+        }
+    }
+
+    // If no fields to update, return an error
     if (Object.keys(updateFields).length === 0) {
         return next(new CustomError("No fields provided for update", 400));
     }
 
+    // Perform the update
     const updatedPharmacy = await Pharmacy.findByIdAndUpdate(
         pharmacyId,
         { $set: updateFields },
         { new: true, runValidators: true }
     );
 
+    if (!updatedPharmacy) {
+        return next(new CustomError("Pharmacy not found", 404));
+    }
+
     return successRes(res, 200, true, "Pharmacy updated successfully", updatedPharmacy);
 });
+
 
 module.exports.getAllPharmacy = asyncErrorHandler(async (req, res, next) => {
     let { page, limit } = req.query;
