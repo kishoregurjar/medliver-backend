@@ -8,7 +8,6 @@ const { assignJwt } = require("../../utils/jsonWebToken");
 const { forgetPasswordMail } = require('../../services/sendMail');
 require('dotenv').config();
 
-
 module.exports.login = asyncErrorHandler(async (req, res, next) => {
   let { email, password } = req.body;
 

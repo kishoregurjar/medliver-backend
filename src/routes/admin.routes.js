@@ -3,7 +3,7 @@ const indexController = require("../controllers/indexController");
 const { verifyAdminToken } = require("../utils/jsonWebToken");
 const { validate, validateQuery, createPharmacy, getAndDeletePharmacyById, getAllPharmacy, updatePharmacy ,createPathologyCenter,getAndDeletePathologyCenterById,updatePathologyCenter,searchPathologyCenter,createFeature, getOrDeleteFeatureById,updateFeatureStatus,getAllFeatures,registerDeliveryPartner,getOrDeleteDeliveryPartner,updateDeliveryPartner,updateDeliveryPartnerStatus,getAllDeliveryPartners,blockUnblockDeliveryPartner,getAllCustomersValidation, getCustomerByIdValidation,createTestValidation,getTestdeleteAndById, getAllApiValidation, searchTestValidation, updateTestValidation} = require('../middleware/validation');
 const router = express.Router();
-const { uploadAdminProfile, uploadLicenceImagePharmacy, uploadMedicineImages } = require('../services/multer');
+const { uploadAdminProfile, uploadLicenceImagePharmacy, uploadMedicineImages,uploadTestCatgPic } = require('../services/multer');
 const { updateTest } = require("../controllers/AdminController/adminTestController");
 
 /** Super Admin Auth Routes */
@@ -92,6 +92,14 @@ router.get("/get-test-by-id",validateQuery(getTestdeleteAndById),verifyAdminToke
 router.delete("/delete-test",validateQuery(getTestdeleteAndById),verifyAdminToken("superadmin"),indexController.adminTestController.deleteTest);
 router.get("/search-test",validateQuery(searchTestValidation),verifyAdminToken("superadmin"),indexController.adminTestController.searchTest);
 router.put("/update-test",validate(updateTestValidation),verifyAdminToken("superadmin"),indexController.adminTestController.updateTest);
+
+//Test Catg Routes
+router.post("/create-test-Category",verifyAdminToken("superadmin"),indexController.adminTestCatgController.createTestCategory)
+router.get("/get-all-test-Category",verifyAdminToken("superadmin"),indexController.adminTestCatgController.getAllTestCategories);
+router.get("/get-test-Category-by-id",verifyAdminToken("superadmin"),indexController.adminTestCatgController.getTestCategoryById);
+router.delete("/delete-test-Category",verifyAdminToken("superadmin"),indexController.adminTestCatgController.deleteTestCategoryById);
+router.put("/update-test-Category",verifyAdminToken("superadmin"),indexController.adminTestCatgController.updateTestCategory);
+router.post('/upload-test-category', verifyAdminToken('superadmin'), uploadTestCatgPic, indexController.adminTestCatgController.uploadTestCatgImg)
 
 
 module.exports = router;
