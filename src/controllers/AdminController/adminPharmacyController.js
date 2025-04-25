@@ -190,7 +190,6 @@ module.exports.updatePharmacy = asyncErrorHandler(async (req, res, next) => {
     return successRes(res, 200, true, "Pharmacy updated successfully", updatedPharmacy);
 });
 
-
 module.exports.getAllPharmacy = asyncErrorHandler(async (req, res, next) => {
     let { page, limit } = req.query;
 
@@ -264,5 +263,29 @@ module.exports.uploadPharmacyDocument = asyncErrorHandler(async (req, res, next)
 
     return successRes(res, 200, true, "Licence Uploaded Successfully", imagePath);
 });
+
+module.exports.changeStatus = asyncErrorHandler(async (req, res, next) => {
+    const { pharmacyId } = req.body;
+
+    if (!pharmacyId) {
+        return next(new CustomError("pharmacyId is required", 400));
+    }
+
+    const pharmacy = await Pharmacy.findById(pharmacyId);
+
+    if (!pharmacy) {
+        return next(new CustomError("Pharmacy not found", 404));
+    }
+
+    pharmacy.status = pharmacy.status === 'active' ? 'inactive' : 'active';
+
+    await pharmacy.save();
+
+    return successRes(res, 200, true, "Status updated successfully", {
+        pharmacyId: pharmacy._id,
+        newStatus: pharmacy.status,
+    });
+});
+
 
 
