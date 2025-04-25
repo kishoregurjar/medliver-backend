@@ -3,7 +3,7 @@ const indexController = require("../controllers/indexController");
 const { verifyAdminToken } = require("../utils/jsonWebToken");
 const { validate, validateQuery, createPharmacy, getAndDeletePharmacyById, getAllPharmacy, updatePharmacy, createPathologyCenter, getAndDeletePathologyCenterById, updatePathologyCenter, searchPathologyCenter, createFeature, getOrDeleteFeatureById, updateFeatureStatus, getAllFeatures, registerDeliveryPartner, getOrDeleteDeliveryPartner, updateDeliveryPartner, updateDeliveryPartnerStatus, getAllDeliveryPartners, blockUnblockDeliveryPartner, getAllCustomersValidation, getCustomerByIdValidation, createTestValidation, getTestdeleteAndById, getAllApiValidation, searchTestValidation, updateTestValidation } = require('../middleware/validation');
 const router = express.Router();
-const { uploadAdminProfile, uploadLicenceImagePharmacy, uploadMedicineImages, uploadTestCatgPic } = require('../services/multer');
+const { uploadAdminProfile, uploadLicenceImagePharmacy, uploadMedicineImages, uploadTestCatgPic,uploadDoctoreCatgImg } = require('../services/multer');
 const { updateTest } = require("../controllers/AdminController/adminTestController");
 
 /** Super Admin Auth Routes */
@@ -114,6 +114,15 @@ router.get("/get-all-vehicle-request",verifyAdminToken("superadmin"),indexContro
 router.get("/get-vehicle-by-id",verifyAdminToken("superadmin"),indexController.adminVehicleController.getVehicleRequestById)
 router.put("/update-vehicle-request",verifyAdminToken("superadmin"),indexController.adminVehicleController.updateVehicleRequest)
 router.put("/archieve-vehicle-request-by-id",verifyAdminToken("superadmin"),indexController.adminVehicleController.archiveVehicleRequest)
+
+//doctor category route
+router.post("/create-doctore-category",verifyAdminToken("superadmin"),indexController.adminDoctoreCategoryController.createDoctoreCatgegory);
+router.get("/get-all-doctore-category",verifyAdminToken("superadmin"),indexController.adminDoctoreCategoryController.getAllDoctoreCategory)
+router.get("/get-doctore-category-by-id",verifyAdminToken("superadmin"),indexController.adminDoctoreCategoryController.getDoctoresCategoryById)
+router.delete("/delete-doctore-category",verifyAdminToken("superadmin"),indexController.adminDoctoreCategoryController.deleteDoctoresCategoryById)
+router.put("/update-doctore-category",verifyAdminToken("superadmin"),indexController.adminDoctoreCategoryController.updateDoctoresCatg);
+router.post("/upload-doctore-image",uploadDoctoreCatgImg,verifyAdminToken("superadmin"),indexController.adminDoctoreCategoryController.uploadDoctoresCatgImage);
+
 
 
 module.exports = router;
