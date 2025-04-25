@@ -371,7 +371,7 @@ module.exports.getAllFeaturedProducts = asyncErrorHandler(async (req, res, next)
 });
 
 
-module.exports.getAllSellingProduct = asyncErrorHandler(async (req, res, next) => {
+module.exports.getAllBestSellingProduct = asyncErrorHandler(async (req, res, next) => {
     let { page = 1, limit = 10 } = req.query;
 
     page = parseInt(page);

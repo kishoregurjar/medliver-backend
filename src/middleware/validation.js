@@ -11,6 +11,7 @@ const createPharmacy = Joi.object({
   phone: Joi.string().required().messages({
     "string.empty": "Phone number is required",
   }),
+  
   password: Joi.string()
     .pattern(
       new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[A-Za-z\\d@$!%*?&]{6,20}$")
@@ -80,31 +81,46 @@ const updatePharmacy = Joi.object({
     "string.empty": "Owner name cannot be empty",
   }),
 
-  phone: Joi.string()
-    .pattern(/^[0-9]{10}$/)
-    .optional()
-    .messages({
-      "string.empty": "Phone number cannot be empty",
-      "string.pattern.base": "Phone number must be exactly 10 digits",
-    }),
   email: Joi.string().email().optional().messages({
     "string.email": "Invalid email format",
   }),
 
-  location: Joi.object({
-    lat: Joi.number().optional().messages({
-      "number.base": "Latitude must be a number",
-    }),
-    long: Joi.number().optional().messages({
-      "number.base": "Longitude must be a number",
-    }),
-  }).optional(),
-  verificationStatus: Joi.string()
-    .valid("pending", "approved", "rejected")
+  phone: Joi.string()
+    .pattern(/^[0-9]{10}$/)
     .optional()
     .messages({
-      "any.only":
-        "Verification status must be 'pending', 'approved', or 'rejected'",
+      "string.pattern.base": "Phone number must be exactly 10 digits",
+    }),
+
+  address: Joi.object({
+    street: Joi.string().optional(),
+    city: Joi.string().optional(),
+    state: Joi.string().optional(),
+    pincode: Joi.string().optional(),
+  }).optional(),
+
+  documents: Joi.object({
+    licenseNumber: Joi.string().optional(),
+    gstNumber: Joi.string().optional(),
+    licenseDocument: Joi.string().optional(),
+    verificationStatus: Joi.string()
+      .valid("pending", "approved", "rejected")
+      .optional()
+      .messages({
+        "any.only":
+          "Verification status must be 'pending', 'approved', or 'rejected'",
+      }),
+  }).optional(),
+
+  commissionRate: Joi.number().optional().messages({
+    "number.base": "Commission rate must be a number",
+  }),
+
+  status: Joi.string()
+    .valid("active", "inactive", "blocked")
+    .optional()
+    .messages({
+      "any.only": "Status must be 'active', 'inactive', or 'blocked'",
     }),
 });
 

@@ -5,7 +5,7 @@ const { successRes } = require("../../services/response")
 require('dotenv').config();
 
 module.exports.createTestCategory = asyncErrorHandler(async (req, res, next) => {
-  const { name, description, image_url } = req.body;
+  const { name, description, image_url,tests  } = req.body;
 
   if (!name) {
     return next(new CustomError("Category name is required", 400));
@@ -15,11 +15,15 @@ module.exports.createTestCategory = asyncErrorHandler(async (req, res, next) => 
   if (existing) {
     return next(new CustomError("Category with this name already exists", 409));
   }
+  if (tests && !Array.isArray(tests)) {
+    return next(new CustomError("Tests should be an array of IDs", 400));
+  }
 
   const newCategory = await TestCategory.create({
     name,
     description,
-    image_url
+    image_url,
+    tests
   });
 
   return successRes(res, 201, true, "Test Category created successfully", newCategory);
@@ -34,7 +38,7 @@ module.exports.getAllTestCategories = asyncErrorHandler(async (req, res, next) =
   const [total, categories] = await Promise.all([
     TestCategory.countDocuments(),
     TestCategory.find()
-      .populate("tests", "name test_code price")
+      // .populate("tests")
       .skip(skip)
       .limit(limit)
       .sort({ created_at: -1 })
@@ -68,7 +72,7 @@ module.exports.getTestCategoryById = asyncErrorHandler(async (req, res, next) =>
 });
 
 module.exports.updateTestCategory = asyncErrorHandler(async (req, res, next) => {
-  const { testCatgId, name, description, image_url} = req.body;
+  const { testCatgId, name, description, image_url,tests } = req.body;
 
   if (!testCatgId) {
     return next(new CustomError("Category ID is required", 400));
@@ -78,9 +82,15 @@ module.exports.updateTestCategory = asyncErrorHandler(async (req, res, next) => 
   if (name) updateFields.name = name;
   if (description) updateFields.description = description;
   if (image_url) updateFields.image_url = image_url;
+  if (tests) {
+    if (!Array.isArray(tests)) {
+      return next(new CustomError("Tests should be an array of IDs", 400));
+    }
+    updateFields.tests = tests;
+  }
   updateFields.updated_at = new Date();
 
-  const updated = await TestCategory.findByIdAndUpdate(testCatgId, { $set: updateFields }, { new: true });
+  const updated = await TestCategory.findByIdAndUpdate(testCatgId, { $set: updateFields }, { new: true,runValidators: true });
   if (!updated) {
     return next(new CustomError("Category not found", 404));
   }
@@ -111,5 +121,27 @@ module.exports.uploadTestCatgImg = asyncErrorHandler(async (req, res, next) => {
     const imageUrl = `${process.env.UPLOAD_CATG_IMG}${req.file.filename}`;
     return successRes(res, 200, true, "File Uploaded Successfully", { imageUrl });
   
+  });
+  
+  module.exports.removeTestFromCategory = asyncErrorHandler(async (req, res, next) => {
+    const { categoryId, testId } = req.body;
+  
+    if (!categoryId || !testId) {
+      return next(new CustomError("Both categoryId and testId are required", 400));
+    }
+  
+    const category = await TestCategory.findById(categoryId);
+    if (!category) {
+      return next(new CustomError("Test Category not found", 404));
+    }
+  
+    const isTestPresent = category.tests.includes(testId);
+    if (!isTestPresent) {
+      return next(new CustomError("Test not found in this category", 404));
+    }
+      category.tests.pull(testId);
+    await category.save();
+  
+    return successRes(res, 200, true, "Test removed from category successfully", category);
   });
   

@@ -128,7 +128,7 @@ module.exports.deletePathologyCenter = asyncErrorHandler(async (req, res, next) 
 });
 
 module.exports.updatePathologyCenter = asyncErrorHandler(async (req, res, next) => {
-  const { pathologyCenterId, centerName, ownerName, phoneNumber, address, labs, status } = req.body;
+  const { pathologyCenterId,email, centerName, ownerName, phoneNumber, address, status } = req.body;
 
   if (!pathologyCenterId) {
     return next(new CustomError("Pathology Center Id is required", 400));
@@ -139,8 +139,9 @@ module.exports.updatePathologyCenter = asyncErrorHandler(async (req, res, next) 
   if (ownerName) updateFields.ownerName = ownerName;
   if (phoneNumber) updateFields.phoneNumber = phoneNumber;
   if (address) updateFields.address = address;
-  if (labs) updateFields.labs = labs;
   if (status) updateFields.status = status;
+  if (email) updateFields.email = email;
+
 
   if (Object.keys(updateFields).length === 0) {
     return next(new CustomError("No fields provided for update", 400));

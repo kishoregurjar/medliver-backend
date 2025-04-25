@@ -24,7 +24,7 @@ router.post("signup-signin-with-google", indexController.customerController.sign
 /** Featue and selling and special offer Routes */
 
 router.get("/get-all-feature-product", validateQuery(getAllFeatureProductValidation), verifyUserToken(), indexController.customerController.getAllFeaturedProducts)
-router.get("/get-all-selling-product", validateQuery(getAllSellingProductValidation), verifyUserToken(), indexController.customerController.getAllSellingProduct);
+router.get("/get-all-best-selling-product", validateQuery(getAllSellingProductValidation), verifyUserToken(), indexController.customerController.getAllBestSellingProduct);
 router.get("/get-all-special-offer", validateQuery(getAllSpecialOfferValidation), verifyUserToken(), indexController.customerController.getallSpecialOffers)
 
 /** Cart Routes */
