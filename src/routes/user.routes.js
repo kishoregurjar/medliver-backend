@@ -23,9 +23,9 @@ router.post("signup-signin-with-google", indexController.customerController.sign
 
 /** Featue and selling and special offer Routes */
 
-router.get("/get-all-feature-product", validateQuery(getAllFeatureProductValidation), verifyUserToken(), indexController.customerController.getAllFeaturedProducts)
-router.get("/get-all-selling-product", validateQuery(getAllSellingProductValidation), verifyUserToken(), indexController.customerController.getAllSellingProduct);
-router.get("/get-all-special-offer", validateQuery(getAllSpecialOfferValidation), verifyUserToken(), indexController.customerController.getallSpecialOffers)
+router.get("/get-all-feature-product", validateQuery(getAllFeatureProductValidation), verifyUserToken(), indexController.customerSpecialProductController.getAllFeaturedProducts)
+router.get("/get-all-selling-product", validateQuery(getAllSellingProductValidation), verifyUserToken(), indexController.customerSpecialProductController.getAllSellingProduct);
+router.get("/get-all-special-offer", validateQuery(getAllSpecialOfferValidation), verifyUserToken(), indexController.customerSpecialProductController.getallSpecialOffers)
 
 /** Cart Routes */
 router.post('/add-to-cart', verifyUserToken(), indexController.customerCartController.addToCart);
