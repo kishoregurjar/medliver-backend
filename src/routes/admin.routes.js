@@ -3,7 +3,7 @@ const indexController = require("../controllers/indexController");
 const { verifyAdminToken } = require("../utils/jsonWebToken");
 const { validate, validateQuery, createPharmacy, getAndDeletePharmacyById, getAllPharmacy, updatePharmacy, createPathologyCenter, getAndDeletePathologyCenterById, updatePathologyCenter, searchPathologyCenter, createFeature, getOrDeleteFeatureById, updateFeatureStatus, getAllFeatures, registerDeliveryPartner, getOrDeleteDeliveryPartner, updateDeliveryPartner, updateDeliveryPartnerStatus, getAllDeliveryPartners, blockUnblockDeliveryPartner, getAllCustomersValidation, getCustomerByIdValidation, createTestValidation, getTestdeleteAndById, getAllApiValidation, searchTestValidation, updateTestValidation } = require('../middleware/validation');
 const router = express.Router();
-const { uploadAdminProfile, uploadLicenceImagePharmacy, uploadMedicineImages, uploadTestCatgPic,uploadDoctoreCatgImg } = require('../services/multer');
+const { uploadAdminProfile, uploadLicenceImagePharmacy, uploadMedicineImages, uploadTestCatgPic, uploadDoctoreCatgImg } = require('../services/multer');
 const { updateTest } = require("../controllers/AdminController/adminTestController");
 
 /** Super Admin Auth Routes */
@@ -18,7 +18,7 @@ router.patch("/update-admin-profile", verifyAdminToken(), indexController.adminA
 /** Upload files */
 router.post('/upload-image', uploadAdminProfile, verifyAdminToken(), indexController.adminAuthController.uploadAdminAvatar);
 
-router.post("/send-notification",indexController.adminAuthController.sendNotification);
+router.post("/send-notification", indexController.adminAuthController.sendNotification);
 
 /** Super Admin Pathology Routes */
 
@@ -106,24 +106,31 @@ router.post('/upload-test-category', verifyAdminToken('superadmin'), uploadTestC
 router.put("/remove-test-from-category", verifyAdminToken("superadmin"), indexController.adminTestCatgController.removeTestFromCategory)
 
 // Insurance routes
-router.get("/get-all-insurance",verifyAdminToken("superadmin"),indexController.adminInsuranceController.getAllInsuranceLeads);
-router.get("/get-insurance-by-id",verifyAdminToken("superadmin"),indexController.adminInsuranceController.getInsuranceById)
-router.put("/archieve-insurence-by-id",verifyAdminToken("superadmin"),indexController.adminInsuranceController.archiveInsuranceById);
+router.get("/get-all-insurance", verifyAdminToken("superadmin"), indexController.adminInsuranceController.getAllInsuranceLeads);
+router.get("/get-insurance-by-id", verifyAdminToken("superadmin"), indexController.adminInsuranceController.getInsuranceById)
+router.put("/archieve-insurence-by-id", verifyAdminToken("superadmin"), indexController.adminInsuranceController.archiveInsuranceById);
 
 
 //vehicle Route
-router.get("/get-all-vehicle-request",verifyAdminToken("superadmin"),indexController.adminVehicleController.getAllVehicleRequests);
-router.get("/get-vehicle-by-id",verifyAdminToken("superadmin"),indexController.adminVehicleController.getVehicleRequestById)
-router.put("/update-vehicle-request",verifyAdminToken("superadmin"),indexController.adminVehicleController.updateVehicleRequest)
-router.put("/archieve-vehicle-request-by-id",verifyAdminToken("superadmin"),indexController.adminVehicleController.archiveVehicleRequest)
+router.get("/get-all-vehicle-request", verifyAdminToken("superadmin"), indexController.adminVehicleController.getAllVehicleRequests);
+router.get("/get-vehicle-by-id", verifyAdminToken("superadmin"), indexController.adminVehicleController.getVehicleRequestById)
+router.put("/update-vehicle-request", verifyAdminToken("superadmin"), indexController.adminVehicleController.updateVehicleRequest)
+router.put("/archieve-vehicle-request-by-id", verifyAdminToken("superadmin"), indexController.adminVehicleController.archiveVehicleRequest)
 
 //doctor category route
-router.post("/create-doctore-category",verifyAdminToken("superadmin"),indexController.adminDoctoreCategoryController.createDoctoreCatgegory);
-router.get("/get-all-doctore-category",verifyAdminToken("superadmin"),indexController.adminDoctoreCategoryController.getAllDoctoreCategory)
-router.get("/get-doctore-category-by-id",verifyAdminToken("superadmin"),indexController.adminDoctoreCategoryController.getDoctoresCategoryById)
-router.delete("/delete-doctore-category",verifyAdminToken("superadmin"),indexController.adminDoctoreCategoryController.deleteDoctoresCategoryById)
-router.put("/update-doctore-category",verifyAdminToken("superadmin"),indexController.adminDoctoreCategoryController.updateDoctoresCatg);
-router.post("/upload-doctore-image",uploadDoctoreCatgImg,verifyAdminToken("superadmin"),indexController.adminDoctoreCategoryController.uploadDoctoresCatgImage);
+router.post("/create-doctore-category", verifyAdminToken("superadmin"), indexController.adminDoctoreCategoryController.createDoctoreCatgegory);
+router.get("/get-all-doctore-category", verifyAdminToken("superadmin"), indexController.adminDoctoreCategoryController.getAllDoctoreCategory)
+router.get("/get-doctore-category-by-id", verifyAdminToken("superadmin"), indexController.adminDoctoreCategoryController.getDoctoresCategoryById)
+router.delete("/delete-doctore-category", verifyAdminToken("superadmin"), indexController.adminDoctoreCategoryController.deleteDoctoresCategoryById)
+router.put("/update-doctore-category", verifyAdminToken("superadmin"), indexController.adminDoctoreCategoryController.updateDoctoresCatg);
+router.post("/upload-doctore-image", uploadDoctoreCatgImg, verifyAdminToken("superadmin"), indexController.adminDoctoreCategoryController.uploadDoctoresCatgImage);
+
+/** Doctor's Route */
+
+router.post('/create-doctor-profile', verifyAdminToken('superadmin'), indexController.adminDoctorController.createDoctorProfile);
+router.get('/get-all-doctor-profile', verifyAdminToken('superadmin'), indexController.adminDoctorController.getAllDoctorsList);
+router.get('/get-doctor-profile-by-id', verifyAdminToken('superadmin'), indexController.adminDoctorController.getDoctorById);
+router.put('/change-status', verifyAdminToken('superadmin'), indexController.adminDoctorController.changeDoctorStatus)
 
 
 module.exports = router;
