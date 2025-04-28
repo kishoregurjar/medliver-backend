@@ -164,6 +164,9 @@ module.exports.updateAdminProfile = asyncErrorHandler(async (req, res, next) => 
   if (!findAdmin) {
     return next(new CustomError("Admin not found", 404));
   }
+  if (req.body.email) {
+    delete req.body.email;
+  }
   const updateAdmin = await adminSchema.findByIdAndUpdate(adminId, req.body, {
     new: true,
     runValidators: true,

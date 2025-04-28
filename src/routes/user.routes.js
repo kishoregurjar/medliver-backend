@@ -45,4 +45,10 @@ router.put('/remove-item-from-cart', verifyUserToken(), indexController.customer
 router.post("/apply-for-insurance",verifyUserToken(),indexController.customerMissLiniesController.applyInsurance);
 router.post("/request-for-emergency-vehicle",indexController.customerMissLiniesController.requestEmergencyVehicle)
 
+
+/** Order Routes */
+router.post("/create-order", verifyUserToken(), indexController.customerOrderController.createOrder);
+router.get("/get-all-orders", verifyUserToken(), indexController.customerOrderController.getAllOrders);
+router.get("/get-order-by-id", verifyUserToken(), indexController.customerOrderController.getOrderById);
+router.put("/cancel-order", verifyUserToken(), indexController.customerOrderController.cancleOrder);
 module.exports = router;

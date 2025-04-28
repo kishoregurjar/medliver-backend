@@ -60,7 +60,7 @@ router.delete('/delete-medicine', verifyAdminToken('superadmin'), indexControlle
 router.post('/upload-medicine-images', verifyAdminToken('superadmin'), uploadMedicineImages, indexController.medicineController.uploadMedicineImages)
 
 //customer routes
-router.get('/get-all-customer', validateQuery(getAllCustomersValidation), verifyAdminToken('superadmin'), indexController.adminCustomerController.getAllCustomers);
+router.get('/get-all-customer', verifyAdminToken('superadmin'), indexController.adminCustomerController.getAllCustomers);
 router.get('/get-customer-by-id', validateQuery(getCustomerByIdValidation), verifyAdminToken('superadmin'), indexController.adminCustomerController.getCustomerById);
 router.put('/block-unblock-customer', validate(getCustomerByIdValidation), verifyAdminToken('superadmin'), indexController.adminCustomerController.BlockUnblockCustomer);
 

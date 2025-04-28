@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const orderSchema = new mongoose.Schema({
   orderType: {
     type: String,
-    enum: ["pharmacy", "pathology"],
+    enum: ["pharmacy", "pathology", "mixed"],
     required: true,
   },
 
@@ -88,7 +88,7 @@ const orderSchema = new mongoose.Schema({
 
   paymentMethod: {
     type: String,
-    enum: ["UPI", "card", "cash", "wallet"],
+    enum: ["UPI", "card", "cash", "wallet", "COD"],
   },
 
   totalAmount: {
@@ -110,7 +110,7 @@ const orderSchema = new mongoose.Schema({
     default: false,
   },
 
-  isTestHomeCollection: {
+  isTestHomeCollection: { 
     type: Boolean,
     default: false,
   },

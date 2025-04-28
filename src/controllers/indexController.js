@@ -18,7 +18,8 @@ const customerSpecialProductController = require('./CustomerController/customerS
 const adminInsuranceController = require("./AdminController/adminInsuranceController");
 const adminVehicleController = require("./AdminController/adminVehicleController");
 const customerMissLiniesController  = require("./CustomerController/cutomermiscellaneous");
-const adminDoctoreCategoryController = require("./AdminController/adminDoctoresCatgController")
+const adminDoctoreCategoryController = require("./AdminController/adminDoctoresCatgController");
+const customerOrderController = require("./CustomerController/customerOrderController")
 
 module.exports = {
     adminAuthController,
@@ -41,6 +42,7 @@ module.exports = {
     adminInsuranceController,
     adminVehicleController,
     customerMissLiniesController,
-    adminDoctoreCategoryController
+    adminDoctoreCategoryController,
+    customerOrderController,
 
 }
