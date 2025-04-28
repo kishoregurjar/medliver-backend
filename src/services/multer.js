@@ -181,5 +181,18 @@ module.exports.uploadMedicineImages = uploadMultipleFiles("images", 3, {
   folder: "uploads/medicineImages",
 });
 
+module.exports.uploadTestCatgPic = uploadSingleFile("image", {
+  fileTypes: /jpeg|jpg|png/,
+  fileSize: 3000000,
+  folder: "uploads/testCatg",
+});
+
+module.exports.uploadDoctoreCatgImg = uploadSingleFile("image", {
+  fileTypes: /jpeg|jpg|png/,
+  fileSize: 3000000,
+  folder: "uploads/doctoreCategoryImage",
+});
+
+
 module.exports.uploadSingleFile = uploadSingleFile;
 module.exports.uploadMultipleFiles = uploadMultipleFiles;

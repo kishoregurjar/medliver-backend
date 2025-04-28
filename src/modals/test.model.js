@@ -34,10 +34,7 @@ const testSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    createdAt: {
-        type: Date,
-        default: Date.now
-    }
-});
+   
+},{ timestamps: true });
 
 module.exports = mongoose.model('Test', testSchema);

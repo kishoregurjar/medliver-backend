@@ -6,6 +6,7 @@ const InsuranceLeadSchema = new mongoose.Schema({
         required: true,
         trim: true,
     },
+
     phone_number: {
         type: String,
         required: true,
@@ -49,6 +50,10 @@ const InsuranceLeadSchema = new mongoose.Schema({
     nominee_relation: {
         type: String,
     },
+    is_archived: {
+        type: Boolean,
+        default: false
+      },
     coverage_for: {
         type: String,
         enum: ['self', 'family'],

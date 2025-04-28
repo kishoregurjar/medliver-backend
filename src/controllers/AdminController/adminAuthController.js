@@ -9,7 +9,6 @@ const { forgetPasswordMail } = require('../../services/sendMail');
 const sendFirebaseNotification = require('../../services/sendNotification');
 require('dotenv').config();
 
-
 module.exports.login = asyncErrorHandler(async (req, res, next) => {
   let { email, password } = req.body;
 

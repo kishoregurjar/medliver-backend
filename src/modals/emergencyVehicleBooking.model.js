@@ -41,6 +41,10 @@ const EmergencyVehicleBookingSchema = new mongoose.Schema({
         enum: ['requested', 'assigned', 'on_route', 'completed', 'cancelled'],
         default: 'requested',
     },
+    is_archived: {
+        type: Boolean,
+        default: false
+      },
     // assigned_vehicle_id: {
     //     type: mongoose.Schema.Types.ObjectId,
     //     ref: 'EmergencyVehicle',

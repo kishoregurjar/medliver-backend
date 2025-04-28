@@ -13,9 +13,9 @@ const customerSchema = new mongoose.Schema({
     trim: true,
     lowercase: true,
   },
-  otp:{
-    type:String ,
-    default:null
+  otp: {
+    type: String,
+    default: null
   },
   phoneNumber: {
     type: String,
@@ -34,14 +34,14 @@ const customerSchema = new mongoose.Schema({
     type: String,
   },
   height: {
-    type: String, 
+    type: String,
     default: null,
   },
   weight: {
-    type: String,  
+    type: String,
     default: null,
   },
-  
+
   bloodGroup: {
     type: String,
     enum: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
@@ -71,70 +71,6 @@ const customerSchema = new mongoose.Schema({
       },
     },
   ],
-  // previousOrders: [
-  //   {
-  //     orderId: String,
-  //     orderDate: Date,
-  //     totalAmount: Number,
-  //     status: {
-  //       type: String,
-  //       enum: ['pending', 'completed', 'cancelled'],
-  //       default: 'pending',
-  //     },
-  //     items: [
-  //       {
-  //         medicineName: String,
-  //         quantity: Number,
-  //         price: Number,
-  //       },
-  //     ],
-  //   },
-  // ],
-  // currentOrder: {
-  //   orderId: String,
-  //   orderStatus: {
-  //     type: String,
-  //     enum: ['pending', 'processing', 'out_for_delivery', 'delivered'],
-  //     default: 'pending',
-  //   },
-  //   deliveryAddress: String,
-  //   paymentMethod: String,
-  //   totalAmount: Number,
-  //   items: [
-  //     {
-  //       medicineName: String,
-  //       quantity: Number,
-  //       price: Number,
-  //     },
-  //   ],
-  // },
-
-  // //  Pathology Bookings with location
-  // pathologyBookings: [
-  //   {
-  //     testName: String,
-  //     labName: String,
-  //     bookingDate: Date,
-  //     status: {
-  //       type: String,
-  //       enum: ['pending', 'completed', 'cancelled'],
-  //       default: 'pending',
-  //     },
-  //     report: {
-  //       type: String,
-  //       default: null,
-  //     },
-  //   },
-  // ],
-  // medicalHistory: [
-  //   {
-  //     testName: String,
-  //     result: String,
-  //     date: Date,
-  //     doctor: String,
-  //     notes: String,
-  //   },
-  // ],
   userCoordinates: {
     lat: { type: Number },
     long: { type: Number },
@@ -144,7 +80,7 @@ const customerSchema = new mongoose.Schema({
     default: null,
   }
 
-},{timestamps:true});
+}, { timestamps: true });
 
 customerSchema.pre('save', function (next) {
   this.updatedAt = Date.now();

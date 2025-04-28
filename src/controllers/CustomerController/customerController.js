@@ -1,12 +1,14 @@
 const customerModel = require("../../modals/customer.model");
 const bcrypt = require("bcrypt");
-const jsonwebtoken = require("jsonwebtoken");
 const CustomError = require("../../utils/customError");
 const { successRes } = require("../../services/response");
 const asyncErrorHandler = require("../../utils/asyncErrorHandler");
 const { assignJwt } = require("../../utils/jsonWebToken");
-const { forgetPasswordMail, verifyOTPMail } = require("../../services/sendMail");
+const { verifyOTPMail } = require("../../services/sendMail");
 const { generateOTPNumber } = require("../../services/helper");
+const CustomerAddress = require('../../modals/customerAddress.model'); // Adjust path as needed
+
+
 
 module.exports.registerUser = asyncErrorHandler(async (req, res, next) => {
   const session = await customerModel.startSession();
@@ -40,7 +42,7 @@ module.exports.registerUser = asyncErrorHandler(async (req, res, next) => {
         session.endSession();
         return successRes(
           res,
-          204,
+          200,
           true,
           "Customer not verified",
           findCustomer
@@ -325,3 +327,186 @@ module.exports.signUPSignInWithGoogle = asyncErrorHandler(async (req, res, next)
     return next(new CustomError("Something went wrong", 500));
   }
 });
+
+/** Address Portion */
+
+module.exports.addAddress = asyncErrorHandler(async (req, res, next) => {
+  const userId = req.user._id;
+  let {
+    address_type,
+    house_number,
+    street,
+    landmark,
+    city,
+    state,
+    pincode,
+    country,
+    location,
+    is_default
+  } = req.body;
+
+  if (!city || !state || !pincode) {
+    return next(new CustomError("City, state, and pincode are required", 400));
+  }
+
+  const addressCount = await CustomerAddress.countDocuments({ customer_id: userId });
+
+  if (addressCount === 0) {
+    is_default = true;
+  }
+
+  if (is_default && addressCount > 0) {
+    await CustomerAddress.updateMany(
+      { customer_id: userId, is_default: true },
+      { $set: { is_default: false } }
+    );
+  }
+
+  const newAddress = new CustomerAddress({
+    customer_id: userId,
+    address_type,
+    house_number,
+    street,
+    landmark,
+    city,
+    state,
+    pincode,
+    country,
+    location,
+    is_default
+  });
+
+  await newAddress.save();
+
+  return successRes(res, 201, true, "Address added successfully", newAddress);
+});
+
+module.exports.getAllAddress = asyncErrorHandler(async (req, res, next) => {
+  const userId = req.user._id;
+  const addresses = await CustomerAddress.find({ customer_id: userId });
+  if (!addresses) {
+    return successRes(res, 200, true, "No addresses found", []);
+  }
+  return successRes(res, 200, true, "Addresses fetched successfully", addresses);
+});
+
+module.exports.editAddress = asyncErrorHandler(async (req, res, next) => {
+  const userId = req.user._id;
+  const addressId = req.body.addressId;
+
+  const {
+    address_type,
+    house_number,
+    street,
+    landmark,
+    city,
+    state,
+    pincode,
+    country,
+    location,
+  } = req.body;
+
+  if (!city || !state || !pincode) {
+    return next(new CustomError("City, state, and pincode are required", 400));
+  }
+
+  const address = await CustomerAddress.findOne({ _id: addressId, customer_id: userId });
+
+  if (!address) {
+    return next(new CustomError("Address not found", 404));
+  }
+
+  address.address_type = address_type || address.address_type;
+  address.house_number = house_number || address.house_number;
+  address.street = street || address.street;
+  address.landmark = landmark || address.landmark;
+  address.city = city;
+  address.state = state;
+  address.pincode = pincode;
+  address.country = country || address.country;
+  address.location = location || address.location;
+
+  await address.save();
+
+  return successRes(res, 200, true, "Address updated successfully", address);
+});
+
+module.exports.deleteAddress = asyncErrorHandler(async (req, res, next) => {
+  const userId = req.user._id;
+  const addressId = req.query.addressId;
+  const newDefaultAddressId = req.query.defaultAddressId;
+  if (!addressId) {
+    return next(new CustomError("Address ID is required", 400));
+  }
+
+  const userAddresses = await CustomerAddress.find({ customer_id: userId });
+
+  if (userAddresses.length <= 1) {
+    return next(new CustomError("At least one address must be available. Cannot delete the only address.", 400));
+  }
+
+  const addressToDelete = await CustomerAddress.findOne({ _id: addressId, customer_id: userId });
+
+  if (!addressToDelete) {
+    return next(new CustomError("Address not found", 404));
+  }
+
+  if (addressToDelete.is_default) {
+    if (!newDefaultAddressId) {
+      return next(new CustomError("New default address ID is required before deleting the current default address", 400));
+    }
+
+    const newDefault = await CustomerAddress.findOne({
+      _id: newDefaultAddressId,
+      customer_id: userId,
+    });
+
+    if (!newDefault) {
+      return next(new CustomError("New default address not found or does not belong to user", 404));
+    }
+
+    newDefault.is_default = true;
+    await newDefault.save();
+  }
+
+  await CustomerAddress.findByIdAndDelete(addressId);
+
+  return successRes(res, 200, true, "Address deleted successfully", addressToDelete);
+});
+
+module.exports.getAddressById = asyncErrorHandler(async (req, res, next) => {
+  const userId = req.user._id;
+  const addressId = req.query.addressId;
+  if (!addressId) {
+    return next(new CustomError("Address ID is required", 400));
+  }
+  const address = await CustomerAddress.findOne({ _id: addressId, customer_id: userId });
+  if (!address) {
+    return next(new CustomError("Address not found", 404));
+  } else {
+    return successRes(res, 200, true, "Address fetched successfully", address);
+  }
+})
+
+module.exports.setDefaultAddress = asyncErrorHandler(async (req, res, next) => {
+  const userId = req.user._id;
+  const addressId = req.body.addressId;
+  if (!addressId) {
+    return next(new CustomError("Address ID is required", 400));
+  }
+
+  const address = await CustomerAddress.findOne({ _id: addressId, customer_id: userId });
+  if (!address) {
+    return next(new CustomError("Address not found", 404));
+  }
+  if (address.is_default) {
+    return next(new CustomError("Address is already set as default", 400));
+  }
+  await CustomerAddress.updateMany({ customer_id: userId }, { $set: { is_default: false } });
+  address.is_default = true;
+  await address.save();
+
+  return successRes(res, 200, true, "Address set as default successfully", address);
+});
+
+

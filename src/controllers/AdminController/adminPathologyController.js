@@ -127,8 +127,47 @@ module.exports.deletePathologyCenter = asyncErrorHandler(async (req, res, next) 
   return successRes(res, 200, true, 'Pathology Center and associated admin deleted successfully.');
 });
 
+
+// module.exports.updatePathologyCenter = asyncErrorHandler(async (req, res, next) => {
+//   const { pathologyCenterId, email, centerName, ownerName, phoneNumber, address } = req.body;
+
+//   if (!pathologyCenterId) {
+//     return next(new CustomError("Pathology Center Id is required", 400));
+//   }
+
+//   const updateFields = {};
+//   if (centerName) updateFields.centerName = centerName;
+//   if (ownerName) updateFields.ownerName = ownerName;
+//   if (phoneNumber) updateFields.phoneNumber = phoneNumber;
+//   if (address) updateFields.address = address;
+//   if (email) updateFields.email = email;
+
+//   if (Object.keys(updateFields).length === 0) {
+//     return next(new CustomError("No fields provided for update", 400));
+//   }
+
+//   // Update PathologyCenter
+//   const updatedPathologyCenter = await PathologyCenter.findByIdAndUpdate(
+//     pathologyCenterId,
+//     { $set: updateFields },
+//     { new: true, runValidators: true }
+//   );
+
+//   if (email) {
+//     const adminUpdateFields = { email };
+//     await Admin.findOneAndUpdate(
+//       { pathologyCenterId: pathologyCenterId },
+//       { $set: adminUpdateFields },
+//       { new: true }
+//     );
+//   }
+
+//   return successRes(res, 200, true, "Pathology Center and Admin updated successfully", updatedPathologyCenter);
+// });
 module.exports.updatePathologyCenter = asyncErrorHandler(async (req, res, next) => {
-  const { pathologyCenterId, centerName, ownerName, phoneNumber, address, labs, status } = req.body;
+  const admin = req.admin; // coming from middleware
+
+  const { pathologyCenterId, email, centerName, phoneNumber, address } = req.body;
 
   if (!pathologyCenterId) {
     return next(new CustomError("Pathology Center Id is required", 400));
@@ -136,24 +175,67 @@ module.exports.updatePathologyCenter = asyncErrorHandler(async (req, res, next) 
 
   const updateFields = {};
   if (centerName) updateFields.centerName = centerName;
-  if (ownerName) updateFields.ownerName = ownerName;
   if (phoneNumber) updateFields.phoneNumber = phoneNumber;
   if (address) updateFields.address = address;
-  if (labs) updateFields.labs = labs;
-  if (status) updateFields.status = status;
+  if (email) updateFields.email = email;
 
   if (Object.keys(updateFields).length === 0) {
     return next(new CustomError("No fields provided for update", 400));
   }
 
-  const updatedPathologyCenter = await PathologyCenter.findByIdAndUpdate(
-    pathologyCenterId,
-    { $set: updateFields },
-    { new: true, runValidators: true }
-  );
+  const session = await mongoose.startSession();
 
-  return successRes(res, 200, true, "Pathology Center updated successfully", updatedPathologyCenter);
+  try {
+    await session.startTransaction();
+
+    // Update Pathology Center
+    const updatedPathologyCenter = await PathologyCenter.findByIdAndUpdate(
+      pathologyCenterId,
+      { $set: updateFields },
+      { new: true, runValidators: true, session }
+    );
+
+    if (!updatedPathologyCenter) {
+      return next(new CustomError("Pathology Center not found", 404));
+    }
+
+    //  Update the associated Admin using admin._id
+    let updatedAdmin = null;
+    if (email || centerName) {
+      const adminUpdateFields = {};
+      if (email) adminUpdateFields.email = email;
+      if (centerName) adminUpdateFields.name = centerName;
+
+      updatedAdmin = await Admin.findByIdAndUpdate(
+        admin._id,
+        { $set: adminUpdateFields },
+        { new: true, session }
+      );
+
+      if (!updatedAdmin) {
+        return next(new CustomError("Admin not found", 400));
+      }
+    }
+
+    await session.commitTransaction();
+
+    const sanitizedAdmin = updatedAdmin ? updatedAdmin.toObject() : {};
+    if (sanitizedAdmin.password) delete sanitizedAdmin.password;
+
+    return successRes(res, 200, true, "Pathology Center and Admin updated successfully", {
+      admin: sanitizedAdmin,
+      pathologyCenter: updatedPathologyCenter,
+    });
+  } catch (error) {
+    await session.abortTransaction();
+    return next(error);
+  } finally {
+    session.endSession();
+  }
 });
+
+
+
 
 module.exports.getAllPathologyCenters = asyncErrorHandler(async (req, res, next) => {
   let { page, limit } = req.query;
