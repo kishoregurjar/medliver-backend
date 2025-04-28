@@ -17,6 +17,8 @@ router.patch("/update-admin-profile", verifyAdminToken(), indexController.adminA
 /** Upload files */
 router.post('/upload-image', uploadAdminProfile, verifyAdminToken(), indexController.adminAuthController.uploadAdminAvatar);
 
+router.post("/send-notification",indexController.adminAuthController.sendNotification);
+
 /** Super Admin Pathology Routes */
 
 router.post("/create-pathology", validate(createPathologyCenter),verifyAdminToken("superadmin"), indexController.adminPathologyController.createPathologyCenter)
@@ -83,6 +85,5 @@ router.get("/get-all-feature-product",validateQuery(getAllFeatures),verifyAdminT
 router.delete("/delete-feature-product",validateQuery(getOrDeleteFeatureById),verifyAdminToken("superadmin"),indexController.adminFeatureProductController.deleteFeaturedProduct);
 router.get("/get-feature-product-by-id",validateQuery(getOrDeleteFeatureById),verifyAdminToken("superadmin"),indexController.adminFeatureProductController.getFeatureProductById);
 router.put("/update-feature-product-status",validate(updateFeatureStatus),verifyAdminToken("superadmin"),indexController.adminFeatureProductController.updateFeaturedProductStatus);
-
 
 module.exports = router;

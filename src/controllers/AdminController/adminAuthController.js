@@ -6,6 +6,7 @@ const { successRes } = require('../../services/response');
 const asyncErrorHandler = require('../../utils/asyncErrorHandler');
 const { assignJwt } = require("../../utils/jsonWebToken");
 const { forgetPasswordMail } = require('../../services/sendMail');
+const sendFirebaseNotification = require('../../services/sendNotification');
 require('dotenv').config();
 
 
@@ -184,3 +185,18 @@ module.exports.uploadAdminAvatar = asyncErrorHandler(async (req, res, next) => {
 
 
 
+module.exports.sendNotification = asyncErrorHandler(async (req, res, next) => {
+  const { deviceToken, title, body } = req.body;
+
+  if (!deviceToken || !title || !body) {
+    return next(new CustomError("Device token, title and body are required", 400));
+  }
+
+  let message = await sendFirebaseNotification(deviceToken, title, body);
+
+  if (!message.success) {
+    return next(new CustomError("Failed to send notification", 500));
+  }
+
+  return successRes(res, 200, true, "Notification sent successfully");
+});

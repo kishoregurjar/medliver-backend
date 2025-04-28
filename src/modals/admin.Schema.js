@@ -33,7 +33,11 @@ const adminSchema = new mongoose.Schema({
     isActive: {
         type: Boolean,
         default: true
-    }
+    },
+    deviceToken: {
+        type: String,
+        default: null,
+    },
 }, {
     timestamps: true 
 });

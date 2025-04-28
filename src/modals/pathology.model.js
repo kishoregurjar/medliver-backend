@@ -27,6 +27,10 @@ const pathologyCenterSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  deviceToken:{
+    type: String,
+    default: null,
+  },
   labs: [
     {
       labName: {

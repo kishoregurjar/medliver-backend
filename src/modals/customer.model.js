@@ -139,6 +139,10 @@ const customerSchema = new mongoose.Schema({
     lat: { type: Number },
     long: { type: Number },
   },
+  deviceToken:{
+    type: String,
+    default: null,
+  }
 
 },{timestamps:true});
 
