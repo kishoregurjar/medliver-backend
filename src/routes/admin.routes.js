@@ -48,6 +48,7 @@ router.put('/update-delivery-partner', validate(updateDeliveryPartner), verifyAd
 router.put('/update-availability-status', validate(updateDeliveryPartnerStatus), verifyAdminToken('superadmin'), indexController.adminDeliveryPartnerController.updateAvailabilityStatus);
 router.delete('/delete-delivery-patner', validateQuery(getOrDeleteDeliveryPartner), verifyAdminToken('superadmin'), indexController.adminDeliveryPartnerController.deleteDeliveryPartner)
 router.put('/block-unblock-delivery-partner', validate(blockUnblockDeliveryPartner), verifyAdminToken('superadmin'), indexController.adminDeliveryPartnerController.BlockUnblockDeliveryPartner)
+router.get('/search-delivery-partner', verifyAdminToken('superadmin'), indexController.adminDeliveryPartnerController.searchDeliveryPartner);
 
 
 /** Medicines Routes Superadmin */

@@ -202,6 +202,7 @@ module.exports.updateDeliveryPartner = asyncErrorHandler(
     );
   }
 );
+
 module.exports.updateAvailabilityStatus = asyncErrorHandler(
   async (req, res, next) => {
     const { partnerId, availabilityStatus } = req.body;
@@ -262,3 +263,18 @@ module.exports.BlockUnblockDeliveryPartner = asyncErrorHandler(
     return successRes(res, 200, true, statusMessage, updatedPartner);
   }
 );
+
+module.exports.searchDeliveryPartner = asyncErrorHandler(async (req, res, next) => {
+  const { query } = req.query;
+  if (!query) {
+    return next(new CustomError("Search query is required", 400));
+  }
+  const partners = await DeliveryPartner.find({
+    $or: [
+      { fullname: { $regex: query, $options: "i" } },
+      { email: { $regex: query, $options: "i" } },
+      { phone: { $regex: query, $options: "i" } },
+    ],
+  });
+  return successRes(res, 200, partners.length > 0 ? true : false, "Delivery Partners", partners);
+})
