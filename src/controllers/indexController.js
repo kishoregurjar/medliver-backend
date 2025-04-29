@@ -48,5 +48,4 @@ module.exports = {
     adminDoctorController,
     customerOrderController,
     customerPaymentController
-
-}
+}   

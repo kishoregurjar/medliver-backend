@@ -278,3 +278,13 @@ module.exports.searchDeliveryPartner = asyncErrorHandler(async (req, res, next) 
   });
   return successRes(res, 200, partners.length > 0 ? true : false, "Delivery Partners", partners);
 })
+
+
+
+module.exports.getAllDeliveryPartnersNotApproved = asyncErrorHandler(async (req, res, next) => {
+  const partners = await DeliveryPartner.find({ isApproved: false });
+  if (partners.length === 0) {
+    return successRes(res, 200, false, "No Delivery Partners Found", []);
+  }
+  return successRes(res, 200, true, "Delivery Partners", partners);
+})
