@@ -53,11 +53,11 @@ const medicineModel = require("../../modals/medicine.model");
 //         }
 //     }
 
- 
+
 
 //     const hasMedicine = itemsToOrder.some(item => item.item_type === "medicine");
 //     const hasTest = itemsToOrder.some(item => item.item_type === "test");
-    
+
 //     if (hasMedicine && hasTest) {
 //         orderType = "mixed";
 //     } else if (hasMedicine) {
@@ -67,7 +67,7 @@ const medicineModel = require("../../modals/medicine.model");
 //     } else {
 //         return next(new CustomError("Invalid items in cart", 400));
 //     }
-    
+
 
 //     const newOrder = new orderSchema({
 //         customerId: userId,
@@ -139,7 +139,7 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
 
     const hasMedicine = itemsToOrder.some(item => item.item_type === "medicine");
     const hasTest = itemsToOrder.some(item => item.item_type === "test");
-    
+
     if (hasMedicine && hasTest) {
         orderType = "mixed";
     } else if (hasMedicine) {
@@ -193,7 +193,7 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
 
 
 
-module.exports.getAllOrders = asyncErrorHandler(async(req, res, next) =>{
+module.exports.getAllOrders = asyncErrorHandler(async (req, res, next) => {
     const userId = req.user._id;
     const orders = await orderSchema.find({ customerId: userId }).populate("items.medicineId").sort({ createdAt: -1 });
     if (!orders || orders.length === 0) {
@@ -206,15 +206,15 @@ module.exports.getAllOrders = asyncErrorHandler(async(req, res, next) =>{
                     item.item_id = item.medicineId._id;
                 }
             });
-        });  
+        });
     }
-    
+
     return successRes(res, 200, true, "Orders fetched successfully", { orders });
 })
 
 
 
-module.exports.getOrderById = asyncErrorHandler(async(req,res,next)=>{
+module.exports.getOrderById = asyncErrorHandler(async (req, res, next) => {
     const userId = req.user._id;
     let { orderId } = req.query;
     if (!orderId) {
@@ -228,7 +228,7 @@ module.exports.getOrderById = asyncErrorHandler(async(req,res,next)=>{
 })
 
 
-module.exports.cancleOrder = asyncErrorHandler(async(req,res,next)=>{
+module.exports.cancleOrder = asyncErrorHandler(async (req, res, next) => {
     const userId = req.user._id;
     let { orderId } = req.query;
     if (!orderId) {

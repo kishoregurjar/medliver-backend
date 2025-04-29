@@ -42,8 +42,8 @@ router.put('/change-cart-product-quantity', verifyUserToken(), indexController.c
 router.put('/remove-item-from-cart', verifyUserToken(), indexController.customerCartController.removeItemFromCart);
 
 /** Insurance route */
-router.post("/apply-for-insurance",verifyUserToken(),indexController.customerMissLiniesController.applyInsurance);
-router.post("/request-for-emergency-vehicle",indexController.customerMissLiniesController.requestEmergencyVehicle)
+router.post("/apply-for-insurance", verifyUserToken(), indexController.customerMissLiniesController.applyInsurance);
+router.post("/request-for-emergency-vehicle", indexController.customerMissLiniesController.requestEmergencyVehicle)
 
 
 /** Order Routes */
@@ -51,4 +51,10 @@ router.post("/create-order", verifyUserToken(), indexController.customerOrderCon
 router.get("/get-all-orders", verifyUserToken(), indexController.customerOrderController.getAllOrders);
 router.get("/get-order-by-id", verifyUserToken(), indexController.customerOrderController.getOrderById);
 router.put("/cancel-order", verifyUserToken(), indexController.customerOrderController.cancleOrder);
+
+/** Payment Routes */
+
+router.post('/create-payment-order', indexController.customerPaymentController.createOrder);
+router.post('/verify-payment', indexController.customerPaymentController.verifyPayment);
+
 module.exports = router;

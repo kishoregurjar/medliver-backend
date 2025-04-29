@@ -21,6 +21,7 @@ const customerMissLiniesController = require("./CustomerController/cutomermiscel
 const adminDoctoreCategoryController = require("./AdminController/adminDoctoresCatgController");
 const customerOrderController = require("./CustomerController/customerOrderController")
 const adminDoctorController = require("./AdminController/adminDoctorController");
+const customerPaymentController = require('./CustomerController/customerPaymentController');
 
 module.exports = {
     adminAuthController,
@@ -46,5 +47,6 @@ module.exports = {
     adminDoctoreCategoryController,
     adminDoctorController,
     customerOrderController,
+    customerPaymentController
 
 }
