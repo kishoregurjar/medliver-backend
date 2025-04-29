@@ -49,7 +49,7 @@ router.put('/update-availability-status', validate(updateDeliveryPartnerStatus),
 router.delete('/delete-delivery-patner', validateQuery(getOrDeleteDeliveryPartner), verifyAdminToken('superadmin'), indexController.adminDeliveryPartnerController.deleteDeliveryPartner)
 router.put('/block-unblock-delivery-partner', validate(blockUnblockDeliveryPartner), verifyAdminToken('superadmin'), indexController.adminDeliveryPartnerController.BlockUnblockDeliveryPartner)
 router.get('/search-delivery-partner', verifyAdminToken('superadmin'), indexController.adminDeliveryPartnerController.searchDeliveryPartner);
-
+router.get("/get-all-delivery-partner-not-approved", verifyAdminToken("superadmin"), indexController.adminDeliveryPartnerController.getAllDeliveryPartnersNotApproved);
 
 /** Medicines Routes Superadmin */
 router.post('/create-medicine', verifyAdminToken('superadmin'), indexController.medicineController.createMedicine)
