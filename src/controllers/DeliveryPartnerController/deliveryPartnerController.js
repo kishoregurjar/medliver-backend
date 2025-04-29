@@ -98,8 +98,11 @@ module.exports.loginDeliveryPartner = asyncErrorHandler(async (req, res, next) =
     if (!findPartner.isVerified) {
         return next(new CustomError("Please Verify you Email First", 400))
     }
-    if (!findPartner.isApproved) {
+    if (!findPartner.approvalStatus === "pending") {
         return next(new CustomError("Your Approval is Pending, Please wait!", 400))
+    }
+    if (findPartner.approvalStatus === "rejected") {
+        return next(new CustomError("Your Account is Rejected, Please wait!", 400))
     }
     const payload = {
         _id: findPartner._id,
