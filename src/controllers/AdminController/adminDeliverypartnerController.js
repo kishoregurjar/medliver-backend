@@ -14,9 +14,12 @@ require("dotenv").config();
 
 /** ----------Delivery Partner ---------------- */
 
-module.exports.approveDeliveryPartner = asyncErrorHandler(
+module.exports.approveRejectDeliveryPartner = asyncErrorHandler(
   async (req, res, next) => {
-    const { partnerId } = req.body;
+    const { partnerId, status } = req.body;
+    if (!["approved", "rejected"].includes(status)) {
+      return next(new CustomError("Invalid status provided", 400));
+    }
     const adminId = req.admin._id;
     if (!partnerId) {
       return next(new CustomError("Partner ID is required", 400));
@@ -36,18 +39,14 @@ module.exports.approveDeliveryPartner = asyncErrorHandler(
       return next(new CustomError("Partner's email is not verified", 400));
     }
 
-    if (findPartner.isApproved) {
-      return next(new CustomError("Partner is already approved", 400));
-    }
-
-    findPartner.isApproved = true;
+    findPartner.approvalStatus = status;
     await findPartner.save();
 
     return successRes(
       res,
       200,
       true,
-      "Delivery Partner approved successfully."
+      status === "approved" ? "Delivery Partner approved successfully." : "Delivery Partner rejected successfully."
     );
   }
 );

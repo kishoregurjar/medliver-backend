@@ -18,7 +18,7 @@ module.exports.registerDeliveryPartner = asyncErrorHandler(async (req, res, next
         documents // expecting { aadharNumber, licenseNumber, idProof }
     } = req.body;
 
-    if (!fullName || !phone || !password || !documents?.aadharNumber || !documents?.licenseNumber || !documents?.idProof) {
+    if (!fullName || !phone || !password || !documents?.aadharUrls || !documents?.licenseUrl || !documents?.idProof) {
         return res.status(400).json({
             success: false,
             message: "Full name, phone, password, and all document fields are required.",
@@ -44,8 +44,8 @@ module.exports.registerDeliveryPartner = asyncErrorHandler(async (req, res, next
         profilePhoto,
         otp,
         documents: {
-            aadharNumber: documents.aadharNumber,
-            licenseNumber: documents.licenseNumber,
+            aadharUrls: documents.aadharUrls,
+            licenseUrl: documents.licenseUrl,
             idProof: documents.idProof,
         },
     });

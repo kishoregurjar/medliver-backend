@@ -28,9 +28,10 @@ const deliveryPartnerSchema = new mongoose.Schema({
     type: String,
     default: null
   },
-  isApproved: {
-    type: Boolean,
-    default: false
+  approvalStatus: {
+    type: String,
+    enum: ["pending", "approved", "rejected"],
+    default: "pending",
   },
   role: {
     type: String,

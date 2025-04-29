@@ -41,7 +41,7 @@ router.put('/change-pharmacy-status', verifyAdminToken("superadmin"), indexContr
 
 /** Super Admin Delivery Partner Routes */
 
-router.put('/approve-delivery-partner', verifyAdminToken('superadmin'), indexController.adminDeliveryPartnerController.approveDeliveryPartner)
+router.put('/approve-delivery-partner', verifyAdminToken('superadmin'), indexController.adminDeliveryPartnerController.approveRejectDeliveryPartner)
 router.get('/get-all-delivery-partner', validateQuery(getAllDeliveryPartners), verifyAdminToken('superadmin'), indexController.adminDeliveryPartnerController.getAllDeliveryPartners);
 router.get('/get-delivery-partner-by-id', validateQuery(getOrDeleteDeliveryPartner), verifyAdminToken('superadmin'), indexController.adminDeliveryPartnerController.getDeliveryPartnerById);
 router.put('/update-delivery-partner', validate(updateDeliveryPartner), verifyAdminToken('superadmin'), indexController.adminDeliveryPartnerController.updateDeliveryPartner)
@@ -132,6 +132,10 @@ router.post('/create-doctor-profile', verifyAdminToken('superadmin'), indexContr
 router.get('/get-all-doctor-profile', verifyAdminToken('superadmin'), indexController.adminDoctorController.getAllDoctorsList);
 router.get('/get-doctor-profile-by-id', verifyAdminToken('superadmin'), indexController.adminDoctorController.getDoctorById);
 router.put('/change-status', verifyAdminToken('superadmin'), indexController.adminDoctorController.changeDoctorStatus)
+
+/** Payment Routes */
+router.post('/initiate-refund', indexController.adminPaymentController.initiateRefund);
+
 
 
 module.exports = router;

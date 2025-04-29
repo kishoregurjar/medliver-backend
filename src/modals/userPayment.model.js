@@ -63,6 +63,19 @@ const paymentSchema = new mongoose.Schema({
     created_at: {
         type: Date,
         default: Date.now,
+    },
+    refund_status: {
+        type: String,
+        enum: ["pending", "processed", "failed", null],
+    },
+    refund_id: {
+        type: String,
+    },
+    refunded_at: {
+        type: Date,
+    },
+    refund_amount: {
+        type: Number,
     }
 });
 
