@@ -280,8 +280,7 @@ module.exports.searchDeliveryPartner = asyncErrorHandler(async (req, res, next) 
 })
 
 module.exports.getAllDeliveryPartnersNotApproved = asyncErrorHandler(async (req, res, next) => {
-  let { status } = req.query;
-  const partners = await DeliveryPartner.find({ approvalStatus: status });
+  const partners = await DeliveryPartner.find({ approvalStatus: 'pending' });
   if (partners.length === 0) {
     return successRes(res, 200, false, "No Delivery Partners Found", []);
   }
