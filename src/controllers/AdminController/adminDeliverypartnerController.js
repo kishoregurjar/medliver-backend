@@ -10,6 +10,7 @@ const { forgetPasswordMail } = require("../../services/sendMail");
 const { JsonWebTokenError } = require("jsonwebtoken");
 const DeliveryPartner = require("../../modals/delivery.model");
 const Customer = require("../../modals/customer.model");
+const deliveryRateModel = require("../../modals/deliveryRate.model");
 require("dotenv").config();
 
 /** ----------Delivery Partner ---------------- */
@@ -278,12 +279,120 @@ module.exports.searchDeliveryPartner = asyncErrorHandler(async (req, res, next) 
   return successRes(res, 200, partners.length > 0 ? true : false, "Delivery Partners", partners);
 })
 
-
-
 module.exports.getAllDeliveryPartnersNotApproved = asyncErrorHandler(async (req, res, next) => {
-  const partners = await DeliveryPartner.find({ isApproved: false });
+  let { status } = req.query;
+  const partners = await DeliveryPartner.find({ approvalStatus: status });
   if (partners.length === 0) {
     return successRes(res, 200, false, "No Delivery Partners Found", []);
   }
   return successRes(res, 200, true, "Delivery Partners", partners);
 })
+
+/** Set Delivery Rate */
+
+module.exports.setDeliveryRate = asyncErrorHandler(async (req, res, next) => {
+  let { deliveryRate } = req.body;
+  const adminId = req.admin._id;
+
+  if (!deliveryRate) {
+    return next(new CustomError("Delivery Rate is required", 400));
+  }
+  deliveryRate = Number(deliveryRate);
+  if (typeof deliveryRate !== "number" || deliveryRate <= 0) {
+    return next(new CustomError("Delivery Rate must be a positive number", 400));
+  }
+
+  await deliveryRateModel.updateMany(
+    { created_by: adminId, is_active: true },
+    { $set: { is_active: false } }
+  );
+
+  const newRate = await deliveryRateModel.create({
+    per_km_price: deliveryRate,
+    created_by: adminId,
+    is_active: true,
+    created_at: new Date()
+  });
+
+  return successRes(res, 201, true, "New Delivery Rate Created Successfully", newRate);
+});
+
+module.exports.getDeliveryRates = asyncErrorHandler(async (req, res, next) => {
+  let status = req.query.status;
+  if (!status) {
+    status = true;
+  }
+  const rates = await deliveryRateModel.find({ is_active: status });
+  return successRes(res, 200, rates.length > 0 ? true : false, "Delivery Rates", rates);
+});
+
+module.exports.editPerKilometerPrice = asyncErrorHandler(async (req, res, next) => {
+  let { deliveryRate, rateId } = req.body;
+  const adminId = req.admin._id;
+
+  if (!deliveryRate) {
+    return next(new CustomError("Delivery Rate is required", 400));
+  }
+  deliveryRate = Number(deliveryRate);
+  if (typeof deliveryRate !== "number" || deliveryRate <= 0) {
+    return next(new CustomError("Delivery Rate must be a positive number", 400));
+  }
+  const findRate = await deliveryRateModel.findById(rateId);
+  if (!findRate) {
+    return next(new CustomError("Delivery Rate not found", 404));
+  }
+  if (findRate.created_by.toString() !== adminId.toString()) {
+    return next(new CustomError("You are not authorized to edit this rate", 403));
+  }
+  findRate.per_km_price = deliveryRate;
+  await findRate.save();
+  return successRes(res, 200, true, "Delivery Rate Updated Successfully", findRate);
+})
+
+module.exports.activateParticularRate = asyncErrorHandler(async (req, res, next) => {
+  const { rateId } = req.body;
+  const adminId = req.admin._id;
+
+  if (!rateId) {
+    return next(new CustomError("Rate ID is required", 400));
+  }
+
+  const findRate = await deliveryRateModel.findById(rateId);
+  if (!findRate) {
+    return next(new CustomError("Delivery Rate not found", 404));
+  }
+
+  await deliveryRateModel.updateMany(
+    { _id: { $ne: rateId }, created_by: adminId, is_active: true },
+    { $set: { is_active: false } }
+  );
+
+  findRate.is_active = true;
+  await findRate.save();
+
+  return successRes(res, 200, true, "Delivery Rate Activated Successfully", findRate);
+});
+
+module.exports.deleteDeliveryRate = asyncErrorHandler(async (req, res, next) => {
+  const { rateId } = req.body;
+  const adminId = req.admin._id;
+
+  if (!rateId) {
+    return next(new CustomError("Rate ID is required", 400));
+  }
+
+  const findRate = await deliveryRateModel.findById(rateId);
+  if (!findRate) {
+    return next(new CustomError("Delivery Rate not found", 404));
+  }
+  if (findRate.is_active) {
+    return next(new CustomError("You can't delete an active rate", 400));
+  }
+
+  if (findRate.created_by.toString() !== adminId.toString()) {
+    return next(new CustomError("You are not authorized to delete this rate", 403));
+  }
+
+  await findRate.deleteOne();
+  return successRes(res, 200, true, "Delivery Rate Deleted Successfully", findRate);
+});

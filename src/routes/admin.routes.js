@@ -136,6 +136,12 @@ router.put('/change-status', verifyAdminToken('superadmin'), indexController.adm
 /** Payment Routes */
 router.post('/initiate-refund', indexController.adminPaymentController.initiateRefund);
 
+/** Delivery Rate Management */
 
+router.post('/create-delivery-rate', verifyAdminToken('superadmin'), indexController.adminDeliveryPartnerController.setDeliveryRate);
+router.get('/get-delivery-rate', verifyAdminToken('superadmin'), indexController.adminDeliveryPartnerController.getDeliveryRates);
+router.put('/update-delivery-rate', verifyAdminToken('superadmin'), indexController.adminDeliveryPartnerController.editPerKilometerPrice);
+router.put('/activate-delivery-rate', verifyAdminToken('superadmin'), indexController.adminDeliveryPartnerController.activateParticularRate);
+router.delete('/delete-delivery-rate', verifyAdminToken('superadmin'), indexController.adminDeliveryPartnerController.deleteDeliveryRate);
 
 module.exports = router;
