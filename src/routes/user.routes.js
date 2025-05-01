@@ -61,4 +61,7 @@ router.post('/verify-payment', indexController.customerPaymentController.verifyP
 
 router.post('/upload-prescription', verifyUserToken(), uploadPrescription, indexController.customerOrderController.uploadPrescription)
 
+/** Map Integration */
+router.post('/search-autocomplete-address', indexController.commonController.autoCompleteAddress);
+
 module.exports = router;

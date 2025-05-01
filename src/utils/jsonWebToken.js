@@ -4,14 +4,15 @@ const adminModal = require("../modals/admin.Schema");
 const SECRET_KEY = process.env.SECRET_KEY;
 const customerModal = require("../modals/customer.model");
 const deliveryModel = require("../modals/delivery.model");
+const doctorSchema = require("../modals/doctorSchema");
 
 const jwt = {
   assignJwt: (admin) => {
     const payload = {
-      _id: admin._id,
-      email: admin.email,
-      role: admin.role,
-      permissions: admin.permissions,
+      _id: admin?._id,
+      email: admin?.email,
+      role: admin?.role,
+      permissions: admin?.permissions,
     };
     const options = {
       expiresIn: "1d",
@@ -31,7 +32,7 @@ const jwt = {
         let decoded;
         try {
           decoded = jsonwebtoken.verify(token, SECRET_KEY);
-          
+
         } catch (err) {
           if (err.name === "TokenExpiredError") {
             return next(
@@ -113,7 +114,6 @@ const jwt = {
       }
     };
   },
-
   verifyDeliveryPartnerToken: () => {
     return async (req, res, next) => {
       try {
@@ -143,17 +143,59 @@ const jwt = {
         if (!partner) {
           return next(new CustomError("Delivery Partner not found", 401));
         }
-            
-         if (partner.isBlocked) {
-      return next(new CustomError("You are blocked. Please contact support.", 403));
-      }
 
-    
+        if (partner.isBlocked) {
+          return next(new CustomError("You are blocked. Please contact support.", 403));
+        }
+
+
         if (partner.isVerified !== true) {
           return next(new CustomError("Delivery Partner not verified", 403));
         }
 
         req.partner = partner;
+        next();
+      } catch (error) {
+        console.log(error, "error");
+        return next(error);
+      }
+    };
+  },
+  verifyDoctorToken: () => {
+    return async (req, res, next) => {
+      try {
+        let token = req.headers.authorization;
+        if (!token) {
+          return next(new CustomError("Please provide token", 401));
+        }
+
+        let decoded;
+        try {
+          decoded = jsonwebtoken.verify(token, SECRET_KEY);
+        } catch (err) {
+          if (err.name === "TokenExpiredError") {
+            return next(
+              new CustomError("Session timeout: Please login again", 401)
+            );
+          }
+          return next(new CustomError("Access Denied: Invalid Token", 401));
+        }
+
+        if (!decoded) {
+          return next(new CustomError("Access Denied: Invalid Token", 401));
+        }
+
+        // Fetch admin from database
+        const doctor = await doctorSchema.findById(decoded._id);
+        if (!doctor) {
+          return next(new CustomError("Doctor not found", 401));
+        }
+
+        if (!doctor.is_active) {
+          return next(new CustomError("You are blocked. Please contact support.", 403));
+        }
+
+        req.doctor = doctor;
         next();
       } catch (error) {
         console.log(error, "error");

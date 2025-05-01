@@ -23,6 +23,8 @@ const customerOrderController = require("./CustomerController/customerOrderContr
 const adminDoctorController = require("./AdminController/adminDoctorController");
 const customerPaymentController = require('./CustomerController/customerPaymentController');
 const adminPaymentController = require('./AdminController/adminPaymentController');
+const doctorAuthController = require('./DoctorController/doctorAuthController');
+const commonController = require('./CommonController/commonController');
 
 module.exports = {
     adminAuthController,
@@ -49,5 +51,7 @@ module.exports = {
     adminDoctorController,
     customerOrderController,
     customerPaymentController,
-    adminPaymentController
+    adminPaymentController,
+    doctorAuthController,
+    commonController
 }   

@@ -1,11 +1,10 @@
 const generateOTPNumber = (length) => {
-  let otp = '';
+  if (length <= 0) return 0;
 
+  const min = Math.pow(10, length - 1);   // e.g., 1000 for 4 digits
+  const max = Math.pow(10, length) - 1;   // e.g., 9999 for 4 digits
 
-  for (let i = 0; i < length; i++) {
-    otp += Math.floor(Math.random() * 10);
-  }
-  return otp;
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
-module.exports = { generateOTPNumber }
+module.exports = { generateOTPNumber };

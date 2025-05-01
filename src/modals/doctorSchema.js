@@ -4,14 +4,14 @@ const doctorProfileSchema = new mongoose.Schema({
     email: {
         type: String,
         required: true,
-        unique: true, // Ensuring the email is unique
+        unique: true,
         trim: true,
         lowercase: true
     },
     password: {
         type: String,
         required: true,
-        minlength: 6 // Minimum password length
+        minlength: 6
     },
     first_name: {
         type: String,
@@ -25,23 +25,23 @@ const doctorProfileSchema = new mongoose.Schema({
     },
     category_id: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: "DoctorCategory", // Referring to the category the doctor belongs to
+        ref: "DoctorCategory",
         required: true
     }],
     category: [{
-        type: String, // Array to store category names for easy access
+        type: String,
         required: true
     }],
     profile_image: {
-        type: String, // URL to the doctor's profile image
+        type: String,
         required: true
     },
     qualifications: {
-        type: [String], // Array of qualifications
+        type: [String],
         required: true
     },
     specialties: {
-        type: [String], // Array of specialties like cardiology, dentistry etc.
+        type: [String],
         required: true
     },
     clinic_name: {
@@ -55,11 +55,11 @@ const doctorProfileSchema = new mongoose.Schema({
     phone_number: {
         type: String,
         required: true,
-        unique: true // Ensuring phone number is unique
+        unique: true
     },
     available_at_home: {
         type: Boolean,
-        default: false // Whether the doctor provides home consultation
+        default: false
     },
     consultation_fee: {
         type: Number,
@@ -67,7 +67,7 @@ const doctorProfileSchema = new mongoose.Schema({
     },
     availability: {
         monday: {
-            type: [String], // Array to store available slots (e.g., ["9AM-12PM", "2PM-5PM"])
+            type: [String],
             default: []
         },
         tuesday: {
@@ -96,11 +96,11 @@ const doctorProfileSchema = new mongoose.Schema({
         }
     },
     experience: {
-        type: String, // Number of years of experience
+        type: String,
         required: true
     },
     description: {
-        type: String, // A short bio or description about the doctor
+        type: String,
         required: true
     },
     created_at: {
@@ -114,10 +114,17 @@ const doctorProfileSchema = new mongoose.Schema({
     is_active: {
         type: Boolean,
         default: true
+    },
+    role: {
+        type: String,
+        default: "doctor"
+    },
+    otp: {
+        type: Number,
+        default: null
     }
 });
 
-// Auto-update updated_at on save
 doctorProfileSchema.pre("save", function (next) {
     this.updated_at = new Date();
     next();

@@ -45,6 +45,7 @@ module.exports.createDoctorProfile = asyncErrorHandler(async (req, res, next) =>
     }
 
     const generatedPassword = crypto.randomBytes(8).toString("hex");
+    console.log(generatedPassword, "password")
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(generatedPassword, salt);
