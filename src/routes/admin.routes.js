@@ -62,6 +62,7 @@ router.post('/upload-medicine-images', verifyAdminToken('superadmin'), uploadMed
 
 //customer routes
 router.get('/get-all-customer', verifyAdminToken('superadmin'), indexController.adminCustomerController.getAllCustomers);
+router.get('/search-customer', verifyAdminToken('superadmin'), indexController.adminCustomerController.searchCustomer);
 router.get('/get-customer-by-id', validateQuery(getCustomerByIdValidation), verifyAdminToken('superadmin'), indexController.adminCustomerController.getCustomerById);
 router.put('/block-unblock-customer', validate(getCustomerByIdValidation), verifyAdminToken('superadmin'), indexController.adminCustomerController.BlockUnblockCustomer);
 

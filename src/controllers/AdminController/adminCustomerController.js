@@ -88,3 +88,30 @@ module.exports.BlockUnblockCustomer = asyncErrorHandler(
     }
   }
 );
+
+module.exports.searchCustomer = asyncErrorHandler(async (req, res, next) => {
+  const { searchQuery } = req.query;
+
+  if (!searchQuery) {
+    return next(new CustomError("Search query is required", 400));
+  }
+
+  const filter = {
+    $or: [
+      { email: { $regex: searchQuery, $options: "i" } }, // Case-insensitive partial match
+      { fullName: { $regex: searchQuery, $options: "i" } }, // Case-insensitive partial match
+      { phoneNumber: { $regex: searchQuery, $options: "i" } }, // Case-insensitive partial match
+    ],
+  };
+
+  const [customers, totalCount] = await Promise.all([
+    Customer.find(filter),
+    Customer.countDocuments(filter),
+  ]);
+
+  return successRes(res, 200, true, "Customers search results", {
+    query: searchQuery,
+    data: customers,
+    totalResults: totalCount,
+  });
+});
