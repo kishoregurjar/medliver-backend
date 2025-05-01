@@ -42,7 +42,7 @@ router.put('/change-cart-product-quantity', verifyUserToken(), indexController.c
 router.put('/remove-item-from-cart', verifyUserToken(), indexController.customerCartController.removeItemFromCart);
 
 /** Insurance route */
-router.post("/apply-for-insurance", verifyUserToken(), indexController.customerMissLiniesController.applyInsurance);
+router.post("/apply-for-insurance", indexController.customerMissLiniesController.applyInsurance);
 router.post("/request-for-emergency-vehicle", indexController.customerMissLiniesController.requestEmergencyVehicle)
 
 
