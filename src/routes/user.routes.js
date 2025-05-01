@@ -1,7 +1,7 @@
 const express = require("express");
 const indexController = require("../controllers/indexController");
 const { verifyUserToken } = require("../utils/jsonWebToken");
-const { uploadUserProfilePic } = require("../services/multer");
+const { uploadUserProfilePic, uploadPrescription } = require("../services/multer");
 const { validate, validateQuery, getAllSpecialOfferValidation, getAllFeatureProductValidation, getAllSellingProductValidation, } = require("../middleware/validation")
 
 const router = express.Router();
@@ -56,5 +56,9 @@ router.put("/cancel-order", verifyUserToken(), indexController.customerOrderCont
 
 router.post('/create-payment-order', indexController.customerPaymentController.createOrder);
 router.post('/verify-payment', indexController.customerPaymentController.verifyPayment);
+
+/** Prescription */
+
+router.post('/upload-prescription', verifyUserToken(), uploadPrescription, indexController.customerOrderController.uploadPrescription)
 
 module.exports = router;

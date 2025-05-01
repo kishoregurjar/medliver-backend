@@ -4,6 +4,7 @@ const CustomError = require("../../utils/customError");
 const cartSchema = require("../../modals/cart.model");
 const { successRes } = require("../../services/response");
 const medicineModel = require("../../modals/medicine.model");
+const pescriptionSchema = require("../../modals/pescriptionSchema");
 
 
 module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
@@ -159,11 +160,11 @@ module.exports.uploadPrescription = asyncErrorHandler(async (req, res, next) => 
     }
 
     const filePaths = req.files.map(file => ({
-        path: `${process.env.PRESCRIPTION}${file.filename}`,
+        path: `${process.env.PRESCRIPTION_IMAGE_PATH}${file.filename}`,
         uploaded_at: new Date()
     }));
 
-    const prescription = new prescriptionModel({
+    const prescription = new pescriptionSchema({
         user_id: userId,
         prescriptions: filePaths
     });

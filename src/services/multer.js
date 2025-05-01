@@ -193,6 +193,12 @@ module.exports.uploadDoctoreCatgImg = uploadSingleFile("image", {
   folder: "uploads/doctoreCategoryImage",
 });
 
+module.exports.uploadPrescription = uploadMultipleFiles("files", 5, {
+  fileTypes: /jpeg|jpg|png/,
+  fileSize: 3000000,
+  folder: "uploads/prescription",
+});
+
 
 module.exports.uploadSingleFile = uploadSingleFile;
 module.exports.uploadMultipleFiles = uploadMultipleFiles;
