@@ -134,68 +134,68 @@ const uploadMultipleFiles = (fieldName, maxCount, options) => {
 /* Admin Section */
 module.exports.uploadInvoice = uploadSingleFile("files", {
   fileTypes: /jpeg|jpg|png/,
-  fileSize: 3000000,
+  fileSize: 10000000,
   folder: "uploads/adminProfile",
 });
 
 module.exports.uploadAdminProfile = uploadSingleFile("files", {
   fileTypes: /jpeg|jpg|png/,
-  fileSize: 3000000,
+  fileSize: 10000000,
   folder: "uploads/adminProfilePicture",
 });
 /* Delivery Partner Section */
 module.exports.uploadDeliveryProfile = uploadSingleFile("image", {
   fileTypes: /jpeg|jpg|png/,
-  fileSize: 3000000,
+  fileSize: 10000000,
   folder: "uploads/deliveryPartnerProfile",
 });
 
 module.exports.uploadAdharcardImages = uploadMultipleFiles("files", 2, {
   fileTypes: /jpeg|jpg|png/,
-  fileSize: 3000000,
+  fileSize: 10000000,
   folder: "uploads/deliveryPartnerDocuments",
 })
 
 module.exports.uploadLicenceImage = uploadSingleFile("image", {
   fileTypes: /jpeg|jpg|png/,
-  fileSize: 3000000,
+  fileSize: 10000000,
   folder: "uploads/deliveryPartnerDocuments",
 });
 
 
 module.exports.uploadUserProfilePic = uploadSingleFile("image", {
   fileTypes: /jpeg|jpg|png/,
-  fileSize: 3000000,
+  fileSize: 10000000,
   folder: "uploads/userProfilePic",
 });
 
 module.exports.uploadLicenceImagePharmacy = uploadSingleFile("image", {
   fileTypes: /jpeg|jpg|png/,
-  fileSize: 3000000,
+  fileSize: 10000000,
   folder: "uploads/pharmacyDocuments",
 });
 
 module.exports.uploadMedicineImages = uploadMultipleFiles("images", 3, {
   fileTypes: /jpeg|jpg|png/,
-  fileSize: 3000000,
+  fileSize: 10000000,
   folder: "uploads/medicineImages",
 });
 
 module.exports.uploadTestCatgPic = uploadSingleFile("image", {
   fileTypes: /jpeg|jpg|png/,
-  fileSize: 3000000,
+  fileSize: 10000000,
   folder: "uploads/testCatg",
 });
 
 module.exports.uploadDoctoreCatgImg = uploadSingleFile("image", {
   fileTypes: /jpeg|jpg|png/,
-  fileSize: 3000000,
+  fileSize: 10000000,
   folder: "uploads/doctoreCategoryImage",
 });
 
 module.exports.uploadPrescription = uploadMultipleFiles("files", 5, {
   fileTypes: /jpeg|jpg|png/,
-  fileSize: 3000000,
+  fileSize: 10000000,
   folder: "uploads/prescription",
 });
 
