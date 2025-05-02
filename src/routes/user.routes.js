@@ -63,5 +63,12 @@ router.post('/upload-prescription', verifyUserToken(), uploadPrescription, index
 
 /** Map Integration */
 router.post('/search-autocomplete-address', indexController.commonController.autoCompleteAddress);
+router.post('/get-distance-between-coords', indexController.commonController.getDistanceBetweenCoords);
+router.post('/get-routes-bw-coords', indexController.commonController.getRouteBetweenCoords);
+
+/**Medicine */
+router.get('/search-medicine', indexController.customerMedicineController.searchMedicine);
+router.post('/log-medicine-click', indexController.customerMedicineController.logMedicineClick);
+router.get('/get-top-picks', indexController.customerMedicineController.getUserTopPicksWithSimilar)
 
 module.exports = router;

@@ -25,6 +25,7 @@ const customerPaymentController = require('./CustomerController/customerPaymentC
 const adminPaymentController = require('./AdminController/adminPaymentController');
 const doctorAuthController = require('./DoctorController/doctorAuthController');
 const commonController = require('./CommonController/commonController');
+const customerMedicineController = require('./CustomerController/customerMedicineController');
 
 module.exports = {
     adminAuthController,
@@ -53,5 +54,6 @@ module.exports = {
     customerPaymentController,
     adminPaymentController,
     doctorAuthController,
-    commonController
+    commonController,
+    customerMedicineController
 }   
