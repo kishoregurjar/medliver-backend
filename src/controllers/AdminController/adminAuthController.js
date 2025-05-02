@@ -7,6 +7,8 @@ const asyncErrorHandler = require('../../utils/asyncErrorHandler');
 const { assignJwt } = require("../../utils/jsonWebToken");
 const { forgetPasswordMail } = require('../../services/sendMail');
 const sendFirebaseNotification = require('../../services/sendNotification');
+const pharmacyModel = require('../../modals/pharmacy.model');
+const PathologyCenter = require('../../modals/pathology.model');
 require('dotenv').config();
 
 module.exports.login = asyncErrorHandler(async (req, res, next) => {
@@ -27,9 +29,8 @@ module.exports.login = asyncErrorHandler(async (req, res, next) => {
   }
 
   let isMatch;
-  console.log("findAdmin.password", findAdmin.password);
   try {
-    isMatch = await bcrypt.compare(password, findAdmin.password); // Hash comparison
+    isMatch = await bcrypt.compare(password, findAdmin.password);
   } catch (error) {
     return next(new CustomError("Error comparing password", 500));
   }
@@ -42,7 +43,6 @@ module.exports.login = asyncErrorHandler(async (req, res, next) => {
     return next(new CustomError("Account is not active, Contact Administration", 400));
   }
 
-
   const payload = {
     _id: findAdmin._id,
     email: findAdmin.email,
@@ -50,17 +50,33 @@ module.exports.login = asyncErrorHandler(async (req, res, next) => {
     permissions: findAdmin.permissions,
   };
 
-
   const token = assignJwt(payload);
-
 
   const sanitizedAdmin = findAdmin.toObject();
   delete sanitizedAdmin.password;
 
-  return successRes(res, 200, true, sanitizedAdmin.role === "superadmin" ? "Super Admin logged in successfully" : `${sanitizedAdmin.role} logged in successfully`, {
-    ...sanitizedAdmin,
-    token,
-  });
+  let roleData = null;
+
+  // Fetch role-specific data
+  if (findAdmin.role === "pharmacy") {
+    roleData = await pharmacyModel.findOne({ adminId: findAdmin._id }).lean();
+  } else if (findAdmin.role === "pathology") {
+    roleData = await PathologyCenter.findOne({ adminId: findAdmin._id }).lean();
+  }
+
+  return successRes(
+    res,
+    200,
+    true,
+    sanitizedAdmin.role === "superadmin"
+      ? "Super Admin logged in successfully"
+      : `${sanitizedAdmin.role} logged in successfully`,
+    {
+      ...sanitizedAdmin,
+      token,
+      roleData,
+    }
+  );
 });
 
 module.exports.getAdminDetails = asyncErrorHandler(async (req, res, next) => {
