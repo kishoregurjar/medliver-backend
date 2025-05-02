@@ -31,9 +31,9 @@ router.put('/set-default-address', verifyUserToken(), indexController.customerCo
 
 /** Featue and selling and special offer Routes */
 
-router.get("/get-all-feature-product", validateQuery(getAllFeatureProductValidation), verifyUserToken(), indexController.customerSpecialProductController.getAllFeaturedProducts)
-router.get("/get-all-selling-product", validateQuery(getAllSellingProductValidation), verifyUserToken(), indexController.customerSpecialProductController.getAllSellingProduct);
-router.get("/get-all-special-offer", validateQuery(getAllSpecialOfferValidation), verifyUserToken(), indexController.customerSpecialProductController.getallSpecialOffers)
+router.get("/get-all-feature-product", validateQuery(getAllFeatureProductValidation), indexController.customerSpecialProductController.getAllFeaturedProducts)
+router.get("/get-all-top-selling-product", validateQuery(getAllSellingProductValidation), indexController.customerSpecialProductController.getAllSellingProduct);
+router.get("/get-all-special-offer", validateQuery(getAllSpecialOfferValidation), indexController.customerSpecialProductController.getallSpecialOffers)
 
 /** Cart Routes */
 router.post('/add-to-cart', verifyUserToken(), indexController.customerCartController.addToCart);
