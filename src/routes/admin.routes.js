@@ -145,4 +145,10 @@ router.put('/update-delivery-rate', verifyAdminToken('superadmin'), indexControl
 router.put('/activate-delivery-rate', verifyAdminToken('superadmin'), indexController.adminDeliveryPartnerController.activateParticularRate);
 router.delete('/delete-delivery-rate', verifyAdminToken('superadmin'), indexController.adminDeliveryPartnerController.deleteDeliveryRate);
 
+
+/**DoctoreLead Routes */
+router.get("/get-all-doctoreLead",verifyAdminToken("superadmin"),indexController.adminDoctoreLeadController.getAllUser);
+router.get("/get-doctoreLead-by-id",verifyAdminToken("superadmin"),indexController.adminDoctoreLeadController.getDoctorLeadById)
+router.put("/update-doctore-lead",verifyAdminToken("superadmin"),indexController.adminDoctoreLeadController.updateDoctorLead);
+router.delete("/delete-doctore-lead",verifyAdminToken("superadmin"),indexController.adminDoctoreLeadController.deleteDoctorLeadById)
 module.exports = router;

@@ -71,4 +71,6 @@ router.get('/search-medicine', indexController.customerMedicineController.search
 router.post('/log-medicine-click', indexController.customerMedicineController.logMedicineClick);
 router.get('/get-top-picks', indexController.customerMedicineController.getUserTopPicksWithSimilar)
 
+/**DoctoreLead Routes */
+router.post("/create-doctoreLead",indexController.customerMissLiniesController.createDoctoreLead);
 module.exports = router;

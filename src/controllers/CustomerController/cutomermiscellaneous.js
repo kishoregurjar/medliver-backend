@@ -4,6 +4,7 @@ const EmergencyVehicleBooking = require("../../modals/emergencyVehicleBooking.mo
 const CustomError = require("../../utils/customError")
 const { successRes } = require("../../services/response")
 const asyncErrorHandler = require("../../utils/asyncErrorHandler")
+const DoctoreLead = require("../../modals/doctoreLead.model")
 
 module.exports.applyInsurance = asyncErrorHandler(async (req, res, next) => {
     const { 
@@ -96,3 +97,31 @@ module.exports.applyInsurance = asyncErrorHandler(async (req, res, next) => {
     return successRes(res, 201, true, "Emergency vehicle requested successfully", newRequest);
   });
   
+  module.exports.createDoctoreLead = asyncErrorHandler(async (req, res, next) => {
+    const {
+      name,
+      email,
+      phone,
+      address,
+      disease,
+    } = req.body;
+  
+    if (!name || !email) {
+      return next(new CustomError("Name and Email are required", 400));
+    }
+  
+    const existingUser = await DoctoreLead.findOne({ name: name.trim(), email });
+    if (existingUser) {
+      return next(
+        new CustomError("User with same name and email already exists", 409)
+      );
+    }
+    const newUser = await DoctoreLead.create({
+      name,
+      email,
+      phone,
+      address,
+      disease,
+    });
+    return successRes(res, 201, true, "User created successfully", newUser);
+  });
