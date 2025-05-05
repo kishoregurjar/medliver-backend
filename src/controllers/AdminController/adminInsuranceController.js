@@ -87,7 +87,7 @@ module.exports.getInsuranceById = asyncErrorHandler(async (req, res, next) => {
 
 module.exports.archiveInsuranceById = asyncErrorHandler(
   async (req, res, next) => {
-    const { insuranceId } = req.body;
+    const { insuranceId } = req.query;
 
     if (!insuranceId) {
       return next(new CustomError("Insurance ID is required", 400));
