@@ -1282,9 +1282,4 @@ module.exports = {
   getVehicleRequestByIdValidation,
   updateVehicleRequestValidation,
   archiveVehicleRequestValidation
-
-
-
-
-
 };
