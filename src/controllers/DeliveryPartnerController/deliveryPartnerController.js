@@ -186,8 +186,8 @@ module.exports.forgetPassword = asyncErrorHandler(async (req, res, next) => {
     if (!email) {
         return next(new CustomError("Email is required", 400))
     }
-    let emmail = email.toLowerCase();
-    const findPartner = await DeliveryPartner.findOne({ email });
+    let emailLowerCase = email.toLowerCase();
+    const findPartner = await DeliveryPartner.findOne({ email:emailLowerCase });
     if (!findPartner) {
         return next(new CustomError("Partner not found", 404));
     }
