@@ -111,6 +111,7 @@ router.put("/remove-test-from-category", verifyAdminToken("superadmin"), indexCo
 router.get("/get-all-insurance", verifyAdminToken("superadmin"), indexController.adminInsuranceController.getAllInsuranceLeads);
 router.get("/get-insurance-by-id", verifyAdminToken("superadmin"), indexController.adminInsuranceController.getInsuranceById)
 router.put("/archieve-insurence-by-id", verifyAdminToken("superadmin"), indexController.adminInsuranceController.archiveInsuranceById);
+router.get('/search-insurance', verifyAdminToken('superadmin'), indexController.adminInsuranceController.searchInsuranceLead)
 
 
 //vehicle Route
@@ -147,8 +148,10 @@ router.delete('/delete-delivery-rate', verifyAdminToken('superadmin'), indexCont
 
 
 /**DoctoreLead Routes */
-router.get("/get-all-doctoreLead",verifyAdminToken("superadmin"),indexController.adminDoctoreLeadController.getAllUser);
-router.get("/get-doctoreLead-by-id",verifyAdminToken("superadmin"),indexController.adminDoctoreLeadController.getDoctorLeadById)
-router.put("/update-doctore-lead",verifyAdminToken("superadmin"),indexController.adminDoctoreLeadController.updateDoctorLead);
-router.delete("/delete-doctore-lead",verifyAdminToken("superadmin"),indexController.adminDoctoreLeadController.deleteDoctorLeadById)
+router.get("/get-all-doctoreLead", verifyAdminToken("superadmin"), indexController.adminDoctoreLeadController.getAllUser);
+router.get("/get-doctoreLead-by-id", verifyAdminToken("superadmin"), indexController.adminDoctoreLeadController.getDoctorLeadById)
+router.put("/update-doctore-lead", verifyAdminToken("superadmin"), indexController.adminDoctoreLeadController.updateDoctorLead);
+router.delete("/delete-doctore-lead", verifyAdminToken("superadmin"), indexController.adminDoctoreLeadController.deleteDoctorLeadById)
+router.get("/search-doctor-lead", verifyAdminToken("superadmin"), indexController.adminDoctoreLeadController.searchDoctorLead);
+
 module.exports = router;
