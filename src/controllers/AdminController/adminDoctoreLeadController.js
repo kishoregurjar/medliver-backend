@@ -37,7 +37,7 @@ module.exports.getAllUser = asyncErrorHandler(async (req, res, next) => {
 // Get Lead by ID
 module.exports.getDoctorLeadById = asyncErrorHandler(async (req, res, next) => {
   const { DoctoreLeadId } = req.query;
-  if(!DoctoreLeadId){
+  if (!DoctoreLeadId) {
     return next(new CustomError("Doctor lead  id is required", 404));
 
   }
@@ -52,7 +52,7 @@ module.exports.getDoctorLeadById = asyncErrorHandler(async (req, res, next) => {
 
 // Update Lead
 module.exports.updateDoctorLead = asyncErrorHandler(async (req, res, next) => {
-  const { DoctoreLeadId,name, email, phone, address, disease, isArchived } = req.body;
+  const { DoctoreLeadId, name, email, phone, address, disease, isArchived } = req.body;
 
   const updateData = { updated_at: new Date() };
   if (name) updateData.name = name;
@@ -62,35 +62,54 @@ module.exports.updateDoctorLead = asyncErrorHandler(async (req, res, next) => {
   if (disease) updateData.disease = disease;
   if (isArchived !== undefined) updateData.isArchived = isArchived;
 
-   if (Object.keys(updateData).length === 0) {
-        return next(new CustomError("No fields provided for update", 400));
-      }
-    
-      const updatedRequest = await DoctorLead.findByIdAndUpdate(
-        DoctoreLeadId,
-        { $set: updateData },
-        { new: true, runValidators: true }
-      );
-    
-      if (!updatedRequest) {
-        return next(new CustomError("Vehicle Request not found", 404));
-      }
+  if (Object.keys(updateData).length === 0) {
+    return next(new CustomError("No fields provided for update", 400));
+  }
+
+  const updatedRequest = await DoctorLead.findByIdAndUpdate(
+    DoctoreLeadId,
+    { $set: updateData },
+    { new: true, runValidators: true }
+  );
+
+  if (!updatedRequest) {
+    return next(new CustomError("Vehicle Request not found", 404));
+  }
 
   return successRes(res, 200, true, "Doctor lead updated successfully", updatedRequest);
 });
 
 module.exports.deleteDoctorLeadById = asyncErrorHandler(async (req, res, next) => {
-    const { DoctoreLeadId } = req.query;
+  const { DoctoreLeadId } = req.query;
 
-    if(!DoctoreLeadId){
-      return next(new CustomError("Doctor lead Id  is required", 404));
-  
-    }
-    const lead = await DoctorLead.findByIdAndDelete(DoctoreLeadId);
-  
-    if (!lead) {
-      return next(new CustomError("Doctor lead not found", 404));
-    }
-  
-    return successRes(res, 200, true, "Doctor lead deleted successfully", lead);
+  if (!DoctoreLeadId) {
+    return next(new CustomError("Doctor lead Id  is required", 404));
+
+  }
+  const lead = await DoctorLead.findByIdAndDelete(DoctoreLeadId);
+
+  if (!lead) {
+    return next(new CustomError("Doctor lead not found", 404));
+  }
+
+  return successRes(res, 200, true, "Doctor lead deleted successfully", lead);
+});
+
+module.exports.searchDoctorLead = asyncErrorHandler(async (req, res, next) => {
+  let { query } = req.query;
+  if (!query) {
+    return next(new CustomError("Please Provide Search Query", 400))
+  }
+
+  const leads = await DoctorLead.find({
+    $or: [
+      { name: { $regex: query, $options: "i" } },
+      { email: { $regex: query, $options: "i" } },
+      { phone: { $regex: query, $options: "i" } },
+      { address: { $regex: query, $options: "i" } },
+      { disease: { $regex: query, $options: "i" } },
+    ],
   });
+
+  return successRes(res, 200, true, "Doctor leads fetched successfully", leads)
+})

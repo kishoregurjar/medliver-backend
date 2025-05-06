@@ -87,7 +87,7 @@ module.exports.getInsuranceById = asyncErrorHandler(async (req, res, next) => {
 
 module.exports.archiveInsuranceById = asyncErrorHandler(
   async (req, res, next) => {
-    const { insuranceId } = req.query;
+    const { insuranceId } = req.body;
 
     if (!insuranceId) {
       return next(new CustomError("Insurance ID is required", 400));
@@ -112,3 +112,20 @@ module.exports.archiveInsuranceById = asyncErrorHandler(
     );
   }
 );
+
+module.exports.searchInsuranceLead = asyncErrorHandler(async (req, res, next) => {
+  const { query } = req.query;
+  if (!query) {
+    return next(new CustomError("Please Provide Search Query", 400))
+  }
+
+  const leads = await InsuranceLead.find({
+    $or: [
+      { full_name: { $regex: query, $options: "i" } },
+      { email: { $regex: query, $options: "i" } },
+      { phone: { $regex: query, $options: "i" } },
+    ],
+  });
+
+  return successRes(res, 200, true, "Insurance leads fetched successfully", leads)
+});

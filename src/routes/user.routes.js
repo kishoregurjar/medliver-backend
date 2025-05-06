@@ -2,7 +2,7 @@ const express = require("express");
 const indexController = require("../controllers/indexController");
 const { verifyUserToken } = require("../utils/jsonWebToken");
 const { uploadUserProfilePic, uploadPrescription } = require("../services/multer");
-const { validate, validateQuery, getAllSpecialOfferValidation, getAllFeatureProductValidation, getAllSellingProductValidation, } = require("../middleware/validation")
+const { validate, validateQuery, getAllSpecialOfferValidation, getAllFeatureProductValidation, getAllSellingProductValidation, createDoctorLeadValidation} = require("../middleware/validation")
 
 const router = express.Router();
 
@@ -72,5 +72,5 @@ router.post('/log-medicine-click', indexController.customerMedicineController.lo
 router.get('/get-top-picks', indexController.customerMedicineController.getUserTopPicksWithSimilar)
 
 /**DoctoreLead Routes */
-router.post("/create-doctoreLead",indexController.customerMissLiniesController.createDoctoreLead);
+router.post("/create-doctoreLead",validate(createDoctorLeadValidation),indexController.customerMissLiniesController.createDoctoreLead);
 module.exports = router;

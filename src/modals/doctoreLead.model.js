@@ -11,25 +11,25 @@ const doctorLeadSchema = new mongoose.Schema({
         required: true
     },
     phone: {
-        type: Number,
+        type: String,
         default: null
     },
-    address:{
-        type :String
+    address: {
+        type: String
     },
-    disease:{
-        type:String
+    disease: {
+        type: String
     },
     is_archived: {
         type: Boolean,
         default: false
-      },
-      status: {
+    },
+    status: {
         type: String,
         enum: ["pending", "completed", "rejected"],
         default: "pending",
-      }, 
-},{timestamps:true});
+    },
+}, { timestamps: true });
 
 // Auto-update updated_at on save
 doctorLeadSchema.pre("save", function (next) {

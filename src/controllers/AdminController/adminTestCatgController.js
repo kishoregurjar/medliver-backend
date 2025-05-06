@@ -135,13 +135,13 @@ module.exports.uploadTestCatgImg = asyncErrorHandler(async (req, res, next) => {
   });
   
   module.exports.removeTestFromCategory = asyncErrorHandler(async (req, res, next) => {
-    const { categoryId, testId } = req.body;
+    const { testCatgId, testId } = req.body;
   
-    if (!categoryId || !testId) {
+    if (!testCatgId || !testId) {
       return next(new CustomError("Both categoryId and testId are required", 400));
     }
   
-    const category = await TestCategory.findById(categoryId);
+    const category = await TestCategory.findById(testCatgId);
     if (!category) {
       return next(new CustomError("Test Category not found", 404));
     }

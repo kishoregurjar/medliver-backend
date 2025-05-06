@@ -99,7 +99,7 @@ module.exports.getAllDoctoreCategory = asyncErrorHandler(async (req, res, next) 
       return successRes(res, 200, false, "No Doctore Category  Found", []);
     }
   
-    return successRes(res, 200, true, "Vehicle Requests fetched successfully", {
+    return successRes(res, 200, true, "Doctores Category Requests fetched successfully", {
         doctoreCatg,
       currentPage: page,
       totalPages: Math.ceil(total / limit),
