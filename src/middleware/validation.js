@@ -286,6 +286,25 @@ const getAllFeatures = Joi.object({
 });
 
 //deliveryPartner
+
+const approveRejectDeliveryPartnerValidation = Joi.object({
+  partnerId: Joi.string()
+  .pattern(/^[0-9a-fA-F]{24}$/)
+  .required()
+  .messages({
+    "string.empty": "Partner ID is required",
+    "string.pattern.base": "Invalid Partner ID format",
+  }),
+  status: Joi.string()
+    .valid("approved", "rejected")
+    .required()
+    .messages({
+      "any.only": "Status must be either 'approved' or 'rejected'",
+      "string.empty": "Status is required",
+      "any.required": "Status is required",
+    }),
+});
+
 const registerDeliveryPartner = Joi.object({
   fullName: Joi.string().required().messages({
     "string.empty": "Full name is required",
@@ -466,6 +485,7 @@ const getAllSellingProductValidation = Joi.object({
   }),
 });
 
+//common you can use for getAll api's
 const getAllSpecialOfferValidation = Joi.object({
   page: Joi.number().min(1).optional().messages({
     "number.base": "Page must be a number",
@@ -557,6 +577,608 @@ const searchTestValidation = Joi.object({
   limit: Joi.number().optional()
 });
 
+//admin validation 
+const loginValidation = Joi.object({
+  email: Joi.string().email().required().messages({
+    'string.email': 'Invalid email format',
+  }),
+  password: Joi.string().required().messages({
+    'any.required': 'Password is required'
+  }),
+});
+
+const forgetPasswordValidation = Joi.object({
+  email: Joi.string().email().required().messages({
+    'string.email': 'Invalid email format',
+    'any.required': 'Email is required'
+  }),
+});
+
+const resetPasswordValidation = Joi.object({
+  resetLink: Joi.string().required().messages({
+    'any.required': 'Reset link is required'
+  }),
+  password: Joi.string().min(6).required().messages({
+    'string.min': 'Password must be at least 6 characters long',
+    'any.required': 'Password is required'
+  }),
+});
+
+const changePasswordValidation = Joi.object({
+  password: Joi.string().min(6).required().messages({
+    'string.min': 'Password must be at least 6 characters long',
+    'any.required': 'Password is required'
+  }),
+});
+
+const updateAdminProfileValidation = Joi.object({
+  name: Joi.string().optional(),
+  phoneNumber: Joi.string().optional(),
+  // email is explicitly disallowed
+  email: Joi.any().forbidden().messages({
+    'any.unknown': 'Email update is not allowed'
+  }),
+});
+
+//admin best selling product validation
+const createBestSelling = Joi.object({
+  productId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "string.empty": "Best Selling ID is required",
+      "string.pattern.base": "Invalid Best Selling Product ID format",
+    }),
+});
+
+const UpdateAndDeleteBestSelling = Joi.object({
+  bestSellingProductId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "string.empty": "Best Selling Product ID is required",
+      "string.pattern.base": "Invalid Best Selling Product ID format",
+    }),
+});
+
+// Doctore Profile validation
+const createDoctorProfileValidation = Joi.object({
+  first_name: Joi.string().trim().required().messages({
+    'string.empty': 'First name is required',
+    'any.required': 'First name is required'
+  }),
+  last_name: Joi.string().trim().required().messages({
+    'string.empty': 'Last name is required',
+    'any.required': 'Last name is required'
+  }),
+  email: Joi.string().email().required().messages({
+    'string.email': 'Invalid email format',
+    'any.required': 'Email is required',
+    'string.empty': 'Email is required'
+  }),
+  phone_number: Joi.string().pattern(/^[6-9]\d{9}$/).required().messages({
+    'string.empty': 'Phone number is required',
+    'any.required': 'Phone number is required',
+    'string.pattern.base': 'Phone number must be a valid 10-digit number starting with 6-9'
+  }),
+  category_id: Joi.array().items(Joi.string().trim().required()).min(1).required().messages({
+    'array.min': 'At least one category is required',
+    'any.required': 'Category is required'
+  }),
+  profile_image: Joi.string().trim().required().messages({
+    'string.empty': 'Profile image is required',
+    'any.required': 'Profile image is required'
+  }),
+  qualifications: Joi.string().trim().required().messages({
+    'string.empty': 'Qualifications are required',
+    'any.required': 'Qualifications are required'
+  }),
+  specialties: Joi.string().trim().required().messages({
+    'string.empty': 'Specialties are required',
+    'any.required': 'Specialties are required'
+  }),
+  clinic_name: Joi.string().trim().required().messages({
+    'string.empty': 'Clinic name is required',
+    'any.required': 'Clinic name is required'
+  }),
+  clinic_address: Joi.string().trim().required().messages({
+    'string.empty': 'Clinic address is required',
+    'any.required': 'Clinic address is required'
+  }),
+  available_at_home: Joi.boolean().optional(),
+  consultation_fee: Joi.number().required().messages({
+    'number.base': 'Consultation fee must be a number',
+    'any.required': 'Consultation fee is required'
+  }),
+  availability: Joi.string().trim().optional(),
+  experience: Joi.string().trim().required().messages({
+    'string.empty': 'Experience is required',
+    'any.required': 'Experience is required'
+  }),
+  description: Joi.string().trim().required().messages({
+    'string.empty': 'Description is required',
+    'any.required': 'Description is required'
+  }),
+});
+
+const getDoctoreByIdAndChangeStatusValidation = Joi.object({
+  doctorId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "string.empty": "Doctore ID is required",
+      "string.pattern.base": "Invalid Doctore ID format",
+    }),
+    isActive: Joi.boolean().optional()
+
+});
+
+const getAllDoctoreProfile = Joi.object({
+  page: Joi.number().min(1).optional().messages({
+    "number.base": "Page must be a number",
+    "number.min": "Page must be at least 1",
+  }),
+  limit: Joi.number().min(1).optional().messages({
+    "number.base": "Limit must be a number",
+    "number.min": "Limit must be at least 1",
+  }),
+  sortOrder: Joi.string().valid("asc", "desc").optional().messages({
+    "string.valid": "Sort order must be either 'asc' or 'desc'",
+  }),
+  isActive: Joi.boolean().optional()
+
+});
+
+//medicine validation
+const createMedicineValidation = Joi.object({
+  name: Joi.string().trim().required().messages({
+    'string.empty': 'Medicine name is required',
+    'any.required': 'Medicine name is required',
+  }),
+  price: Joi.number().positive().required().messages({
+    'number.base': 'Price must be a number',
+    'number.positive': 'Price must be a positive number',
+    'any.required': 'Price is required',
+  }),
+  manufacturer: Joi.string().trim().required().messages({
+    'string.empty': 'Manufacturer is required',
+    'any.required': 'Manufacturer is required',
+  }),
+  packSizeLabel: Joi.string().trim().required().messages({
+    'string.empty': 'Pack size label is required',
+    'any.required': 'Pack size label is required',
+  }),
+});
+
+const updateMedicineValidation = Joi.object({
+  medicineId: Joi.string()
+  .pattern(/^[0-9a-fA-F]{24}$/)
+  .required()
+  .messages({
+    "string.empty": "Medicine ID is required",
+    "string.pattern.base": "Invalid Medicine ID format",
+  }),
+  name: Joi.string().trim().optional(),
+  price: Joi.number().positive().optional().messages({
+    'number.base': 'Price must be a number',
+    'number.positive': 'Price must be a positive number',
+  }),
+  manufacturer: Joi.string().trim().optional(),
+  packSizeLabel: Joi.string().trim().optional(),
+  description: Joi.string().trim().optional()
+});
+
+
+const getMedicineByIdValidation = Joi.object({
+  medicineId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "string.empty": "Medicine ID is required",
+      "string.pattern.base": "Invalid Medicine ID format",
+    }),
+    isActive: Joi.boolean().optional()
+
+});
+
+const deleteMedicineValidation = getMedicineByIdValidation;
+
+const searchMedicineValidation = Joi.object({
+  query: Joi.string().trim().required().messages({
+    'string.empty': 'Search query is required',
+    'any.required': 'Search query is required',
+  }),
+  page: Joi.number().integer().min(1).optional(),
+});
+
+// doctore Lead Validation
+
+const createDoctorLeadValidation = Joi.object({
+  name: Joi.string().trim().required().messages({
+    "any.required": "Name is required",
+    "string.empty": "Name cannot be empty",
+  }),
+  email: Joi.string().email().required().messages({
+    "any.required": "Email is required",
+    "string.email": "Please provide a valid email address",
+    "string.empty": "Email cannot be empty",
+  }),
+  phone: Joi.string()
+    .pattern(/^[6-9]\d{9}$/)
+    .messages({
+      "string.pattern.base": "Phone number must be a valid 10-digit Indian number",
+    }),
+  address: Joi.string().trim().messages({
+    "string.empty": "Address cannot be empty",
+  }),
+  disease: Joi.string().trim().messages({
+    "string.empty": "Disease cannot be empty",
+  }),
+});
+
+const getAllDoctoreLeadValidation = Joi.object({
+  page: Joi.number().min(1).optional().messages({
+    "number.base": "Page must be a number",
+    "number.min": "Page must be at least 1",
+  }),
+  limit: Joi.number().min(1).optional().messages({
+    "number.base": "Limit must be a number",
+    "number.min": "Limit must be at least 1",
+  }),
+  sortOrder: Joi.string().valid("asc", "desc").optional().messages({
+    "string.valid": "Sort order must be either 'asc' or 'desc'",
+  }),
+});
+const getAnddeleteDoctoreLeadByIdValidation = Joi.object({
+  DoctoreLeadId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "string.empty": "Doctore LeadId  is required",
+      "string.pattern.base": "Invalid DoctoreLead ID format",
+    }),
+});
+
+const updateDoctorLeadValidation = Joi.object({
+  DoctoreLeadId: Joi.string()
+  .pattern(/^[0-9a-fA-F]{24}$/)
+  .required()
+  .messages({
+    "string.empty": "Doctore LeadId  is required",
+    "string.pattern.base": "Invalid DoctoreLead ID format",
+  }),
+  name: Joi.string().trim().optional(),
+  email: Joi.string().email().optional().messages({
+    "string.email": "Please provide a valid email address",
+  }),
+  phone: Joi.string().pattern(/^[6-9]\d{9}$/).optional().messages({
+    "string.pattern.base": "Phone number must be a valid 10-digit Indian number",
+  }),
+  address: Joi.string().trim().optional(),
+  disease: Joi.string().trim().optional(),
+  isArchived: Joi.boolean().optional(),
+});
+
+// doctore Category validation 
+
+const createDoctorCategoryValidation = Joi.object({
+  name: Joi.string().trim().required().messages({
+    "any.required": "Name is required",
+    "string.empty": "Name cannot be empty",
+  }),
+  description: Joi.string().trim().required().messages({
+    "any.required": "Description is required",
+    "string.empty": "Description cannot be empty",
+  }),
+  image_url: Joi.string().uri().optional().messages({
+    "string.uri": "Image URL must be a valid URI",
+  }),
+});
+
+const updateDoctorCategoryValidation = Joi.object({
+  doctoreCatgId: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).required().messages({
+    "string.pattern.base": "Invalid doctor category ID format",
+    "string.empty": "Doctor category ID is required",
+  }),
+  name: Joi.string().trim().optional(),
+  description: Joi.string().trim().optional(),
+  image_url: Joi.string().uri().optional().messages({
+    "string.uri": "Image URL must be a valid URI",
+  }),
+});
+
+const getAndDeleteDoctorCategoryByIdValidation = Joi.object({
+  doctoreCatgId: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).required().messages({
+    "string.pattern.base": "Invalid doctor category ID format",
+    "string.empty": "Doctor category ID is required",
+  }),
+});
+
+const getAllDoctorCategoryValidation = Joi.object({
+  page: Joi.number().min(1).optional().messages({
+    "number.base": "Page must be a number",
+    "number.min": "Page must be at least 1",
+  }),
+  limit: Joi.number().min(1).optional().messages({
+    "number.base": "Limit must be a number",
+    "number.min": "Limit must be at least 1",
+  }),
+  sortOrder: Joi.string().valid("asc", "desc").optional().messages({
+    "any.only": "Sort order must be either 'asc' or 'desc'",
+  }),
+});
+
+// feature product validation
+
+const createFeaturedProductValidation = Joi.object({
+  productId: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).required().messages({
+    "any.required": "Medicine ID is required",
+    "string.empty": "Medicine ID cannot be empty",
+    "string.pattern.base": "Invalid Medicine ID format",
+  }),
+});
+
+// Validate get/delete/update by productId in query
+const getAndDeleteFeatureProductIdValidation = Joi.object({
+  productId: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).required().messages({
+    "any.required": "Product ID is required",
+    "string.empty": "Product ID cannot be empty",
+    "string.pattern.base": "Invalid Product ID format",
+  }),
+});
+
+// Validate pagination and sorting in getAllFeaturedProducts
+const getAllFeaturedProductsValidation = Joi.object({
+  page: Joi.number().min(1).optional().messages({
+    "number.base": "Page must be a number",
+    "number.min": "Page must be at least 1",
+  }),
+  limit: Joi.number().min(1).optional().messages({
+    "number.base": "Limit must be a number",
+    "number.min": "Limit must be at least 1",
+  }),
+  sortOrder: Joi.string().valid("asc", "desc").optional().messages({
+    "any.only": "Sort order must be either 'asc' or 'desc'",
+  }),
+});
+
+const updateFeaturedProductStatusValidation = Joi.object({
+  productId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "string.pattern.base": "Invalid product ID format",
+      "any.required": "Featured product ID is required",
+      "string.empty": "Featured product ID cannot be empty",
+    }),
+});
+
+
+//insurance validation
+const getAllInsuranceLeadsValidation = Joi.object({
+  page: Joi.number().min(1).optional().messages({
+    "number.base": "Page must be a number",
+    "number.min": "Page must be at least 1",
+  }),
+  limit: Joi.number().min(1).optional().messages({
+    "number.base": "Limit must be a number",
+    "number.min": "Limit must be at least 1",
+  }),
+  is_archived: Joi.string().valid("true", "false").optional().messages({
+    "any.only": "is_archived must be either 'true' or 'false'",
+  }),
+});
+
+const getInsuranceByIdValidation = Joi.object({
+  insuranceId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "string.pattern.base": "Invalid insurance ID format",
+      "any.required": "insurance ID is required",
+      "string.empty": "insurance ID cannot be empty",
+    }),
+});
+
+const archiveInsuranceByIdValidation = Joi.object({
+  insuranceId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "string.pattern.base": "Invalid insurance ID format",
+      "any.required": "insurance ID is required",
+      "string.empty": "insurance ID cannot be empty",
+    }),
+});
+
+//** Special Offer Validation */
+
+const createSpecialOfferValidation = Joi.object({
+  product: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).required().messages({
+    "string.pattern.base": "Invalid product ID format",
+    "any.required": "Product ID is required",
+  }),
+  offerPercentage: Joi.number().min(0).required().messages({
+    "number.base": "Offer percentage must be a number",
+    "number.min": "Offer percentage cannot be less than 0",
+    "any.required": "Offer percentage is required",
+  }),
+  validTill: Joi.string()
+  .pattern(/^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/(19|20)\d\d$/)
+  .required()
+  .messages({
+    'string.pattern.base': 'Valid till date must be in DD/MM/YYYY format',
+    'any.required': 'Valid till date is required',
+  }),
+});
+
+// Update Special Offer
+const updateSpecialOfferValidation = Joi.object({
+  specialOfferId: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).required().messages({
+    "string.pattern.base": "Invalid special offer ID format",
+    "any.required": "Special offer ID is required",
+  }),
+  offerPercentage: Joi.number().min(0).required().messages({
+    "number.base": "Offer percentage must be a number",
+    "number.min": "Offer percentage cannot be less than 0",
+    "any.required": "Offer percentage is required",
+  }),
+});
+
+// Get/Delete Special Offer by ID
+const specialOfferIdQueryValidation = Joi.object({
+  specialOfferId: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).required().messages({
+    "string.pattern.base": "Invalid special offer ID format",
+    "any.required": "Special offer ID is required",
+  }),
+});
+
+// Activate/Deactivate Special Offer
+const activeDeactiveSpecialOfferValidation = Joi.object({
+  specialOfferId: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).required().messages({
+    "string.pattern.base": "Invalid special offer ID format",
+    "any.required": "Special offer ID is required",
+  }),
+  isActive: Joi.boolean().required().messages({
+    "boolean.base": "isActive must be true or false",
+    "any.required": "isActive status is required",
+  }),
+});
+
+// Get All Special Offers
+const getAllSpecialOffersValidation = Joi.object({
+  page: Joi.number().min(1).optional().messages({
+    "number.base": "Page must be a number",
+    "number.min": "Page must be at least 1",
+  }),
+  limit: Joi.number().min(1).optional().messages({
+    "number.base": "Limit must be a number",
+    "number.min": "Limit must be at least 1",
+  }),
+});
+
+//  CREATE Test Category validation
+const createTestCategory = Joi.object({
+  name: Joi.string().trim().required().messages({
+    "string.base": "Name must be a string",
+    "any.required": "Category name is required",
+  }),
+  description: Joi.string().allow("").optional(),
+  image_url: Joi.string().uri().allow("").optional(),
+  tests: Joi.array().optional().messages({
+    "array.base": "Tests should be an array of valid IDs",
+  }),
+});
+
+const updateTestCategory = Joi.object({
+  testCatgId: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).required().messages({
+    "string.pattern.base": "Invalid Test category ID format",
+    "any.required": "Test categoryID is required",
+  }),
+  name: Joi.string().trim().optional(),
+  description: Joi.string().optional(),
+  image_url: Joi.string().uri().optional(),
+  tests: Joi.array().optional().messages({
+    "array.base": "Tests should be an array of valid IDs",
+  }),
+});
+
+const getOrDeleteTestCategory = Joi.object({
+  testCatgId: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).required().messages({
+    "string.pattern.base": "Invalid Test category ID format",
+    "any.required": "Test categoryID is required",
+  }),
+});
+
+// REMOVE Test from Category
+const removeTestFromCategory = Joi.object({
+  testCatgId: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).required().messages({
+    "string.pattern.base": "Invalid Test category ID format",
+    "any.required": "Test categoryID is required",
+  }),
+  testId: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).required().messages({
+    "string.pattern.base": "Invalid test ID format",
+    "any.required": "test Id is required",
+  }),
+});
+
+const getAllTestCatgValidation = Joi.object({
+  page: Joi.number().min(1).optional().messages({
+    "number.base": "Page must be a number",
+    "number.min": "Page must be at least 1",
+  }),
+  limit: Joi.number().min(1).optional().messages({
+    "number.base": "Limit must be a number",
+    "number.min": "Limit must be at least 1",
+  }),
+});
+
+//vehicle validation
+const getAllVehicleRequestsValidation = Joi.object({
+  page: Joi.number().min(1).optional().messages({
+    "number.base": "Page must be a number",
+    "number.min": "Page must be at least 1",
+  }),
+  limit: Joi.number().min(1).optional().messages({
+    "number.base": "Limit must be a number",
+    "number.min": "Limit must be at least 1",
+  }),
+  sortOrder: Joi.string().valid("asc", "desc").optional().messages({
+    "string.base": "Sort order must be a string",
+    "any.only": "Sort order must be either 'asc' or 'desc'",
+  }),
+  is_archived: Joi.string().valid("true", "false").optional().messages({
+    "any.only": "is_archived must be either 'true' or 'false'",
+  }),
+});
+
+// GET vehicle request by ID
+const getVehicleRequestByIdValidation = Joi.object({
+  vehiclerequestId: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).required().messages({
+    "string.pattern.base": "Invalid vehicle request ID format",
+    "any.required": "Vehicle request ID is required",
+  }),
+});
+
+// UPDATE vehicle request
+const updateVehicleRequestValidation = Joi.object({
+  vehiclerequestId: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).required().messages({
+    "string.pattern.base": "Invalid vehicle request ID format",
+    "any.required": "Vehicle request ID is required",
+  }),
+  patient_name: Joi.string().optional().messages({
+    "string.base": "Patient name must be a string",
+  }),
+  patient_phone: Joi.string().optional().messages({
+    "string.base": "Patient phone must be a string",
+  }),
+  emergency_type: Joi.string().optional().messages({
+    "string.base": "Emergency type must be a string",
+  }),
+  location: Joi.string().optional().messages({
+    "string.base": "Location must be a string",
+  }),
+  address: Joi.string().optional().messages({
+    "string.base": "Address must be a string",
+  }),
+  destination_hospital: Joi.string().optional().messages({
+    "string.base": "Destination hospital must be a string",
+  }),
+  vehicle_type: Joi.string().optional().messages({
+    "string.base": "Vehicle type must be a string",
+  }),
+});
+
+// ARCHIVE vehicle request
+const archiveVehicleRequestValidation = Joi.object({
+  vehiclerequestId: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).required().messages({
+    "string.pattern.base": "Invalid vehicle request ID format",
+    "any.required": "Vehicle request ID is required",
+  }),
+});
+
+
+
 const validate = (schema) => {
   return (req, res, next) => {
     const { error } = schema.validate(req.body);
@@ -611,5 +1233,58 @@ module.exports = {
   getTestdeleteAndById,
   createTestValidation,
   updateTestValidation,
-  searchTestValidation
+  searchTestValidation,
+
+  loginValidation,
+  forgetPasswordValidation,
+  resetPasswordValidation,
+  changePasswordValidation,
+  updateAdminProfileValidation,
+  createBestSelling,
+  UpdateAndDeleteBestSelling,
+  createDoctorProfileValidation,
+  getAllApiValidation,
+  getAllDoctoreProfile,
+  getDoctoreByIdAndChangeStatusValidation,
+  createMedicineValidation,
+  updateMedicineValidation,
+  getMedicineByIdValidation,
+  deleteMedicineValidation,
+  searchMedicineValidation,
+  approveRejectDeliveryPartnerValidation,
+  createDoctorLeadValidation,
+  getAllDoctoreLeadValidation,
+  getAnddeleteDoctoreLeadByIdValidation,
+  updateDoctorLeadValidation,
+  getAllDoctoreLeadValidation,
+  createDoctorCategoryValidation,
+  getAndDeleteDoctorCategoryByIdValidation,
+  updateDoctorCategoryValidation,
+  getAllDoctorCategoryValidation,
+  createFeaturedProductValidation,
+  getAndDeleteFeatureProductIdValidation,
+  getAllFeaturedProductsValidation,
+  updateFeaturedProductStatusValidation,
+  getAllInsuranceLeadsValidation,
+  getInsuranceByIdValidation,
+  archiveInsuranceByIdValidation,
+  createSpecialOfferValidation,
+  getAllSpecialOffersValidation,
+  updateSpecialOfferValidation,
+  specialOfferIdQueryValidation,
+  activeDeactiveSpecialOfferValidation,
+  createTestCategory,
+  updateTestCategory,
+  getOrDeleteTestCategory,
+  removeTestFromCategory,
+  getAllTestCatgValidation,
+  getAllVehicleRequestsValidation,
+  getVehicleRequestByIdValidation,
+  updateVehicleRequestValidation,
+  archiveVehicleRequestValidation
+
+
+
+
+
 };

@@ -110,12 +110,6 @@ module.exports.applyInsurance = asyncErrorHandler(async (req, res, next) => {
       return next(new CustomError("Name and Email are required", 400));
     }
   
-    const existingUser = await DoctoreLead.findOne({ name: name.trim(), email });
-    if (existingUser) {
-      return next(
-        new CustomError("User with same name and email already exists", 409)
-      );
-    }
     const newUser = await DoctoreLead.create({
       name,
       email,
