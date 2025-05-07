@@ -103,7 +103,7 @@ const deliveryPartnerSchema = new mongoose.Schema({
   deviceToken: {
     type: String,
     default: null
-  },
+  }
 
 }, { timestamps: true });
 
