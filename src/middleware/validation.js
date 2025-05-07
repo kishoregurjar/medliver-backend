@@ -1312,5 +1312,4 @@ module.exports = {
   setDeliveryRateValidation,
   rateIdValidation,
   editRateValidation
-  
 };
