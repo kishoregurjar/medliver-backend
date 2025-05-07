@@ -1,12 +1,18 @@
 const express = require("express");
 const indexController = require("../controllers/indexController");
 const { verifyAdminToken } = require("../utils/jsonWebToken");
-const { validate, validateQuery, createPharmacy, getAndDeletePharmacyById, getAllPharmacy, updatePharmacy, createPathologyCenter, getAndDeletePathologyCenterById, updatePathologyCenter, searchPathologyCenter, createFeature, getOrDeleteFeatureById, updateFeatureStatus, getAllFeatures, registerDeliveryPartner, getOrDeleteDeliveryPartner, updateDeliveryPartner, updateDeliveryPartnerStatus, getAllDeliveryPartners, blockUnblockDeliveryPartner, getAllCustomersValidation, getCustomerByIdValidation, createTestValidation, getTestdeleteAndById, getAllApiValidation, searchTestValidation, updateTestValidation, loginValidation,
+const { validate, validateQuery, createPharmacy, getAndDeletePharmacyById, getAllPharmacy, updatePharmacy, createPathologyCenter, getAndDeletePathologyCenterById, updatePathologyCenter, searchPathologyCenter, createFeature, getOrDeleteFeatureById, updateFeatureStatus, getAllFeatures, registerDeliveryPartner, getOrDeleteDeliveryPartner, updateDeliveryPartner, updateDeliveryPartnerStatus, getAllDeliveryPartners, blockUnblockDeliveryPartner, getAllCustomersValidation, getCustomerByIdValidation, createTestValidation, getTestdeleteAndById, getAllApiValidation, searchTestValidation, updateTestValidation, loginValidation, Updatedupstream,
     forgetPasswordValidation, resetPasswordValidation, changePasswordValidation, updateAdminProfileValidation, createBestSelling, UpdateAndDeleteBestSelling, getAllSellingProductValidation, createDoctorProfileValidation, getDoctoreByIdAndChangeStatusValidation, getAllDoctoreProfile, createMedicineValidation,
     updateMedicineValidation, getMedicineByIdValidation, deleteMedicineValidation, searchMedicineValidation, approveRejectDeliveryPartnerValidation, getAllDoctoreLeadValidation, getAnddeleteDoctoreLeadByIdValidation, updateDoctorLeadValidation, createDoctorCategoryValidation, getAndDeleteDoctorCategoryByIdValidation, updateDoctorCategoryValidation, getAllDoctorCategoryValidation, getAllInsuranceLeadsValidation,
     getInsuranceByIdValidation, archiveInsuranceByIdValidation, createSpecialOfferValidation,
     getAllSpecialOffersValidation, updateSpecialOfferValidation, specialOfferIdQueryValidation, activeDeactiveSpecialOfferValidation, createTestCategory, updateTestCategory, getOrDeleteTestCategory, removeTestFromCategory, getAllTestCatgValidation, getAllVehicleRequestsValidation,
-    getVehicleRequestByIdValidation, updateVehicleRequestValidation, archiveVehicleRequestValidation
+    getVehicleRequestByIdValidation, updateVehicleRequestValidation, archiveVehicleRequestValidation,
+
+forgetPasswordValidation,resetPasswordValidation,changePasswordValidation,updateAdminProfileValidation,createBestSelling,UpdateAndDeleteBestSelling,getAllSellingProductValidation, createDoctorProfileValidation,getDoctoreByIdAndChangeStatusValidation,getAllDoctoreProfile, createMedicineValidation,
+  updateMedicineValidation,getMedicineByIdValidation,deleteMedicineValidation,searchMedicineValidation,approveRejectDeliveryPartnerValidation,getAllDoctoreLeadValidation,getAnddeleteDoctoreLeadByIdValidation,updateDoctorLeadValidation, createDoctorCategoryValidation,getAndDeleteDoctorCategoryByIdValidation,updateDoctorCategoryValidation,getAllDoctorCategoryValidation,  getAllInsuranceLeadsValidation,
+getInsuranceByIdValidation,archiveInsuranceByIdValidation, createSpecialOfferValidation,
+  getAllSpecialOffersValidation,updateSpecialOfferValidation,specialOfferIdQueryValidation,activeDeactiveSpecialOfferValidation,  createTestCategory, updateTestCategory,getOrDeleteTestCategory,removeTestFromCategory,getAllTestCatgValidation,  getAllVehicleRequestsValidation,getVehicleRequestByIdValidation,updateVehicleRequestValidation,archiveVehicleRequestValidation,setDeliveryRateValidation,
+rateIdValidation, editRateValidation
 } = require('../middleware/validation');
 const router = express.Router();
 const { uploadAdminProfile, uploadLicenceImagePharmacy, uploadMedicineImages, uploadTestCatgPic, uploadDoctoreCatgImg } = require('../services/multer');
@@ -116,10 +122,10 @@ router.post('/upload-test-category', verifyAdminToken('superadmin'), uploadTestC
 router.put("/remove-test-from-category", validate(removeTestFromCategory), verifyAdminToken("superadmin"), indexController.adminTestCatgController.removeTestFromCategory)
 
 // Insurance routes
-router.get("/get-all-insurance", verifyAdminToken("superadmin"), indexController.adminInsuranceController.getAllInsuranceLeads);
-router.get("/get-insurance-by-id", verifyAdminToken("superadmin"), indexController.adminInsuranceController.getInsuranceById)
-router.put("/archieve-insurence-by-id", verifyAdminToken("superadmin"), indexController.adminInsuranceController.archiveInsuranceById);
-router.get('/search-insurance', verifyAdminToken('superadmin'), indexController.adminInsuranceController.searchInsuranceLead)
+router.get("/get-all-insurance",validateQuery(getAllInsuranceLeadsValidation) ,verifyAdminToken("superadmin"), indexController.adminInsuranceController.getAllInsuranceLeads);
+router.get("/get-insurance-by-id",validateQuery(getInsuranceByIdValidation), verifyAdminToken("superadmin"), indexController.adminInsuranceController.getInsuranceById)
+router.put("/archieve-insurence-by-id",validate(archiveInsuranceByIdValidation), verifyAdminToken("superadmin"), indexController.adminInsuranceController.archiveInsuranceById);
+router.get("/search-insurance",indexController.adminInsuranceController.searchInsuranceLead);
 
 
 //vehicle Route
@@ -148,11 +154,11 @@ router.post('/initiate-refund', indexController.adminPaymentController.initiateR
 
 /** Delivery Rate Management */
 
-router.post('/create-delivery-rate', verifyAdminToken('superadmin'), indexController.adminDeliveryPartnerController.setDeliveryRate);
+router.post('/create-delivery-rate',validate(setDeliveryRateValidation) ,verifyAdminToken('superadmin'), indexController.adminDeliveryPartnerController.setDeliveryRate);
 router.get('/get-delivery-rate', verifyAdminToken('superadmin'), indexController.adminDeliveryPartnerController.getDeliveryRates);
-router.put('/update-delivery-rate', verifyAdminToken('superadmin'), indexController.adminDeliveryPartnerController.editPerKilometerPrice);
-router.put('/activate-delivery-rate', verifyAdminToken('superadmin'), indexController.adminDeliveryPartnerController.activateParticularRate);
-router.delete('/delete-delivery-rate', verifyAdminToken('superadmin'), indexController.adminDeliveryPartnerController.deleteDeliveryRate);
+router.put('/update-delivery-rate', validate(editRateValidation),verifyAdminToken('superadmin'), indexController.adminDeliveryPartnerController.editPerKilometerPrice);
+router.put('/activate-delivery-rate', validate(rateIdValidation) ,verifyAdminToken('superadmin'), indexController.adminDeliveryPartnerController.activateParticularRate);
+router.delete("/delete-delivery-rate",validate(rateIdValidation),verifyAdminToken("superadmin"),indexController.adminDeliveryPartnerController.deleteDeliveryRate)
 
 
 /**DoctoreLead Routes */

@@ -1177,6 +1177,33 @@ const archiveVehicleRequestValidation = Joi.object({
   }),
 });
 
+// delivery rate validation
+const setDeliveryRateValidation = Joi.object({
+  deliveryRate: Joi.number().positive().required().messages({
+    "any.required": "Delivery Rate is required",
+    "number.base": "Delivery Rate must be a number",
+    "number.positive": "Delivery Rate must be a positive number",
+  }),
+});
+
+const rateIdValidation = Joi.object({
+  rateId: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).required().messages({
+    "string.pattern.base": "Invalid rate ID format",
+    "any.required": "rate Id is required",
+  }),
+});
+
+const editRateValidation = Joi.object({
+  rateId: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).required().messages({
+    "string.pattern.base": "Invalid rate ID format",
+    "any.required": "rate Id is required",
+  }),
+  deliveryRate: Joi.number().positive().required().messages({
+    "any.required": "Delivery Rate is required",
+    "number.base": "Delivery Rate must be a number",
+    "number.positive": "Delivery Rate must be a positive number",
+  }),
+});
 
 
 const validate = (schema) => {
@@ -1281,5 +1308,9 @@ module.exports = {
   getAllVehicleRequestsValidation,
   getVehicleRequestByIdValidation,
   updateVehicleRequestValidation,
-  archiveVehicleRequestValidation
+  archiveVehicleRequestValidation,
+  setDeliveryRateValidation,
+  rateIdValidation,
+  editRateValidation
+  
 };
