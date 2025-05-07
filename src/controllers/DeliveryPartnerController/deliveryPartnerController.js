@@ -288,3 +288,25 @@ module.exports.updateDeliveryPartnerStatus = asyncErrorHandler(async (req, res, 
 
     return successRes(res, 200, true, "Status updated successfully", updatedPartner);
 });
+
+
+module.exports.verifyForgotPasswordOtp = asyncErrorHandler(async  (req,res,next) => {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+        return next(new CustomError("Email and OTP are required", 400));
+    }
+
+    emailLowercase = email.toLowerCase();
+
+    const partner = await DeliveryPartner.findOne({ email:emailLowercase });
+    if (!partner) {
+        return next(new CustomError("Email not found", 400));
+    }
+
+    if (partner.otp !== otp) {
+        return next(new CustomError("Invalid OTP", 400));
+    }
+    await partner.save();
+    return successRes(res, 200, true, "Verified successfully");
+})

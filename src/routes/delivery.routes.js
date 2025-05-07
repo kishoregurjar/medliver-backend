@@ -18,5 +18,5 @@ router.post('/upload-delivery-partner-profile', uploadDeliveryProfile, indexCont
 router.post('/upload-delivery-partner-adharcard', uploadAdharcardImages, indexController.deliveryPartnerController.uploadDeliveryAdharCardImages)
 router.post('/upload-delivery-partner-licence', uploadLicenceImage, indexController.deliveryPartnerController.uploadLicence)
 router.put('/update-delivery-partner-status', verifyDeliveryPartnerToken(), indexController.deliveryPartnerController.updateDeliveryPartnerStatus)
-
+router.post('/verify-forgot-password-otp', indexController.deliveryPartnerController.verifyForgotPasswordOtp);
 module.exports = router;

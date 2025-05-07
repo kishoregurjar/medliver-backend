@@ -709,4 +709,5 @@ router.delete(
 );
 router.get("/search-doctore-lead",verifyAdminToken("superadmin"),indexController.adminDoctoreLeadController.searchDoctorLead);
 
+
 module.exports = router;
