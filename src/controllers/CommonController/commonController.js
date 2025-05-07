@@ -28,14 +28,11 @@ module.exports.autoCompleteAddress = asyncErrorHandler(async (req, res, next) =>
             place_id: prediction.place_id
         }));
 
-        console.log("suggestions", suggestions)
         let address = await getLatLngFromPlaceId(suggestions[0].place_id);
 
-        return res.status(200).json({
-            success: true,
+        return successRes(res, 200, true, "Address suggestions fetched successfully", {
             suggestions,
             address
-
         });
     } catch (error) {
         console.error("Google Places API error:", error.message);
@@ -145,8 +142,6 @@ module.exports.getRouteBetweenCoords = asyncErrorHandler(async (req, res, next) 
         if (data.status !== 'OK' || !data.routes.length) {
             return next(new CustomError("Could not find route between the locations", 404));
         }
-        console.log(data.routes, "data")
-        // Select the route with the shortest distance
         let shortestRoute = data.routes[0];
         let shortestDistance = shortestRoute.legs[0].distance.value;
 
@@ -160,8 +155,7 @@ module.exports.getRouteBetweenCoords = asyncErrorHandler(async (req, res, next) 
 
         const leg = shortestRoute.legs[0];
 
-        return res.status(200).json({
-            success: true,
+        return successRes(res, 200, true, "Route fetched successfully", {
             distance: leg.distance.text,
             duration: leg.duration.text,
             start_address: leg.start_address,
