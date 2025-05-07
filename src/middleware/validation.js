@@ -124,6 +124,16 @@ const updatePharmacy = Joi.object({
     }),
 });
 
+const changeStatusPharmacyValidation = Joi.object({
+  pharmacyId: Joi.string()
+  .pattern(/^[0-9a-fA-F]{24}$/)
+  .required()
+  .messages({
+    "string.empty": "Pharmacy ID is required",
+    "string.pattern.base": "Invalid Pharmacy ID format",
+  }),
+});
+
 //pathology validation
 const createPathologyCenter = Joi.object({
   adminId: Joi.string()
@@ -1205,6 +1215,22 @@ const editRateValidation = Joi.object({
   }),
 });
 
+// payment validation
+const initiateRefundValidation = Joi.object({
+  payment_id: Joi.string().required().messages({
+    "string.base": "Payment ID must be a string",
+    "string.empty": "Payment ID is required",
+  }),
+  amount: Joi.number().positive().optional().messages({
+    "number.base": "Amount must be a number",
+    "number.positive": "Amount must be a positive number"
+  }),
+  speed: Joi.string().valid("normal", "optimum").optional().messages({
+    "any.only": "Speed must be either 'normal' or 'optimum'",
+    "string.base": "Speed must be a string"
+  })
+});
+
 
 const validate = (schema) => {
   return (req, res, next) => {
@@ -1238,6 +1264,7 @@ module.exports = {
   getAndDeletePharmacyById,
   getAllPharmacy,
   updatePharmacy,
+  changeStatusPharmacyValidation,
   createPathologyCenter,
   getAndDeletePathologyCenterById,
   updatePathologyCenter,
@@ -1283,7 +1310,6 @@ module.exports = {
   getAllDoctoreLeadValidation,
   getAnddeleteDoctoreLeadByIdValidation,
   updateDoctorLeadValidation,
-  getAllDoctoreLeadValidation,
   createDoctorCategoryValidation,
   getAndDeleteDoctorCategoryByIdValidation,
   updateDoctorCategoryValidation,
@@ -1311,5 +1337,6 @@ module.exports = {
   archiveVehicleRequestValidation,
   setDeliveryRateValidation,
   rateIdValidation,
-  editRateValidation
+  editRateValidation,
+  initiateRefundValidation
 };

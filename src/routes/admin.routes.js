@@ -5,6 +5,7 @@ const {
     validate,
     validateQuery,
     createPharmacy,
+    changeStatusPharmacyValidation,
     getAndDeletePharmacyById,
     getAllPharmacy,
     updatePharmacy,
@@ -30,7 +31,6 @@ const {
     searchTestValidation,
     updateTestValidation,
     loginValidation,
-    Updatedupstream,
     forgetPasswordValidation,
     resetPasswordValidation,
     changePasswordValidation,
@@ -74,6 +74,7 @@ const {
     setDeliveryRateValidation,
     rateIdValidation,
     editRateValidation,
+    initiateRefundValidation
 } = require("../middleware/validation");
 const router = express.Router();
 const {
@@ -222,7 +223,7 @@ router.post(
     indexController.adminPharmacyController.uploadPharmacyDocument
 );
 router.put(
-    "/change-pharmacy-status",
+    "/change-pharmacy-status",validate(changeStatusPharmacyValidation),
     verifyAdminToken("superadmin"),
     indexController.adminPharmacyController.changeStatus
 );
@@ -649,7 +650,7 @@ router.put(
 
 /** Payment Routes */
 router.post(
-    "/initiate-refund",
+    "/initiate-refund",validate(initiateRefundValidation),
     indexController.adminPaymentController.initiateRefund
 );
 
@@ -687,23 +688,25 @@ router.delete(
 
 /**DoctoreLead Routes */
 router.get(
-    "/get-all-doctoreLead",
+    "/get-all-doctoreLead",validateQuery(getAllDoctoreLeadValidation),
     verifyAdminToken("superadmin"),
     indexController.adminDoctoreLeadController.getAllUser
 );
 router.get(
-    "/get-doctoreLead-by-id",
+    "/get-doctoreLead-by-id",validateQuery(getAnddeleteDoctoreLeadByIdValidation),
     verifyAdminToken("superadmin"),
     indexController.adminDoctoreLeadController.getDoctorLeadById
 );
 router.put(
-    "/update-doctore-lead",
+    "/update-doctore-lead",validate(updateDoctorLeadValidation),
     verifyAdminToken("superadmin"),
     indexController.adminDoctoreLeadController.updateDoctorLead
 );
 router.delete(
-    "/delete-doctore-lead",
+    "/delete-doctore-lead",validateQuery(getAnddeleteDoctoreLeadByIdValidation),
     verifyAdminToken("superadmin"),
     indexController.adminDoctoreLeadController.deleteDoctorLeadById
 );
+router.get("/search-doctore-lead",verifyAdminToken("superadmin"),indexController.adminDoctoreLeadController.searchDoctorLead);
+
 module.exports = router;
