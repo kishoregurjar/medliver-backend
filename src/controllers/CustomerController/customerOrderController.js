@@ -41,7 +41,7 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
         if (item.item_type === "medicine") {
             // yahan tujhe Medicine model se find karna padega prescriptionRequired check karne ke liye
             const medicine = await medicineModel.findById(item.item_id);
-            if (medicine?.prescriptionRequired) {
+            if (medicine?.isPrescriptionRequired) {
                 prescriptionRequired = true;
             }
         }
