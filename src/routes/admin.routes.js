@@ -706,4 +706,5 @@ router.delete(
     verifyAdminToken("superadmin"),
     indexController.adminDoctoreLeadController.deleteDoctorLeadById
 );
+router.get('/search-doctor', verifyAdminToken("superadmin"), indexController.adminDoctoreLeadController.searchDoctorLead)
 module.exports = router;
