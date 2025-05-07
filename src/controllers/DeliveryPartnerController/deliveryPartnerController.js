@@ -115,6 +115,12 @@ module.exports.loginDeliveryPartner = asyncErrorHandler(async (req, res, next) =
     const sanitizedAdmin = findPartner.toObject();
     delete sanitizedAdmin.password;
 
+    if (Object.keys(req.body.location).length > 0) {
+        findPartner.location.lat = req.body.location.lat;
+        findPartner.location.long = req.body.location.long;
+        await findPartner.save();
+    }
+
     return successRes(res, 200, true, "Logged In Successfully", {
         ...sanitizedAdmin,
         token,
@@ -187,7 +193,7 @@ module.exports.forgetPassword = asyncErrorHandler(async (req, res, next) => {
         return next(new CustomError("Email is required", 400))
     }
     let emailLowerCase = email.toLowerCase();
-    const findPartner = await DeliveryPartner.findOne({ email:emailLowerCase });
+    const findPartner = await DeliveryPartner.findOne({ email: emailLowerCase });
     if (!findPartner) {
         return next(new CustomError("Partner not found", 404));
     }
@@ -290,7 +296,7 @@ module.exports.updateDeliveryPartnerStatus = asyncErrorHandler(async (req, res, 
 });
 
 
-module.exports.verifyForgotPasswordOtp = asyncErrorHandler(async  (req,res,next) => {
+module.exports.verifyForgotPasswordOtp = asyncErrorHandler(async (req, res, next) => {
     const { email, otp } = req.body;
 
     if (!email || !otp) {
@@ -299,7 +305,7 @@ module.exports.verifyForgotPasswordOtp = asyncErrorHandler(async  (req,res,next)
 
     emailLowercase = email.toLowerCase();
 
-    const partner = await DeliveryPartner.findOne({ email:emailLowercase });
+    const partner = await DeliveryPartner.findOne({ email: emailLowercase });
     if (!partner) {
         return next(new CustomError("Email not found", 400));
     }
