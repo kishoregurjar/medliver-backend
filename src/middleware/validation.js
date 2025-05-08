@@ -519,6 +519,29 @@ const getCustomerByIdValidation = Joi.object({
     }),
 });
 
+
+const getAllCustomersValidation = Joi.object({
+  page: Joi.number().integer().min(1).optional().messages({
+    "number.base": "Page must be a number",
+    "number.integer": "Page must be an integer",
+    "number.min": "Page must be at least 1",
+  }),
+
+  limit: Joi.number().integer().min(1).max(100).optional().messages({
+    "number.base": "Limit must be a number",
+    "number.integer": "Limit must be an integer",
+    "number.min": "Limit must be at least 1",
+    "number.max": "Limit must not exceed 100",
+  }),
+
+  sortOrder: Joi.string()
+    .valid("asc", "desc", "ASC", "DESC")
+    .optional()
+    .messages({
+      "any.only": "Sort order must be 'asc' or 'desc'",
+    }),
+});
+
 const getAllApiValidation = Joi.object({
   page: Joi.number().min(1).optional().messages({
     "number.base": "Page must be a number",
@@ -1283,6 +1306,8 @@ const initiateRefundValidation = Joi.object({
 });
 
 // customer controller validation
+
+
 const registerCustomerSchema = Joi.object({
   fullName: Joi.string().min(3).max(100).required().messages({
     "string.empty": "Full name is required",
@@ -1365,32 +1390,69 @@ const resetPasswordCustomerValidation = Joi.object({
         "Password must be at least 6 characters and include uppercase, lowercase, number, and special character",
     }),
 });
-// const updateUserProfileValidation = Joi.object({
-//   fullName: Joi.string().min(2).max(50).optional().messages({
-//     "string.min": "Full name must be at least 2 characters",
-//     "string.max": "Full name must not exceed 50 characters",
-//   }),
-//   email: Joi.string().email().optional().messages({
-//     "string.email": "Please enter a valid email address",
-//   }),
-//   phoneNumber: Joi.string()
-//     .pattern(/^[6-9]\d{9}$/)
-//     .optional()
-//     .messages({
-//       "string.pattern.base": "Phone number must be a valid 10-digit Indian number",
-//     }),
-//   userCoordinates: Joi.object({
-//     lat: Joi.number().required().optional().messages({
-//       "number.base": "Latitude must be a number",
-//       "any.required": "Latitude is required",
-//     }),
-//     long: Joi.number().required().optional().messages({
-//       "number.base": "Longitude must be a number",
-//       "any.required": "Longitude is required",
-//     }),
-//   }).optional(),
-// }).optional();
+const updateUserProfileValidation = Joi.object({
+  fullName: Joi.string().min(2).max(50).optional().messages({
+    "string.min": "Full name must be at least 2 characters",
+    "string.max": "Full name must not exceed 50 characters",
+  }),
 
+  email: Joi.string().email().optional().messages({
+    "string.email": "Please enter a valid email address",
+  }),
+
+  phoneNumber: Joi.string()
+    .pattern(/^[6-9]\d{9}$/)
+    .optional()
+    .messages({
+      "string.pattern.base": "Phone number must be a valid 10-digit Indian number",
+    }),
+
+  password: Joi.string().optional().messages({
+    "string.empty": "Password cannot be empty",
+  }),
+
+  address: Joi.string().optional().messages({
+    "string.empty": "Address cannot be empty",
+  }),
+
+  profilePicture: Joi.string().uri().optional().messages({
+    "string.uri": "Profile picture must be a valid URL",
+  }),
+
+  height: Joi.string()
+    .pattern(/^\d+\s?(cm|CM)$/)
+    .optional()
+    .messages({
+      "string.pattern.base": "Height must be in cm (e.g., '170 cm')",
+    }),
+
+  weight: Joi.string()
+    .pattern(/^\d+\s?(kg|KG)?$/)
+    .optional()
+    .messages({
+      "string.pattern.base": "Weight must be in kg (e.g., '70 kg')",
+    }),
+
+  bloodGroup: Joi.string()
+    .valid('A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-')
+    .optional()
+    .messages({
+      "any.only": "Blood group must be a valid type (e.g., 'A+', 'O-')",
+    }),
+
+  userCoordinates: Joi.object({
+    lat: Joi.number().messages({
+      "number.base": "Latitude must be a number",
+    }),
+    long: Joi.number().messages({
+      "number.base": "Longitude must be a number",
+    }),
+  })
+    .optional()
+    .messages({
+      "object.base": "User coordinates must be an object with lat and long",
+    }),
+});
 
 const signUpSignInWithGoogleValidation = Joi.object({
   fullName: Joi.string().min(2).max(50).required().messages({
@@ -1601,6 +1663,7 @@ module.exports = {
   createTestValidation,
   updateTestValidation,
   searchTestValidation,
+  getAllCustomersValidation,
 
   loginValidation,
   forgetPasswordValidation,
@@ -1657,6 +1720,7 @@ module.exports = {
   loginCustomerSchema,
   forgetPasswordCustomerValidation,
   resetPasswordCustomerValidation,
+  updateUserProfileValidation,
   signUpSignInWithGoogleValidation,
   addAddressValidation,
   editAddressSchema,

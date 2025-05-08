@@ -2,7 +2,7 @@ const express = require("express");
 const indexController = require("../controllers/indexController");
 const { verifyUserToken } = require("../utils/jsonWebToken");
 const { uploadUserProfilePic, uploadPrescription } = require("../services/multer");
-const { validate, validateQuery, getAllSpecialOfferValidation, getAllFeatureProductValidation, getAllSellingProductValidation, createDoctorLeadValidation,registerCustomerSchema,CustomerverifyOtpSchema,loginCustomerSchema,forgetPasswordCustomerValidation,resetPasswordCustomerValidation,signUpSignInWithGoogleValidation,addAddressValidation,editAddressSchema,getOrDeleteCustomerAddress,addToCartSchema,changeQuantitySchema,removeItemFromCartSchema,applyInsuranceSchema,emergencyVehicleRequestSchema} = require("../middleware/validation")
+const { validate, validateQuery, getAllSpecialOfferValidation, getAllFeatureProductValidation, getAllSellingProductValidation, createDoctorLeadValidation,registerCustomerSchema,CustomerverifyOtpSchema,loginCustomerSchema,forgetPasswordCustomerValidation,resetPasswordCustomerValidation,signUpSignInWithGoogleValidation,addAddressValidation,editAddressSchema,getOrDeleteCustomerAddress,addToCartSchema,changeQuantitySchema,removeItemFromCartSchema,applyInsuranceSchema,emergencyVehicleRequestSchema,updateUserProfileValidation} = require("../middleware/validation")
 
 const router = express.Router();
 
@@ -17,7 +17,7 @@ router.post("/verify-forget-password-otp",validate(CustomerverifyOtpSchema), ind
 router.post("/reset-password", validate(resetPasswordCustomerValidation),indexController.customerController.resetPassword);
 router.get("/get-user-details", verifyUserToken(), indexController.customerController.getUserDetails);
 router.post("/change-password", verifyUserToken(), indexController.customerController.changeUserPassword);
-router.patch("/update-user-profile", verifyUserToken(), indexController.customerController.updateUserProfile);
+router.patch("/update-user-profile",validate(updateUserProfileValidation) ,verifyUserToken(), indexController.customerController.updateUserProfile);
 router.post("/update-user-profile-picture", verifyUserToken(), uploadUserProfilePic, indexController.customerController.updateUserProfilePicture);
 router.post("signup-signin-with-google", validate,indexController.customerController.signUPSignInWithGoogle);
 
@@ -44,6 +44,7 @@ router.put('/remove-item-from-cart',validate(removeItemFromCartSchema) ,verifyUs
 /** Insurance route */
 router.post("/apply-for-insurance",validate(applyInsuranceSchema),indexController.customerMissLiniesController.applyInsurance);
 router.post("/request-for-emergency-vehicle",validate(emergencyVehicleRequestSchema), indexController.customerMissLiniesController.requestEmergencyVehicle)
+
 
 
 /** Order Routes */

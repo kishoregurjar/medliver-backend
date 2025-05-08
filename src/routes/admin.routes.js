@@ -331,7 +331,7 @@ router.post(
 //customer routes
 router.get(
     "/get-all-customer",
-    validate(getAllBestSellingProduct),
+     validateQuery(getAllCustomersValidation),
     verifyAdminToken("superadmin"),
     indexController.adminCustomerController.getAllCustomers
 );
