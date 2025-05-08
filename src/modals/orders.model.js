@@ -16,10 +16,10 @@ const orderSchema = new mongoose.Schema({
   pharmacyId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Pharmacy",
-    required:false
-  //   required: function () {
-  //     return this.orderType === "pharmacy";
-  //   },
+    required: false
+    //   required: function () {
+    //     return this.orderType === "pharmacy";
+    //   },
   },
 
   pathologyCenterId: {
@@ -58,12 +58,15 @@ const orderSchema = new mongoose.Schema({
       long: Number,
     },
   },
-
+  deliveryAddressId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "CustomerAddress"
+  },
   pickupAddress: {
-    type: String, 
-    coordinates:{
-        lat:Number,
-        long:Number
+    type: String,
+    coordinates: {
+      lat: Number,
+      long: Number
     }
   },
 
@@ -111,7 +114,7 @@ const orderSchema = new mongoose.Schema({
     default: false,
   },
 
-  isTestHomeCollection: { 
+  isTestHomeCollection: {
     type: Boolean,
     default: false,
   },

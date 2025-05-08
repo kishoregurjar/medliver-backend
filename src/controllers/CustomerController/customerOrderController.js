@@ -5,109 +5,109 @@ const cartSchema = require("../../modals/cart.model");
 const { successRes } = require("../../services/response");
 const medicineModel = require("../../modals/medicine.model");
 const pescriptionSchema = require("../../modals/pescriptionSchema");
+const customerAddressModel = require("../../modals/customerAddress.model");
 
 
 module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
     const userId = req.user._id;
-    let { item_ids, deliveryAddress, paymentMethod } = req.body;
+    const { item_ids, deliveryAddressId, paymentMethod } = req.body;
 
-    const cart = await cartSchema.findOne({ user_id: userId });
-    if (!cart) {
-        return next(new CustomError("Cart not found", 404));
-    }
-
-    if (cart.items.length === 0) {
-        return next(new CustomError("Cart is empty", 400));
-    }
-    if (!item_ids || item_ids.length === 0) {
+    if (!item_ids || !Array.isArray(item_ids) || item_ids.length === 0) {
         return next(new CustomError("Item IDs are required", 400));
     }
 
+    const cart = await cartSchema.findOne({ user_id: userId });
+    if (!cart || cart.items.length === 0) {
+        return next(new CustomError("Cart is empty or not found", 404));
+    }
+
     const itemsToOrder = cart.items.filter(item => item_ids.includes(item.item_id.toString()));
+
     if (itemsToOrder.length === 0) {
-        return next(new CustomError("No items found in the cart for the provided item IDs", 404));
+        return next(new CustomError("No valid items found in the cart for the provided item IDs", 404));
     }
 
-    const totalPrice = itemsToOrder.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-    if (totalPrice === 0) {
-        return next(new CustomError("Total price is zero", 400));
-    }
-
+    let totalPrice = 0;
     let prescriptionRequired = false;
     let isTestHomeCollection = false;
-    let orderType;
+    let orderType = null;
+
+    const orderItems = [];
 
     for (const item of itemsToOrder) {
+        totalPrice += item.price * item.quantity;
+
         if (item.item_type === "medicine") {
-            // yahan tujhe Medicine model se find karna padega prescriptionRequired check karne ke liye
             const medicine = await medicineModel.findById(item.item_id);
-            if (medicine?.isPrescriptionRequired) {
-                prescriptionRequired = true;
-            }
-        }
-        if (item.item_type === "test") {
-            if (item.details?.available_at_home) {
-                isTestHomeCollection = true;
-            }
-        }
-    }
+            if (medicine?.isPrescriptionRequired) prescriptionRequired = true;
 
-    const hasMedicine = itemsToOrder.some(item => item.item_type === "medicine");
-    const hasTest = itemsToOrder.some(item => item.item_type === "test");
-
-    if (hasMedicine && hasTest) {
-        orderType = "mixed";
-    } else if (hasMedicine) {
-        orderType = "pharmacy";
-    } else if (hasTest) {
-        orderType = "pathology";
-    } else {
-        return next(new CustomError("Invalid items in cart", 400));
-    }
-
-    // Now map items properly
-    const orderItems = itemsToOrder.map(item => {
-        if (item.item_type === "medicine") {
-            return {
+            orderItems.push({
                 medicineId: item.item_id,
                 quantity: item.quantity,
                 price: item.price,
-            };
+            });
+
         } else if (item.item_type === "test") {
-            return {
+            if (item.details?.available_at_home) isTestHomeCollection = true;
+
+            orderItems.push({
                 testName: item.name,
                 quantity: item.quantity,
                 price: item.price,
-            };
+            });
         }
+    }
+
+    const hasMedicine = itemsToOrder.some(i => i.item_type === "medicine");
+    const hasTest = itemsToOrder.some(i => i.item_type === "test");
+
+    orderType = hasMedicine && hasTest ? "mixed" : hasMedicine ? "pharmacy" : hasTest ? "pathology" : null;
+
+    if (!orderType) {
+        return next(new CustomError("Invalid items in cart", 400));
+    }
+    console.log(userId, "userId", deliveryAddressId, "deliveryAddressId")
+    let findAddress = await customerAddressModel.findOne({
+        customer_id: userId,
+        _id: deliveryAddressId
     });
 
+    if (!findAddress) {
+        return next(new CustomError("Delivery address not found", 404));
+    }
+    console.log(findAddress, "findAddress")
     const newOrder = new orderSchema({
         customerId: userId,
-        orderType: orderType,
+        orderType,
         items: orderItems,
         totalAmount: totalPrice,
-        deliveryAddress: deliveryAddress,
-        paymentMethod: paymentMethod,
-        prescriptionRequired: prescriptionRequired,
-        isTestHomeCollection: isTestHomeCollection,
+        deliveryAddressId,
+        paymentMethod,
+        prescriptionRequired,
+        isTestHomeCollection,
     });
 
     await newOrder.save();
 
-    await cartSchema.updateOne(
-        { user_id: userId },
-        { $pull: { items: { item_id: { $in: item_ids } } } }
-    );
+    // Remove ordered items from cart
+    const updatedItems = cart.items.filter(item => !item_ids.includes(item.item_id.toString()));
+
+    // Recalculate cart total
+    const newTotalPrice = updatedItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+
+    cart.items = updatedItems;
+    cart.total_price = newTotalPrice;
+    await cart.save();
 
     return successRes(res, 201, true, "Order created successfully", {
         order: newOrder,
     });
 });
 
+
 module.exports.getAllOrders = asyncErrorHandler(async (req, res, next) => {
     const userId = req.user._id;
-    const orders = await orderSchema.find({ customerId: userId }).populate("items.medicineId").sort({ createdAt: -1 });
+    const orders = await orderSchema.find({ customerId: userId }).populate("items.medicineId").populate("deliveryAddressId").sort({ createdAt: -1 });
     if (!orders || orders.length === 0) {
         return next(new CustomError("No orders found", 404));
     }

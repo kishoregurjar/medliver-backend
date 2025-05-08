@@ -7,12 +7,12 @@ const CustomError = require("../../utils/customError");
 
 module.exports.addToCart = asyncErrorHandler(async (req, res, next) => {
     const userId = req.user._id;
-    const { productId, quantity, type } = req.body;
+    let { productId, quantity, type } = req.body;
 
     if (!productId || !quantity || !type) {
         return res.status(400).json({ message: 'Product ID, quantity, and type are required.' });
     }
-
+    quantity = Number(quantity);
     let findOriginalProduct;
     let name, price, details;
 

@@ -11,7 +11,7 @@ const createPharmacy = Joi.object({
   phone: Joi.string().required().messages({
     "string.empty": "Phone number is required",
   }),
-  
+
   password: Joi.string()
     .pattern(
       new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[A-Za-z\\d@$!%*?&]{6,20}$")
@@ -126,12 +126,12 @@ const updatePharmacy = Joi.object({
 
 const changeStatusPharmacyValidation = Joi.object({
   pharmacyId: Joi.string()
-  .pattern(/^[0-9a-fA-F]{24}$/)
-  .required()
-  .messages({
-    "string.empty": "Pharmacy ID is required",
-    "string.pattern.base": "Invalid Pharmacy ID format",
-  }),
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "string.empty": "Pharmacy ID is required",
+      "string.pattern.base": "Invalid Pharmacy ID format",
+    }),
 });
 
 //pathology validation
@@ -299,12 +299,12 @@ const getAllFeatures = Joi.object({
 
 const approveRejectDeliveryPartnerValidation = Joi.object({
   partnerId: Joi.string()
-  .pattern(/^[0-9a-fA-F]{24}$/)
-  .required()
-  .messages({
-    "string.empty": "Partner ID is required",
-    "string.pattern.base": "Invalid Partner ID format",
-  }),
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "string.empty": "Partner ID is required",
+      "string.pattern.base": "Invalid Partner ID format",
+    }),
   status: Joi.string()
     .valid("approved", "rejected")
     .required()
@@ -570,8 +570,8 @@ const createTestValidation = Joi.object({
   sample_required: Joi.string().optional(),
   preparation: Joi.string().optional(),
   delivery_time: Joi.string().optional(),
-  available_at_home:Joi.boolean().optional(),
-  available:Joi.boolean().optional()
+  available_at_home: Joi.boolean().optional(),
+  available: Joi.boolean().optional()
 });
 
 const getTestdeleteAndById = Joi.object({
@@ -742,7 +742,7 @@ const getDoctoreByIdAndChangeStatusValidation = Joi.object({
       "string.empty": "Doctore ID is required",
       "string.pattern.base": "Invalid Doctore ID format",
     }),
-    isActive: Joi.boolean().optional()
+  isActive: Joi.boolean().optional()
 
 });
 
@@ -785,12 +785,12 @@ const createMedicineValidation = Joi.object({
 
 const updateMedicineValidation = Joi.object({
   medicineId: Joi.string()
-  .pattern(/^[0-9a-fA-F]{24}$/)
-  .required()
-  .messages({
-    "string.empty": "Medicine ID is required",
-    "string.pattern.base": "Invalid Medicine ID format",
-  }),
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "string.empty": "Medicine ID is required",
+      "string.pattern.base": "Invalid Medicine ID format",
+    }),
   name: Joi.string().trim().optional(),
   price: Joi.number().positive().optional().messages({
     'number.base': 'Price must be a number',
@@ -810,7 +810,7 @@ const getMedicineByIdValidation = Joi.object({
       "string.empty": "Medicine ID is required",
       "string.pattern.base": "Invalid Medicine ID format",
     }),
-    isActive: Joi.boolean().optional()
+  isActive: Joi.boolean().optional()
 
 });
 
@@ -874,12 +874,12 @@ const getAnddeleteDoctoreLeadByIdValidation = Joi.object({
 
 const updateDoctorLeadValidation = Joi.object({
   DoctoreLeadId: Joi.string()
-  .pattern(/^[0-9a-fA-F]{24}$/)
-  .required()
-  .messages({
-    "string.empty": "Doctore LeadId  is required",
-    "string.pattern.base": "Invalid DoctoreLead ID format",
-  }),
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "string.empty": "Doctore LeadId  is required",
+      "string.pattern.base": "Invalid DoctoreLead ID format",
+    }),
   name: Joi.string().trim().optional(),
   email: Joi.string().email().optional().messages({
     "string.email": "Please provide a valid email address",
@@ -1088,12 +1088,12 @@ const createSpecialOfferValidation = Joi.object({
     "any.required": "Offer percentage is required",
   }),
   validTill: Joi.string()
-  .pattern(/^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/(19|20)\d\d$/)
-  .required()
-  .messages({
-    'string.pattern.base': 'Valid till date must be in DD/MM/YYYY format',
-    'any.required': 'Valid till date is required',
-  }),
+    .pattern(/^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/(19|20)\d\d$/)
+    .required()
+    .messages({
+      'string.pattern.base': 'Valid till date must be in DD/MM/YYYY format',
+      'any.required': 'Valid till date is required',
+    }),
 });
 
 // Update Special Offer
@@ -1320,13 +1320,13 @@ const registerCustomerSchema = Joi.object({
   }),
 
   password: Joi.string()
-  .pattern(new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{6,}$"))
-  .required()
-  .messages({
-    "string.empty": "Password is required",
-    "string.pattern.base":
-      "Password must be at least 6 characters and include uppercase, lowercase, number, and special character",
-  }),
+    .pattern(new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{6,}$"))
+    .required()
+    .messages({
+      "string.empty": "Password is required",
+      "string.pattern.base":
+        "Password must be at least 6 characters and include uppercase, lowercase, number, and special character",
+    }),
 
   phoneNumber: Joi.string()
     .pattern(/^[0-9]{10}$/)
@@ -1616,31 +1616,8 @@ const createOrderValidation = Joi.object({
       "array.min": "At least one item_id is required",
       "any.required": "item_ids are required",
     }),
+  deliveryAddressId: Joi.string().length(24).hex().message("deliveryAddressId must be a valid MongoDB ObjectId"),
 
-  deliveryAddress: Joi.object({
-    addressLine1: Joi.string().min(1).required().messages({
-      "string.empty": "Address Line 1 is required",
-    }),
-    addressLine2: Joi.string().allow('', null), // optional
-    city: Joi.string().min(2).required().messages({
-      "string.empty": "City is required",
-    }),
-    state: Joi.string().min(2).required().messages({
-      "string.empty": "State is required",
-    }),
-    pincode: Joi.string().pattern(/^\d{6}$/).required().messages({
-      "string.pattern.base": "Pincode must be a 6-digit number",
-      "string.empty": "Pincode is required",
-    }),
-    landmark: Joi.string().allow('', null), // optional
-    contactNumber: Joi.string().pattern(/^[6-9]\d{9}$/).required().messages({
-      "string.pattern.base": "Contact number must be a valid 10-digit Indian number",
-      "string.empty": "Contact number is required",
-    }),
-  }).required().messages({
-    "object.base": "Delivery address must be a valid object",
-    "any.required": "Delivery address is required",
-  }),
   paymentMethod: Joi.string()
     .valid("cash", "online", "upi", "card", "COD")
     .required()
@@ -1701,7 +1678,7 @@ const getDistanceBetweenCoordsValidation = Joi.object({
   }).required().messages({
     "any.required": "Origin coordinates are required",
   }),
-  
+
   destination: Joi.object({
     lat: Joi.number().required().messages({
       "number.base": "Latitude of destination must be a number",
@@ -1718,28 +1695,28 @@ const getDistanceBetweenCoordsValidation = Joi.object({
 
 const getRouteBetweenCoordsValidation = Joi.object({
   origin: Joi.object({
-      lat: Joi.number().required().messages({
-          "number.base": "Latitude of origin must be a number",
-          "any.required": "Latitude of origin is required"
-      }),
-      lng: Joi.number().required().messages({
-          "number.base": "Longitude of origin must be a number",
-          "any.required": "Longitude of origin is required"
-      })
+    lat: Joi.number().required().messages({
+      "number.base": "Latitude of origin must be a number",
+      "any.required": "Latitude of origin is required"
+    }),
+    lng: Joi.number().required().messages({
+      "number.base": "Longitude of origin must be a number",
+      "any.required": "Longitude of origin is required"
+    })
   }).required().messages({
-      "any.required": "Origin coordinates are required"
+    "any.required": "Origin coordinates are required"
   }),
   destination: Joi.object({
-      lat: Joi.number().required().messages({
-          "number.base": "Latitude of destination must be a number",
-          "any.required": "Latitude of destination is required"
-      }),
-      lng: Joi.number().required().messages({
-          "number.base": "Longitude of destination must be a number",
-          "any.required": "Longitude of destination is required"
-      })
+    lat: Joi.number().required().messages({
+      "number.base": "Latitude of destination must be a number",
+      "any.required": "Latitude of destination is required"
+    }),
+    lng: Joi.number().required().messages({
+      "number.base": "Longitude of destination must be a number",
+      "any.required": "Longitude of destination is required"
+    })
   }).required().messages({
-      "any.required": "Destination coordinates are required"
+    "any.required": "Destination coordinates are required"
   }),
 });
 
@@ -1747,14 +1724,14 @@ const getRouteBetweenCoordsValidation = Joi.object({
 
 const searchUMedicineValidation = Joi.object({
   query: Joi.string().trim().required().messages({
-      'string.base': 'Query must be a string',
-      'string.empty': 'Search query is required',
-      'any.required': 'Search query is required'
+    'string.base': 'Query must be a string',
+    'string.empty': 'Search query is required',
+    'any.required': 'Search query is required'
   }),
   page: Joi.number().integer().min(1).optional().messages({
-      'number.base': 'Page must be a number',
-      'number.integer': 'Page must be an integer',
-      'number.min': 'Page must be at least 1'
+    'number.base': 'Page must be a number',
+    'number.integer': 'Page must be an integer',
+    'number.min': 'Page must be at least 1'
   })
 });
 const logMedicineClickValidation = Joi.object({
@@ -1852,9 +1829,9 @@ const registerDeliveryPartnerValidation = Joi.object({
       'any.required': 'Documents (Aadhar URLs) are required',
     }),
     idProof: Joi.string().required().messages({
-             'any.required': 'ID Proof is required',
-             'string.empty': 'ID Proof cannot be empty',
-         }),
+      'any.required': 'ID Proof is required',
+      'string.empty': 'ID Proof cannot be empty',
+    }),
 
     licenseUrl: Joi.string().uri().required().messages({
       'any.required': 'License URL is required',
@@ -1918,12 +1895,12 @@ const verifyOtpSchema = Joi.object({
     "string.email": "Invalid email format",
   }),
   otp: Joi.string()
-  .pattern(/^[0-9]{4}$/)
-  .required()
-  .messages({
-    "string.empty": "OTP is required",
-    "string.pattern.base": "OTP must be a 4-digit number",
-  }),
+    .pattern(/^[0-9]{4}$/)
+    .required()
+    .messages({
+      "string.empty": "OTP is required",
+      "string.pattern.base": "OTP must be a 4-digit number",
+    }),
 });
 
 // Validation for login
@@ -2080,13 +2057,13 @@ const resetDoctorePasswordSchema = Joi.object({
     "any.required": "OTP is required"
   }),
   newPassword: Joi.string()
-  .pattern(new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{6,}$"))
-  .required()
-  .messages({
-    "string.empty": "new Password is required",
-    "string.pattern.base":
-      "new Password must be at least 6 characters and include uppercase, lowercase, number, and special character",
-  }),
+    .pattern(new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{6,}$"))
+    .required()
+    .messages({
+      "string.empty": "new Password is required",
+      "string.pattern.base":
+        "new Password must be at least 6 characters and include uppercase, lowercase, number, and special character",
+    }),
 });
 
 const changeDoctorePasswordSchema = Joi.object({
@@ -2094,13 +2071,13 @@ const changeDoctorePasswordSchema = Joi.object({
     "any.required": "Old password is required",
   }),
   newPassword: Joi.string()
-  .pattern(new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{6,}$"))
-  .required()
-  .messages({
-    "string.empty": "new Password is required",
-    "string.pattern.base":
-      "new Password must be at least 6 characters and include uppercase, lowercase, number, and special character",
-  }),
+    .pattern(new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{6,}$"))
+    .required()
+    .messages({
+      "string.empty": "new Password is required",
+      "string.pattern.base":
+        "new Password must be at least 6 characters and include uppercase, lowercase, number, and special character",
+    }),
 })
 
 //stock routes validation
@@ -2115,7 +2092,7 @@ const createStockValidation = Joi.object({
         "string.pattern.base": "Invalid medicine ID format",
         "any.required": "medicine ID is required",
       }),
-      name:Joi.string().required(),
+      name: Joi.string().required(),
       price: Joi.number().required(),
       quantity: Joi.number().default(0),
       discount: Joi.number().default(0),
