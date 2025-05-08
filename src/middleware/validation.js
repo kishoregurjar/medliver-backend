@@ -1765,6 +1765,345 @@ const logMedicineClickValidation = Joi.object({
   }),
 });
 
+// delivery routes validation
+// const registerDeliveryPartnerValidation = Joi.object({
+//   fullName: Joi.string().trim().required().messages({
+//     'any.required': 'Full name is required',
+//     'string.empty': 'Full name cannot be empty',
+//   }),
+//   email: Joi.string().email().optional().allow(null, '').messages({
+//     'string.email': 'Invalid email format',
+//   }),
+//   phone: Joi.string()
+//     .pattern(/^[6-9]\d{9}$/)
+//     .required()
+//     .messages({
+//       'any.required': 'Phone number is required',
+//       'string.pattern.base': 'Invalid phone number format',
+//       'string.empty': 'Phone number cannot be empty',
+//     }),
+//   password: Joi.string().min(6).required().messages({
+//     'any.required': 'Password is required',
+//     'string.min': 'Password must be at least 6 characters long',
+//     'string.empty': 'Password cannot be empty',
+//   }),
+//   profilePhoto: Joi.string().uri().optional().allow('', null),
+//   documents: Joi.object({
+//     aadharUrls: Joi.object({
+//       front: Joi.string().uri().required().messages({
+//         'string.uri': 'Aadhar front must be a valid URL',
+//         'any.required': 'Aadhar front is required'
+//       }),
+//       back: Joi.string().uri().required().messages({
+//         'string.uri': 'Aadhar back must be a valid URL',
+//         'any.required': 'Aadhar back is required'
+//       })
+//     }).required().messages({
+//       'any.required': 'Aadhar document URLs are required'
+//     })
+//     ,
+//     licenseUrl: Joi.string().uri().required().messages({
+//       'any.required': 'License URL is required',
+//       'string.uri': 'License URL must be a valid URI',
+//     }),
+//     idProof: Joi.string().required().messages({
+//       'any.required': 'ID Proof is required',
+//       'string.empty': 'ID Proof cannot be empty',
+//     }),
+//   }).required().messages({
+//     'any.required': 'Document details are required',
+//   }),
+// });
+
+const registerDeliveryPartnerValidation = Joi.object({
+  fullName: Joi.string().required().messages({
+    'any.required': 'Full name is required',
+  }),
+
+  phone: Joi.string().pattern(/^\d{10}$/).required().messages({
+    'any.required': 'Phone number is required',
+    'string.pattern.base': 'Phone number must be 10 digits',
+  }),
+
+  email: Joi.string().email().optional().messages({
+    'string.email': 'Please provide a valid email address',
+  }),
+
+  password: Joi.string().min(6).required().messages({
+    'any.required': 'Password is required',
+    'string.min': 'Password must be at least 6 characters long',
+  }),
+
+  profilePhoto: Joi.string().uri().optional().messages({
+    'string.uri': 'Profile photo URL must be a valid URI',
+  }),
+
+  documents: Joi.object({
+    aadharUrls: Joi.object({
+      front: Joi.string().uri().required().messages({
+        'any.required': 'Aadhar front URL is required',
+        'string.uri': 'Aadhar front URL must be a valid URI',
+      }),
+      back: Joi.string().uri().required().messages({
+        'any.required': 'Aadhar back URL is required',
+        'string.uri': 'Aadhar back URL must be a valid URI',
+      }),
+    }).required().messages({
+      'any.required': 'Documents (Aadhar URLs) are required',
+    }),
+    idProof: Joi.string().required().messages({
+             'any.required': 'ID Proof is required',
+             'string.empty': 'ID Proof cannot be empty',
+         }),
+
+    licenseUrl: Joi.string().uri().required().messages({
+      'any.required': 'License URL is required',
+      'string.uri': 'License URL must be a valid URI',
+    }),
+
+    verificationStatus: Joi.string().valid("pending", "approved", "rejected").optional().default("pending").messages({
+      'any.only': 'Verification status must be one of ["pending", "approved", "rejected"]',
+    }),
+  }).optional(),
+
+  approvalStatus: Joi.string().valid("pending", "approved", "rejected").optional().default("pending").messages({
+    'any.only': 'Approval status must be one of ["pending", "approved", "rejected"]',
+  }),
+
+  role: Joi.string().valid('delivery_partner').default('delivery_partner').optional(),
+
+  isBlocked: Joi.boolean().optional().default(false),
+
+  availabilityStatus: Joi.string().valid("available", "on-delivery", "offline").default("offline").optional(),
+
+  location: Joi.object({
+    lat: Joi.number().optional(),
+    long: Joi.number().optional(),
+  }).optional(),
+
+  pharmacy: Joi.object({
+    lat: Joi.number().optional(),
+    long: Joi.number().optional(),
+  }).optional(),
+
+  assignedOrders: Joi.array().items(Joi.object({
+    orderId: Joi.string().required(),
+    status: Joi.string().optional(),
+  })).optional(),
+
+  earnings: Joi.object({
+    totalEarnings: Joi.number().optional().default(0),
+    monthly: Joi.array().items(Joi.object({
+      month: Joi.string().required(),
+      amount: Joi.number().required(),
+    })).optional(),
+  }).optional(),
+
+  rating: Joi.number().min(0).max(5).optional().default(0),
+
+  emergencyContacts: Joi.array().items(Joi.object({
+    name: Joi.string().required(),
+    phone: Joi.string().pattern(/^\d{10}$/).required(),
+  })).optional(),
+
+  sosTriggered: Joi.boolean().optional().default(false),
+
+  deviceToken: Joi.string().optional().default(null),
+});
+
+// Validation for verifying OTP
+const verifyOtpSchema = Joi.object({
+  email: Joi.string().email().lowercase().required().messages({
+    "any.required": "Email is required",
+    "string.email": "Invalid email format",
+  }),
+  otp: Joi.string()
+  .pattern(/^[0-9]{4}$/)
+  .required()
+  .messages({
+    "string.empty": "OTP is required",
+    "string.pattern.base": "OTP must be a 4-digit number",
+  }),
+});
+
+// Validation for login
+const loginSchema = Joi.object({
+  email: Joi.string().email().lowercase().required().messages({
+    "any.required": "Email is required",
+    "string.email": "Invalid email format",
+  }),
+  password: Joi.string().required().messages({
+    "any.required": "Password is required",
+  }),
+  location: Joi.object({
+    lat: Joi.number().required(),
+    long: Joi.number().required(),
+  }).optional().messages({
+    "number.base": "Location coordinates must be numbers",
+  }),
+});
+
+const editDeliveryPartnerSchema = Joi.object({
+  fullName: Joi.string().trim().min(2).max(50).optional().messages({
+    "string.min": "Full name must be at least 2 characters",
+    "string.max": "Full name must be at most 50 characters"
+  }),
+  phone: Joi.string().pattern(/^[0-9]{10}$/).optional().messages({
+    "string.pattern.base": "Phone must be a valid 10-digit number"
+  }),
+  email: Joi.string().email().lowercase().optional().messages({
+    "string.email": "Invalid email format"
+  }),
+  profilePhoto: Joi.string().uri().optional().messages({
+    "string.uri": "Profile photo must be a valid URL"
+  })
+});
+
+// Change Password Schema
+const changePasswordSchema = Joi.object({
+  oldPassword: Joi.string().min(6).required().messages({
+    "any.required": "Old password is required",
+    "string.min": "Old password must be at least 6 characters"
+  }),
+  newPassword: Joi.string().min(6).required().messages({
+    "any.required": "New password is required",
+    "string.min": "New password must be at least 6 characters"
+  })
+});
+
+// Forget Password Schema
+const forgetPasswordSchema = Joi.object({
+  email: Joi.string().email().required().messages({
+    "string.email": "Invalid email format",
+    "any.required": "Email is required"
+  })
+});
+
+// Reset Password Schema
+const resetPasswordSchema = Joi.object({
+  email: Joi.string().email().required().messages({
+    "string.email": "Invalid email format",
+    "any.required": "Email is required"
+  }),
+  otp: Joi.string().length(4).required().messages({
+    "string.length": "OTP must be 4 characters",
+    "any.required": "OTP is required"
+  }),
+  newPassword: Joi.string().min(6).required().messages({
+    "any.required": "New password is required",
+    "string.min": "New password must be at least 6 characters"
+  })
+});
+const updateDeliveryPartnerStatusSchema = Joi.object({
+  status: Joi.string()
+    .valid("available", "on-delivery", "offline")
+    .required()
+    .messages({
+      "any.only": "Invalid status provided",
+      "any.required": "Status is required",
+    }),
+});
+
+// Verify Forgot Password OTP Schema
+const verifyForgotPasswordOtpSchema = Joi.object({
+  email: Joi.string().email().required().messages({
+    "string.email": "Invalid email format",
+    "any.required": "Email is required",
+  }),
+  otp: Joi.string().length(4).required().messages({
+    "string.length": "OTP must be 4 characters long",
+    "any.required": "OTP is required",
+  }),
+});
+
+const coordinateSchema = Joi.object({
+  lat: Joi.number().required().messages({
+    "any.required": "Latitude (lat) is required",
+    "number.base": "Latitude (lat) must be a number",
+  }),
+  lng: Joi.number().required().messages({
+    "any.required": "Longitude (lng) is required",
+    "number.base": "Longitude (lng) must be a number",
+  }),
+});
+
+
+const getCompleteRouteDetailsSchema = Joi.object({
+  deliveryPartner: Joi.object({
+    lat: Joi.number().required().label("Delivery Partner Latitude"),
+    lng: Joi.number().required().label("Delivery Partner Longitude"),
+  }).required().label("Delivery Partner"),
+
+  pharmacy: Joi.object({
+    lat: Joi.number().required().label("Pharmacy Latitude"),
+    lng: Joi.number().required().label("Pharmacy Longitude"),
+  }).required().label("Pharmacy"),
+
+  user: Joi.object({
+    lat: Joi.number().required().label("User Latitude"),
+    lng: Joi.number().required().label("User Longitude"),
+  }).required().label("User"),
+});
+
+// doctoreRoutes validation
+const loginDoctorValidation = Joi.object({
+  email: Joi.string()
+    .email()
+    .required()
+    .messages({
+      'string.empty': 'Email is required',
+      'string.email': 'Please provide a valid email address',
+      'any.required': 'Email is required',
+    }),
+  password: Joi.string()
+    .min(6)
+    .required()
+    .messages({
+      'string.empty': 'Password is required',
+    }),
+});
+
+const forgetDoctorePasswordSchema = Joi.object({
+  email: Joi.string().email().required().messages({
+    "string.email": "Invalid email format",
+    "any.required": "Email is required"
+  })
+});
+
+const resetDoctorePasswordSchema = Joi.object({
+  email: Joi.string().email().required().messages({
+    "string.email": "Invalid email format",
+    "any.required": "Email is required"
+  }),
+  otp: Joi.string().length(4).required().messages({
+    "string.length": "OTP must be 4 characters",
+    "any.required": "OTP is required"
+  }),
+  newPassword: Joi.string()
+  .pattern(new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{6,}$"))
+  .required()
+  .messages({
+    "string.empty": "new Password is required",
+    "string.pattern.base":
+      "new Password must be at least 6 characters and include uppercase, lowercase, number, and special character",
+  }),
+});
+
+const changeDoctorePasswordSchema = Joi.object({
+  oldPassword: Joi.string().required().messages({
+    "any.required": "Old password is required",
+  }),
+  newPassword: Joi.string()
+  .pattern(new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{6,}$"))
+  .required()
+  .messages({
+    "string.empty": "new Password is required",
+    "string.pattern.base":
+      "new Password must be at least 6 characters and include uppercase, lowercase, number, and special character",
+  }),
+})
+
+
 const validate = (schema) => {
   return (req, res, next) => {
     const { error } = schema.validate(req.body);
@@ -1896,6 +2235,21 @@ module.exports = {
   getDistanceBetweenCoordsValidation,
   getRouteBetweenCoordsValidation,
   searchUMedicineValidation,
-  logMedicineClickValidation
+  logMedicineClickValidation,
+
+  registerDeliveryPartnerValidation,
+  verifyOtpSchema,
+  loginSchema,
+  editDeliveryPartnerSchema,
+  forgetPasswordSchema,
+  changePasswordSchema,
+  resetPasswordSchema,
+  updateDeliveryPartnerStatusSchema,
+  verifyForgotPasswordOtpSchema,
+  getCompleteRouteDetailsSchema,
+  loginDoctorValidation,
+  changeDoctorePasswordSchema,
+  forgetDoctorePasswordSchema,
+  resetDoctorePasswordSchema
 
 };

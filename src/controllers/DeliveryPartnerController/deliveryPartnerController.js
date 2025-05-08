@@ -19,12 +19,12 @@ module.exports.registerDeliveryPartner = asyncErrorHandler(async (req, res, next
         documents // expecting { aadharNumber, licenseNumber, idProof }
     } = req.body;
 
-    if (!fullName || !phone || !password || !documents?.aadharUrls || !documents?.licenseUrl || !documents?.idProof) {
-        return res.status(400).json({
-            success: false,
-            message: "Full name, phone, password, and all document fields are required.",
-        });
-    }
+    // if (!fullName || !phone || !password || !documents?.aadharUrls || !documents?.licenseUrl || !documents?.idProof) {
+    //     return res.status(400).json({
+    //         success: false,
+    //         message: "Full name, phone, password, and all document fields are required.",
+    //     });
+    // }
 
     const existingPartner = await DeliveryPartner.findOne({
         $or: [{ phone }, { email }],
