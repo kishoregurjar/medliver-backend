@@ -2103,6 +2103,100 @@ const changeDoctorePasswordSchema = Joi.object({
   }),
 })
 
+//stock routes validation
+const createStockValidation = Joi.object({
+  pharmacyId: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).required().messages({
+    "string.pattern.base": "Invalid pharmacy ID format",
+    "any.required": "pharmacy ID is required",
+  }),
+  medicines: Joi.array().items(
+    Joi.object({
+      medicineId: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).required().messages({
+        "string.pattern.base": "Invalid medicine ID format",
+        "any.required": "medicine ID is required",
+      }),
+      name:Joi.string().required(),
+      price: Joi.number().required(),
+      quantity: Joi.number().default(0),
+      discount: Joi.number().default(0),
+    })
+  ).min(1).required(),
+});
+
+const getStockByPharmacyIdValidation = Joi.object({
+  pharmacyId: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).required().messages({
+    "string.pattern.base": "Invalid pharmacy ID format",
+    "any.required": "pharmacy ID is required",
+  }),
+});
+
+const getAllStockValidation = Joi.object({
+  page: Joi.number().integer().min(1).optional().messages({
+    "number.base": "Page must be a number",
+    "number.integer": "Page must be an integer",
+    "number.min": "Page must be at least 1",
+  }),
+
+  limit: Joi.number().integer().min(1).max(100).optional().messages({
+    "number.base": "Limit must be a number",
+    "number.integer": "Limit must be an integer",
+    "number.min": "Limit must be at least 1",
+    "number.max": "Limit must not exceed 100",
+  })
+});
+
+const deleteStockValidation = Joi.object({
+  stockId: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).required().messages({
+    "string.pattern.base": "Invalid stock ID format",
+    "any.required": "stock ID is required",
+  }),
+});
+
+const updateStockValidation = Joi.object({
+  pharmacyId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "string.empty": "Pharmacy ID is required",
+      "string.pattern.base": "Invalid Pharmacy ID format",
+    }),
+
+  medicineId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "string.empty": "Medicine ID is required",
+      "string.pattern.base": "Invalid Medicine ID format",
+    }),
+
+  quantity: Joi.number()
+    .min(0)
+    .optional()
+    .messages({
+      "number.base": "Quantity must be a number",
+      "number.min": "Quantity cannot be negative",
+    }),
+
+  price: Joi.number()
+    .positive()
+    .optional()
+    .messages({
+      "number.base": "Price must be a number",
+      "number.positive": "Price must be a positive number",
+    }),
+
+  discount: Joi.number()
+    .min(0)
+    .max(100)
+    .optional()
+    .messages({
+      "number.base": "Discount must be a number",
+      "number.min": "Discount cannot be less than 0",
+      "number.max": "Discount cannot be more than 100",
+    }),
+})
+
+
 
 const validate = (schema) => {
   return (req, res, next) => {
@@ -2250,6 +2344,11 @@ module.exports = {
   loginDoctorValidation,
   changeDoctorePasswordSchema,
   forgetDoctorePasswordSchema,
-  resetDoctorePasswordSchema
+  resetDoctorePasswordSchema,
+  createStockValidation,
+  getStockByPharmacyIdValidation,
+  getAllStockValidation,
+  deleteStockValidation,
+  updateStockValidation
 
 };
