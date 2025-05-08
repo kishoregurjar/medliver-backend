@@ -200,30 +200,29 @@ module.exports.updatePathologyCenter = asyncErrorHandler(async (req, res, next) 
     }
 
     //  Update the associated Admin using admin._id
-    let updatedAdmin = null;
-    if (email || centerName) {
-      const adminUpdateFields = {};
-      if (email) adminUpdateFields.email = email;
-      if (centerName) adminUpdateFields.name = centerName;
+    // let updatedAdmin = null;
+    // if (email || centerName) {
+    //   const adminUpdateFields = {};
+    //   if (email) adminUpdateFields.email = email;
+    //   if (centerName) adminUpdateFields.name = centerName;
 
-      updatedAdmin = await Admin.findByIdAndUpdate(
-        admin._id,
-        { $set: adminUpdateFields },
-        { new: true, session }
-      );
+    //   updatedAdmin = await Admin.findByIdAndUpdate(
+    //     admin._id,
+    //     { $set: adminUpdateFields },
+    //     { new: true, session }
+    //   );
 
-      if (!updatedAdmin) {
-        return next(new CustomError("Admin not found", 400));
-      }
-    }
+    //   if (!updatedAdmin) {
+    //     return next(new CustomError("Admin not found", 400));
+    //   }
+    // }
 
     await session.commitTransaction();
 
-    const sanitizedAdmin = updatedAdmin ? updatedAdmin.toObject() : {};
-    if (sanitizedAdmin.password) delete sanitizedAdmin.password;
+    // const sanitizedAdmin = updatedAdmin ? updatedAdmin.toObject() : {};
+    // if (sanitizedAdmin.password) delete sanitizedAdmin.password;
 
     return successRes(res, 200, true, "Pathology Center and Admin updated successfully", {
-      admin: sanitizedAdmin,
       pathologyCenter: updatedPathologyCenter,
     });
   } catch (error) {
