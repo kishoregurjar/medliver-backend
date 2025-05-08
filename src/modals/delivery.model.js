@@ -52,6 +52,7 @@ const deliveryPartnerSchema = new mongoose.Schema({
       back: { type: String, required: true },
     },
     licenseUrl: { type: String, required: true },
+    rcCardUrl: { type: String, required: true },
     verificationStatus: {
       type: String,
       enum: ["pending", "approved", "rejected"],

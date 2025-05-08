@@ -47,7 +47,7 @@ module.exports.registerDeliveryPartner = asyncErrorHandler(async (req, res, next
         documents: {
             aadharUrls: documents.aadharUrls,
             licenseUrl: documents.licenseUrl,
-            idProof: documents.idProof,
+            rcCardUrl: documents.rcCardUrl,
         },
     });
 
@@ -272,6 +272,16 @@ module.exports.uploadLicence = asyncErrorHandler(async (req, res, next) => {
     const filePath = `${process.env.DELIVERY_PARTNER_LICENCE}${req.file.filename}`;
 
     return successRes(res, 200, true, "Licence Uploaded Successfully", filePath);
+})
+
+module.exports.uploadRcCard = asyncErrorHandler(async (req, res, next) => {
+    if (!req.file) {
+        return next(new CustomError("No File Uploaded", 400))
+    }
+
+    const filePath = `${process.env.DELIVERY_PARTNER_REGISTRATION_CARD}${req.file.filename}`;
+
+    return successRes(res, 200, true, "Registration Card Uploaded Successfully", filePath);
 })
 
 module.exports.updateDeliveryPartnerStatus = asyncErrorHandler(async (req, res, next) => {
