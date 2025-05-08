@@ -40,11 +40,8 @@ const AddressSchema = new mongoose.Schema({
         default: 'India',
     },
     location: {
-        type: {
-            lat: Number,
-            lng: Number,
-        },
-        required: false,
+        lat: Number,
+        lng: Number,
     },
     is_default: {
         type: Boolean,

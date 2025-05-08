@@ -14,20 +14,20 @@ const pathologyCenterSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
-    unique: true,
+    // unique: true,
     trim: true,
     lowercase: true,
   },
   phoneNumber: {
     type: String,
     required: true,
-    unique: true,
+    // unique: true,
   },
   address: {
     type: String,
     required: true,
   },
-  deviceToken:{
+  deviceToken: {
     type: String,
     default: null,
   },

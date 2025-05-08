@@ -2,12 +2,12 @@ const mongoose = require("mongoose");
 
 const pharmacySchema = new mongoose.Schema(
   {
-      adminId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Admin",
-        required: true,
-      },
-      pharmacyName: {
+    adminId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Admin",
+      required: true,
+    },
+    pharmacyName: {
       type: String,
       required: true,
     },
@@ -17,13 +17,13 @@ const pharmacySchema = new mongoose.Schema(
     },
     email: {
       type: String,
-      unique: true,
+      // unique: true,
       sparse: true,
     },
     phone: {
       type: String,
       required: true,
-      unique: true,
+      // unique: true,
     },
     password: {
       type: String,
@@ -34,10 +34,11 @@ const pharmacySchema = new mongoose.Schema(
       city: String,
       state: String,
       pincode: String,
-      coordinates: {
-        lat: Number,
-        lng: Number,
-      },
+    },
+    completeAddress: String,
+    pharmacyCoordinates: {
+      lat: Number,
+      lng: Number,
     },
     documents: {
       licenseNumber: String,
@@ -83,6 +84,11 @@ const pharmacySchema = new mongoose.Schema(
       enum: ["active", "inactive", "blocked"],
       default: "active",
     },
+    availabilityStatus: {
+      type: String,
+      enum: ["available", "unavailable"],
+      default: "unavailable",
+    }
   },
   { timestamps: true }
 );

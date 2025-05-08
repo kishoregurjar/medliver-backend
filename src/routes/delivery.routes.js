@@ -19,4 +19,9 @@ router.post('/upload-delivery-partner-adharcard', uploadAdharcardImages, indexCo
 router.post('/upload-delivery-partner-licence', uploadLicenceImage, indexController.deliveryPartnerController.uploadLicence)
 router.put('/update-delivery-partner-status', verifyDeliveryPartnerToken(), indexController.deliveryPartnerController.updateDeliveryPartnerStatus)
 router.post('/verify-forgot-password-otp', indexController.deliveryPartnerController.verifyForgotPasswordOtp);
+
+//==========================
+
+router.post('/calculate-distance-rate', indexController.deliveryPartnerController.getCompleteRouteDetailsForDeliveryPartner);
+
 module.exports = router;

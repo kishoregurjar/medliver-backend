@@ -6,6 +6,7 @@ const asyncErrorHandler = require('../../utils/asyncErrorHandler');
 const CustomError = require('../../utils/customError');
 const bcrypt = require('bcrypt');
 const { assignJwt } = require('../../utils/jsonWebToken');
+const axios = require('axios');
 
 
 module.exports.registerDeliveryPartner = asyncErrorHandler(async (req, res, next) => {
@@ -295,7 +296,6 @@ module.exports.updateDeliveryPartnerStatus = asyncErrorHandler(async (req, res, 
     return successRes(res, 200, true, "Status updated successfully", updatedPartner);
 });
 
-
 module.exports.verifyForgotPasswordOtp = asyncErrorHandler(async (req, res, next) => {
     const { email, otp } = req.body;
 
@@ -316,3 +316,65 @@ module.exports.verifyForgotPasswordOtp = asyncErrorHandler(async (req, res, next
     await partner.save();
     return successRes(res, 200, true, "Verified successfully");
 })
+
+// -----------------------------------------------------------------------------------
+
+const API_KEY = process.env.GOOGLE_API_KEY_FOR_MAP;
+console.log(API_KEY, "1111111111111")
+const PER_KM_RATE = 10;
+
+module.exports.getCompleteRouteDetailsForDeliveryPartner = asyncErrorHandler(async (req, res, next) => {
+    const { deliveryPartner, pharmacy, user } = req.body;
+
+    if (!deliveryPartner || !pharmacy || !user) {
+        return next(new CustomError("All 3 coordinates (deliveryPartner, pharmacy, user) are required", 400));
+    }
+
+    const fetchDirections = async (origin, destination) => {
+        const response = await axios.get('https://maps.googleapis.com/maps/api/directions/json', {
+            params: {
+                origin: `${origin.lat},${origin.lng}`,
+                destination: `${destination.lat},${destination.lng}`,
+                key: API_KEY
+            }
+        });
+
+        const data = response.data;
+        if (
+            data.routes.length === 0 ||
+            data.routes[0].legs.length === 0 ||
+            data.routes[0].legs[0].distance == null
+        ) {
+            return next(new CustomError("Unable to fetch route data", 500));
+        }
+
+        const leg = data.routes[0].legs[0];
+        return {
+            distanceText: leg.distance.text,
+            distanceValue: leg.distance.value, // in meters
+            durationText: leg.duration.text,
+            durationValue: leg.duration.value, // in seconds
+            // steps: leg.steps,
+            polyline: data.routes[0].overview_polyline.points
+        };
+    };
+
+    const deliveryToPharmacy = await fetchDirections(deliveryPartner, pharmacy);
+    const pharmacyToUser = await fetchDirections(pharmacy, user);
+
+    const totalDistanceMeters = deliveryToPharmacy.distanceValue + pharmacyToUser.distanceValue;
+    const totalDistanceKm = totalDistanceMeters / 1000;
+    const totalCost = Math.ceil(totalDistanceKm * PER_KM_RATE);
+
+    return successRes(res, 200, true, "Route fetched successfully", {
+        totalCost,
+        totalDistance: `${totalDistanceKm.toFixed(2)} km`,
+        totalDuration: `${((deliveryToPharmacy.durationValue + pharmacyToUser.durationValue) / 60).toFixed(2)} mins`,
+        routes: {
+            deliveryToPharmacy,
+            pharmacyToUser
+        }
+    })
+});
+
+
