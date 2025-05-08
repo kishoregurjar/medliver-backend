@@ -233,9 +233,6 @@ module.exports.updatePathologyCenter = asyncErrorHandler(async (req, res, next) 
   }
 });
 
-
-
-
 module.exports.getAllPathologyCenters = asyncErrorHandler(async (req, res, next) => {
   let { page, limit } = req.query;
 

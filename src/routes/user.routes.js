@@ -2,7 +2,7 @@ const express = require("express");
 const indexController = require("../controllers/indexController");
 const { verifyUserToken } = require("../utils/jsonWebToken");
 const { uploadUserProfilePic, uploadPrescription } = require("../services/multer");
-const { validate, validateQuery, getAllSpecialOfferValidation, getAllFeatureProductValidation, getAllSellingProductValidation, createDoctorLeadValidation,registerCustomerSchema,CustomerverifyOtpSchema,loginCustomerSchema,forgetPasswordCustomerValidation,resetPasswordCustomerValidation,signUpSignInWithGoogleValidation,addAddressValidation,editAddressSchema,getOrDeleteCustomerAddress,addToCartSchema,changeQuantitySchema,removeItemFromCartSchema,applyInsuranceSchema,emergencyVehicleRequestSchema,updateUserProfileValidation} = require("../middleware/validation")
+const { validate, validateQuery, getAllSpecialOfferValidation, getAllFeatureProductValidation, getAllSellingProductValidation, createDoctorLeadValidation,registerCustomerSchema,CustomerverifyOtpSchema,loginCustomerSchema,forgetPasswordCustomerValidation,resetPasswordCustomerValidation,signUpSignInWithGoogleValidation,addAddressValidation,editAddressSchema,getOrDeleteCustomerAddress,addToCartSchema,changeQuantitySchema,removeItemFromCartSchema,applyInsuranceSchema,emergencyVehicleRequestSchema,updateUserProfileValidation,createOrderValidation,getOrderByIdValidation,createRazorpayOrderValidation,verifyRazorpayPaymentValidation, autoCompleteAddressValidation,getDistanceBetweenCoordsValidation,getRouteBetweenCoordsValidation,searchUMedicineValidation,logMedicineClickValidation} = require("../middleware/validation")
 
 const router = express.Router();
 
@@ -48,28 +48,28 @@ router.post("/request-for-emergency-vehicle",validate(emergencyVehicleRequestSch
 
 
 /** Order Routes */
-router.post("/create-order", verifyUserToken(), indexController.customerOrderController.createOrder);
+router.post("/create-order",validate(createOrderValidation), verifyUserToken(), indexController.customerOrderController.createOrder);
 router.get("/get-all-orders", verifyUserToken(), indexController.customerOrderController.getAllOrders);
-router.get("/get-order-by-id", verifyUserToken(), indexController.customerOrderController.getOrderById);
-router.put("/cancel-order", verifyUserToken(), indexController.customerOrderController.cancleOrder);
+router.get("/get-order-by-id",validateQuery(getOrderByIdValidation), verifyUserToken(), indexController.customerOrderController.getOrderById);
+router.put("/cancel-order", validateQuery(getOrderByIdValidation),verifyUserToken(), indexController.customerOrderController.cancleOrder);
 
 /** Payment Routes */
 
-router.post('/create-payment-order', indexController.customerPaymentController.createOrder);
-router.post('/verify-payment', indexController.customerPaymentController.verifyPayment);
+router.post('/create-payment-order', validate(createRazorpayOrderValidation),indexController.customerPaymentController.createOrder);
+router.post('/verify-payment', validate(verifyRazorpayPaymentValidation),indexController.customerPaymentController.verifyPayment);
 
 /** Prescription */
 
 router.post('/upload-prescription', verifyUserToken(), uploadPrescription, indexController.customerOrderController.uploadPrescription)
 
 /** Map Integration */
-router.post('/search-autocomplete-address', indexController.commonController.autoCompleteAddress);
-router.post('/get-distance-between-coords', indexController.commonController.getDistanceBetweenCoords);
-router.post('/get-routes-bw-coords', indexController.commonController.getRouteBetweenCoords);
+router.post('/search-autocomplete-address',validate( autoCompleteAddressValidation), indexController.commonController.autoCompleteAddress);
+router.post('/get-distance-between-coords', validate(getDistanceBetweenCoordsValidation),indexController.commonController.getDistanceBetweenCoords);
+router.post('/get-routes-bw-coords', validate(getRouteBetweenCoordsValidation),indexController.commonController.getRouteBetweenCoords);
 
 /**Medicine */
-router.get('/search-medicine', indexController.customerMedicineController.searchMedicine);
-router.post('/log-medicine-click', indexController.customerMedicineController.logMedicineClick);
+router.get('/search-medicine', validateQuery(searchUMedicineValidation),indexController.customerMedicineController.searchMedicine);
+router.post('/log-medicine-click',validate(logMedicineClickValidation) ,indexController.customerMedicineController.logMedicineClick);
 router.get('/get-top-picks', indexController.customerMedicineController.getUserTopPicksWithSimilar)
 
 /**DoctoreLead Routes */

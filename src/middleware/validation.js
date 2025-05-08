@@ -1605,7 +1605,165 @@ const emergencyVehicleRequestSchema = Joi.object({
 });
 
 
-// 
+// order validation
+const createOrderValidation = Joi.object({
+  item_ids: Joi.array()
+    .items(Joi.string().length(24).hex().message("Each item_id must be a valid MongoDB ObjectId"))
+    .min(1)
+    .required()
+    .messages({
+      "array.base": "item_ids must be an array",
+      "array.min": "At least one item_id is required",
+      "any.required": "item_ids are required",
+    }),
+
+  deliveryAddress: Joi.object({
+    addressLine1: Joi.string().min(1).required().messages({
+      "string.empty": "Address Line 1 is required",
+    }),
+    addressLine2: Joi.string().allow('', null), // optional
+    city: Joi.string().min(2).required().messages({
+      "string.empty": "City is required",
+    }),
+    state: Joi.string().min(2).required().messages({
+      "string.empty": "State is required",
+    }),
+    pincode: Joi.string().pattern(/^\d{6}$/).required().messages({
+      "string.pattern.base": "Pincode must be a 6-digit number",
+      "string.empty": "Pincode is required",
+    }),
+    landmark: Joi.string().allow('', null), // optional
+    contactNumber: Joi.string().pattern(/^[6-9]\d{9}$/).required().messages({
+      "string.pattern.base": "Contact number must be a valid 10-digit Indian number",
+      "string.empty": "Contact number is required",
+    }),
+  }).required().messages({
+    "object.base": "Delivery address must be a valid object",
+    "any.required": "Delivery address is required",
+  }),
+  paymentMethod: Joi.string()
+    .valid("cash", "online", "upi", "card", "COD")
+    .required()
+    .messages({
+      "any.only": "Payment method must be one of: cash, online, upi, card, COD",
+      "any.required": "Payment method is required",
+    }),
+});
+const getOrderByIdValidation = Joi.object({
+  orderId: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).required().messages({
+    "string.pattern.base": "Invalid Order ID format",
+    "any.required": "order ID is required",
+  }),
+});
+
+//create OrderPayment validation
+const createRazorpayOrderValidation = Joi.object({
+  amount: Joi.number().positive().required().messages({
+    "number.base": "Amount must be a number",
+    "number.positive": "Amount must be a positive number",
+    "any.required": "Amount is required",
+  }),
+});
+
+const verifyRazorpayPaymentValidation = Joi.object({
+  razorpay_order_id: Joi.string().required().messages({
+    "string.base": "Order ID must be a string",
+    "any.required": "Order ID is required",
+  }),
+  razorpay_payment_id: Joi.string().required().messages({
+    "string.base": "Payment ID must be a string",
+    "any.required": "Payment ID is required",
+  }),
+  razorpay_signature: Joi.string().required().messages({
+    "string.base": "Signature must be a string",
+    "any.required": "Signature is required",
+  }),
+});
+
+/** Map Integration validation*/
+const autoCompleteAddressValidation = Joi.object({
+  query: Joi.string().trim().required().messages({
+    "string.base": "Query must be a string",
+    "any.required": "Address query is required",
+  }),
+})
+
+const getDistanceBetweenCoordsValidation = Joi.object({
+  origin: Joi.object({
+    lat: Joi.number().required().messages({
+      "number.base": "Latitude of origin must be a number",
+      "any.required": "Latitude of origin is required",
+    }),
+    lng: Joi.number().required().messages({
+      "number.base": "Longitude of origin must be a number",
+      "any.required": "Longitude of origin is required",
+    }),
+  }).required().messages({
+    "any.required": "Origin coordinates are required",
+  }),
+  
+  destination: Joi.object({
+    lat: Joi.number().required().messages({
+      "number.base": "Latitude of destination must be a number",
+      "any.required": "Latitude of destination is required",
+    }),
+    lng: Joi.number().required().messages({
+      "number.base": "Longitude of destination must be a number",
+      "any.required": "Longitude of destination is required",
+    }),
+  }).required().messages({
+    "any.required": "Destination coordinates are required",
+  }),
+});
+
+const getRouteBetweenCoordsValidation = Joi.object({
+  origin: Joi.object({
+      lat: Joi.number().required().messages({
+          "number.base": "Latitude of origin must be a number",
+          "any.required": "Latitude of origin is required"
+      }),
+      lng: Joi.number().required().messages({
+          "number.base": "Longitude of origin must be a number",
+          "any.required": "Longitude of origin is required"
+      })
+  }).required().messages({
+      "any.required": "Origin coordinates are required"
+  }),
+  destination: Joi.object({
+      lat: Joi.number().required().messages({
+          "number.base": "Latitude of destination must be a number",
+          "any.required": "Latitude of destination is required"
+      }),
+      lng: Joi.number().required().messages({
+          "number.base": "Longitude of destination must be a number",
+          "any.required": "Longitude of destination is required"
+      })
+  }).required().messages({
+      "any.required": "Destination coordinates are required"
+  }),
+});
+
+// userRout madicine controller validation
+
+const searchUMedicineValidation = Joi.object({
+  query: Joi.string().trim().required().messages({
+      'string.base': 'Query must be a string',
+      'string.empty': 'Search query is required',
+      'any.required': 'Search query is required'
+  }),
+  page: Joi.number().integer().min(1).optional().messages({
+      'number.base': 'Page must be a number',
+      'number.integer': 'Page must be an integer',
+      'number.min': 'Page must be at least 1'
+  })
+});
+const logMedicineClickValidation = Joi.object({
+  medicineId: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).required().messages({
+    'string.pattern.base': 'Invalid Medicine ID format',
+    'any.required': 'Medicine ID is required',
+    'string.empty': 'Medicine ID cannot be empty',
+  }),
+});
 
 const validate = (schema) => {
   return (req, res, next) => {
@@ -1729,5 +1887,15 @@ module.exports = {
   changeQuantitySchema,
   removeItemFromCartSchema,
   applyInsuranceSchema,
-  emergencyVehicleRequestSchema
+  emergencyVehicleRequestSchema,
+  createOrderValidation,
+  getOrderByIdValidation,
+  createRazorpayOrderValidation,
+  verifyRazorpayPaymentValidation,
+  autoCompleteAddressValidation,
+  getDistanceBetweenCoordsValidation,
+  getRouteBetweenCoordsValidation,
+  searchUMedicineValidation,
+  logMedicineClickValidation
+
 };

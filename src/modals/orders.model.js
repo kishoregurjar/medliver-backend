@@ -16,9 +16,10 @@ const orderSchema = new mongoose.Schema({
   pharmacyId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Pharmacy",
-    required: function () {
-      return this.orderType === "pharmacy";
-    },
+    required:false
+  //   required: function () {
+  //     return this.orderType === "pharmacy";
+  //   },
   },
 
   pathologyCenterId: {
