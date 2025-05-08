@@ -1829,7 +1829,7 @@ const registerDeliveryPartnerValidation = Joi.object({
     }).required().messages({
       'any.required': 'Documents (Aadhar URLs) are required',
     }),
-    idProof: Joi.string().required().messages({
+    rcCardUrl: Joi.string().required().messages({
       'any.required': 'ID Proof is required',
       'string.empty': 'ID Proof cannot be empty',
     }),
