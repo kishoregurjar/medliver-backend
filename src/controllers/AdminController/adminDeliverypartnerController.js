@@ -168,11 +168,11 @@ module.exports.updateDeliveryPartner = asyncErrorHandler(
     // Optional documents
     if (documents) {
       updateFields.documents = {};
-      if (documents.aadharNumber)
-        updateFields.documents.aadharNumber = documents.aadharNumber;
-      if (documents.licenseNumber)
-        updateFields.documents.licenseNumber = documents.licenseNumber;
-      if (documents.idProof) updateFields.documents.idProof = documents.idProof;
+      if (documents.aadharUrls)
+        updateFields.documents.aadharUrls = documents.aadharUrls;
+      if (documents.licenseUrl)
+        updateFields.documents.licenseUrl = documents.licenseUrl;
+      if (documents.rcCardUrl) updateFields.documents.rcCardUrl = documents.rcCardUrl;
     }
 
     if (emergencyContacts && Array.isArray(emergencyContacts)) {

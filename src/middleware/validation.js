@@ -414,6 +414,7 @@ const updateDeliveryPartner = Joi.object({
       back: Joi.string().optional(),
     }).optional(),
     licenseUrl: Joi.string().optional(),
+    rcCardUrl: Joi.string().optional(),
     verificationStatus: Joi.string()
       .valid("pending", "approved", "rejected")
       .optional(),
