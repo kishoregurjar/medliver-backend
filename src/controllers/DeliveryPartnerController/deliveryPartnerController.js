@@ -143,7 +143,7 @@ module.exports.viewProfile = asyncErrorHandler(async (req, res, next) => {
 
 module.exports.editDeliveryPartner = asyncErrorHandler(async (req, res, next) => {
     const partnerId = req.partner._id;
-    const { fullName, phone, email, profilePhoto } = req.body;
+    const { fullname, phone, email, profilePhoto } = req.body;
 
     const findPartner = await DeliveryPartner.findById(partnerId);
     if (!findPartner) {
@@ -151,7 +151,7 @@ module.exports.editDeliveryPartner = asyncErrorHandler(async (req, res, next) =>
     }
 
     // Update fields if provided
-    if (fullName) findPartner.fullname = fullName;
+    if (fullname) findPartner.fullname = fullname;
     if (phone) findPartner.phone = phone;
     if (email) findPartner.email = email.toLowerCase();
     if (profilePhoto) findPartner.profilePhoto = profilePhoto;

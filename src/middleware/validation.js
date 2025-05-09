@@ -1940,7 +1940,7 @@ const loginSchema = Joi.object({
 });
 
 const editDeliveryPartnerSchema = Joi.object({
-  fullName: Joi.string().trim().min(2).max(50).optional().messages({
+  fullname: Joi.string().trim().min(2).max(50).optional().messages({
     "string.min": "Full name must be at least 2 characters",
     "string.max": "Full name must be at most 50 characters"
   }),
