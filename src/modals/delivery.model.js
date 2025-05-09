@@ -48,11 +48,11 @@ const deliveryPartnerSchema = new mongoose.Schema({
   },
   documents: {
     aadharUrls: {
-      front: { type: String, required: true },
-      back: { type: String, required: true },
+      front: { type: String, default: null },
+      back: { type: String, default: null },
     },
-    licenseUrl: { type: String, required: true },
-    rcCardUrl: { type: String, required: true },
+    licenseUrl: { type: String, default: null },
+    rcCardUrl: { type: String, default: null },
     verificationStatus: {
       type: String,
       enum: ["pending", "approved", "rejected"],
