@@ -308,6 +308,115 @@ module.exports.searchPathology = asyncErrorHandler(async (req, res, next) => {
 });
 
 
+//commision managment
+module.exports.getCommissionByID = asyncErrorHandler(async (req, res, next) => {
+  const { CommisionId } = req.query;
+
+  if (!CommisionId) {
+    return next(new CustomError('Please provide Commission ID', 400));
+  }
+
+  const commission = await Commission.findById(CommisionId).populate("pathologyCenterId");
+
+  if (!commission) {
+    return next(new CustomError('Commission not found for this Id', 404));
+  }
+
+  return successRes(res, 200, true, 'Commission fetched successfully.', {
+    commission,
+  });
+});
+
+
+// Delete Commission by pathologyCenterId
+module.exports.deleteCommissionByID = asyncErrorHandler(async (req, res, next) => {
+  const { CommisionId } = req.query;
+
+  if (!CommisionId) {
+    return next(new CustomError('Please provide Commission ID', 400));
+  }
+
+  const deleted = await Commission.findByIdAndDelete( CommisionId );
+
+  if (!deleted) {
+    return next(new CustomError('Commission not found ', 404));
+  }
+
+  return successRes(res, 200, true, 'Commission deleted successfully.');
+});
+
+module.exports.getAllCommission = asyncErrorHandler(async (req, res, next) => {
+  let { page, limit, sortOrder } = req.query;
+
+  page = parseInt(page) || 1;
+  limit = parseInt(limit) || 10;
+  const skip = (page - 1) * limit;
+
+  const sortDir = sortOrder?.toLowerCase() === "asc" ? 1 : -1; // default is descending
+
+  const [total, commission] = await Promise.all([
+    Commission.countDocuments(),
+    Commission.find().populate("pathologyCenterId").sort({ createdAt: sortDir }).skip(skip).limit(limit),
+  ]);
+
+  if (commission.length === 0) {
+    return successRes(res, 200, false, "No Commission Found", []);
+  }
+
+  return successRes(res, 200, true, "Commission fetched successfully", {
+    commission,
+    currentPage: page,
+    totalPages: Math.ceil(total / limit),
+    total,
+  });
+});
+
+
+module.exports.updateCommissionById = asyncErrorHandler(async (req, res, next) => {
+  const { CommisionId, commissionType, commissionValue } = req.body;
+
+  if (!CommisionId) {
+    return next(new CustomError("Commission ID is required", 400));
+  }
+
+  const updateFields = {};
+  if (commissionType) updateFields.type = commissionType;
+  if (commissionValue) updateFields.value = commissionValue;
+  
+  if (Object.keys(updateFields).length === 0) {
+    return next(new CustomError("No fields provided for update", 400));
+  }
+
+  const session = await mongoose.startSession();
+
+  try {
+    await session.startTransaction();
+
+    const updatedCommission = await Commission.findByIdAndUpdate(
+       CommisionId ,
+      { $set: updateFields },
+      { new: true, runValidators: true, session }
+    );
+    
+    if (!updatedCommission) {
+      return next(new CustomError("Commission not found for this Id", 404));
+    }
+
+    await session.commitTransaction();
+
+    return successRes(res, 200, true, "Commission updated successfully", {
+      commission: updatedCommission,
+    });
+  } catch (error) {
+    await session.abortTransaction();
+    return next(error);
+  } finally {
+    session.endSession();
+  }
+}); 
+
+
+
 
 
 
