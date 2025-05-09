@@ -217,7 +217,6 @@ module.exports.updateAvailabilityStatus = asyncErrorHandler(
         new CustomError("Invalid or missing availability status", 400)
       );
     }
-
     const updatedPartner = await DeliveryPartner.findByIdAndUpdate(
       partnerId,
       { $set: { availabilityStatus } },
@@ -227,7 +226,6 @@ module.exports.updateAvailabilityStatus = asyncErrorHandler(
     if (!updatedPartner) {
       return next(new CustomError("Delivery Partner not found", 404));
     }
-
     return successRes(
       res,
       200,

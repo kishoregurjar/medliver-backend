@@ -74,7 +74,10 @@ const {
     setDeliveryRateValidation,
     rateIdValidation,
     editRateValidation,
-    initiateRefundValidation
+    initiateRefundValidation,
+    getAndDeleteCommissionById,
+    getAllCommissionValidation,
+    updateCommissionValidation
 } = require("../middleware/validation");
 const router = express.Router();
 const {
@@ -709,5 +712,11 @@ router.delete(
 );
 router.get("/search-doctore-lead",verifyAdminToken("superadmin"),indexController.adminDoctoreLeadController.searchDoctorLead);
 
+
+//commission Routes for pathology 
+router.get("/get-commission-by-id",validateQuery(getAndDeleteCommissionById),verifyAdminToken("superadmin"),indexController.adminPathologyController.getCommissionByID);
+router.delete("/delete-commission-by-id",validateQuery(getAndDeleteCommissionById),verifyAdminToken("superadmin"),indexController.adminPathologyController.deleteCommissionByID);
+router.put("/update-commission-by-id",validate(updateCommissionValidation),verifyAdminToken("superadmin"),indexController.adminPathologyController.updateCommissionById);
+router.get('/get-all-commission',validateQuery(getAllCommissionValidation),verifyAdminToken("superadmin"),indexController.adminPathologyController.getAllCommission);
 
 module.exports = router;

@@ -176,11 +176,11 @@ phoneNumber: Joi.string()
     "string.empty": "Address is required",
   }),
   commissionType: Joi.string()
-    .valid("flat","fixed", "percentage")
+    .valid("flat", "percentage")
     .required()
     .messages({
       "string.empty": "Commission type is required",
-      "any.only": "Commission type must be 'flat/fixed' or 'percentage'",
+      "any.only": "Commission type must be 'flat or 'percentage'",
     }),
 
   commissionValue: Joi.number()
@@ -2192,6 +2192,50 @@ const updateStockValidation = Joi.object({
     }),
 })
 
+// validation for commision route
+const getAndDeleteCommissionById = Joi.object({
+  CommisionId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "string.empty": "Commission ID is required",
+      "string.pattern.base": "Invalid Commission ID format",
+    }),
+});
+
+const getAllCommissionValidation = Joi.object({
+  page: Joi.number().min(1).optional().allow('',null).messages({
+    "number.base": "Page must be a number",
+    "number.min": "Page must be at least 1",
+  }),
+  limit: Joi.number().min(1).optional().allow('',null).messages({
+    "number.base": "Limit must be a number",
+    "number.min": "Limit must be at least 1",
+  }),
+  sortOrder: Joi.string().valid("asc", "desc").optional().messages({
+    "string.valid": "Sort order must be either 'asc' or 'desc'",
+  }),
+});
+
+const updateCommissionValidation = Joi.object({
+  CommisionId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      'string.empty': 'Commission ID is required',
+      'string.pattern.base': 'Invalid Commission ID format',
+    }),
+
+  commissionType: Joi.string().valid('flat','percentage').optional().messages({
+    'string.base': 'Commission type must be a string',
+    'any.only': 'Commission type must be either "flat" or "percentage"',
+  }),
+
+  commissionValue: Joi.number().min(0).optional().messages({
+    'number.base': 'Commission value must be a number',
+    'number.min': 'Commission value cannot be negative',
+  }),
+});
 
 
 const validate = (schema) => {
@@ -2345,6 +2389,10 @@ module.exports = {
   getStockByPharmacyIdValidation,
   getAllStockValidation,
   deleteStockValidation,
-  updateStockValidation
+  updateStockValidation,
+  getAndDeleteCommissionById,
+  getAllCommissionValidation,
+updateCommissionValidation
+
 
 };
