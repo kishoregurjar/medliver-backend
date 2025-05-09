@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const asyncErrorHandler = require("../../utils/asyncErrorHandler")
 const CustomError = require('../../utils/customError')
 const { successRes } = require('../../services/response');
+const Commission = require('../../modals/pathologyCommission.model');
 
 module.exports.createPathologyCenter = asyncErrorHandler(async (req, res, next) => {
   const admin = req.admin;
@@ -14,13 +15,15 @@ module.exports.createPathologyCenter = asyncErrorHandler(async (req, res, next) 
     phoneNumber,
     address,
     password,
+    commissionType, 
+    commissionValue
   } = req.body;
 
   if (!admin.role || admin.role !== "superadmin") {
     return next(new CustomError("Only superadmin can create a pathology center", 403));
   }
 
-  if (!centerName || !email || !phoneNumber || !address || !password) {
+  if (!centerName || !email || !phoneNumber || !address || !password || !commissionType || !commissionValue) {
     return next(new CustomError("All required fields must be provided", 400));
   }
 
@@ -69,14 +72,24 @@ module.exports.createPathologyCenter = asyncErrorHandler(async (req, res, next) 
     newAdmin.pathologyCenterId = newCenter._id;
     await newAdmin.save({ session });
 
+    // Create commission for this pathology center
+      const newCommission = new Commission({
+      pathologyCenterId: newCenter._id,
+      type: commissionType,  // 'flat' or 'percentage'
+      value: commissionValue,  // The commission value
+    });
+
+    await newCommission.save({ session });
+    
     await session.commitTransaction();
 
     const sanitizedAdmin = newAdmin.toObject();
     delete sanitizedAdmin.password;
 
-    return successRes(res, 201, true, "Pathology Center and Admin created successfully", {
+    return successRes(res, 201, true, "Pathology Center and Admin created successfully, along with Commission", {
       admin: sanitizedAdmin,
       pathologyCenter: newCenter,
+      commission: newCommission,
     });
   } catch (error) {
     await session.abortTransaction();
@@ -85,8 +98,6 @@ module.exports.createPathologyCenter = asyncErrorHandler(async (req, res, next) 
     session.endSession();
   }
 });
-
-
 
 module.exports.getPathologyCenterById = asyncErrorHandler(async (req, res, next) => {
   const { pathologyCenterId } = req.query;
@@ -295,6 +306,8 @@ module.exports.searchPathology = asyncErrorHandler(async (req, res, next) => {
     totalPatholody
   });
 });
+
+
 
 
 

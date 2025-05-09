@@ -154,13 +154,14 @@ const createPathologyCenter = Joi.object({
     "string.email": "Email must be a valid format",
   }),
 
-  phoneNumber: Joi.string()
-    .pattern(/^[0-9]{10}$/)
-    .optional()
-    .messages({
-      "string.empty": "Phone number cannot be empty",
-      "string.pattern.base": "Phone number must be exactly 10 digits",
-    }),
+phoneNumber: Joi.string()
+  .pattern(/^(\+91)?[6-9]\d{9}$/)
+  .optional()
+  .messages({
+    "string.empty": "Phone number cannot be empty",
+    "string.pattern.base": "Phone number must be 10 digits, optionally prefixed with +91",
+  }),
+
   password: Joi.string()
     .pattern(
       new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[A-Za-z\\d@$!%*?&]{6,20}$")
@@ -174,6 +175,23 @@ const createPathologyCenter = Joi.object({
   address: Joi.string().required().messages({
     "string.empty": "Address is required",
   }),
+  commissionType: Joi.string()
+    .valid("flat","fixed", "percentage")
+    .required()
+    .messages({
+      "string.empty": "Commission type is required",
+      "any.only": "Commission type must be 'flat/fixed' or 'percentage'",
+    }),
+
+  commissionValue: Joi.number()
+    .positive()
+    .required()
+    .messages({
+      "number.base": "Commission value must be a number",
+      "number.positive": "Commission value must be a positive number",
+      "any.required": "Commission value is required",
+    }),
+
 }).optional();
 
 const getAndDeletePathologyCenterById = Joi.object({
