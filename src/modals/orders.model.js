@@ -12,16 +12,6 @@ const orderSchema = new mongoose.Schema({
     ref: "Customer",
     required: true,
   },
-
-  pharmacyId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Pharmacy",
-    required: false
-    //   required: function () {
-    //     return this.orderType === "pharmacy";
-    //   },
-  },
-
   pathologyCenterId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "PathologyCenter",
@@ -47,7 +37,6 @@ const orderSchema = new mongoose.Schema({
       prescription: String, // URL if uploaded
     },
   ],
-
   deliveryAddress: {
     street: String,
     city: String,
@@ -69,7 +58,6 @@ const orderSchema = new mongoose.Schema({
       long: Number
     }
   },
-
   orderStatus: {
     type: String,
     enum: [
@@ -83,41 +71,74 @@ const orderSchema = new mongoose.Schema({
     ],
     default: "pending",
   },
-
   paymentStatus: {
     type: String,
     enum: ["pending", "paid", "failed"],
     default: "pending",
   },
-
   paymentMethod: {
     type: String,
     enum: ["UPI", "card", "cash", "wallet", "COD"],
   },
-
   totalAmount: {
     type: Number,
     required: true,
   },
-
   orderDate: {
     type: Date,
     default: Date.now,
   },
-
   deliveryDate: {
     type: Date,
   },
-
   prescriptionRequired: {
     type: Boolean,
     default: false,
   },
-
   isTestHomeCollection: {
     type: Boolean,
     default: false,
   },
-});
+  // ✅ NEW FIELDS FOR PHARMACY ASSIGNMENT QUEUE
+  pharmacyQueue: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Pharmacy",
+    }
+  ],
+  assignedPharmacyId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Pharmacy",
+    default: null,
+  },
+  pharmacyResponseStatus: {
+    type: String,
+    enum: ["pending", "accepted", "rejected"],
+    default: "pending",
+  },
+  pharmacyAttempts: [
+    {
+      pharmacyId: { type: mongoose.Schema.Types.ObjectId, ref: "Pharmacy" },
+      status: {
+        type: String,
+        enum: ["pending", "accepted", "rejected"],
+        default: "pending"
+      },
+      attemptedAt: { type: Date, default: Date.now }
+    }
+  ],
+  deliveryPartnerAttempts: [
+    {
+      deliveryPartnerId: { type: mongoose.Schema.Types.ObjectId, ref: "DeliveryPartner" },
+      status: {
+        type: String,
+        enum: ["pending", "accepted", "rejected"],
+        default: "pending"
+      },
+      attemptedAt: { type: Date, default: Date.now }
+    }
+  ],
+
+}, { timestamps: true });
 
 module.exports = mongoose.model("Order", orderSchema);

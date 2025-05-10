@@ -88,7 +88,11 @@ const pharmacySchema = new mongoose.Schema(
       type: String,
       enum: ["available", "unavailable"],
       default: "unavailable",
-    }
+    },
+    deviceToken: {
+      type: String,
+      default: null,
+    },
   },
   { timestamps: true }
 );
