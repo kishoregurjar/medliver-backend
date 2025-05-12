@@ -15,7 +15,7 @@ const jwt = {
       permissions: admin?.permissions,
     };
     const options = {
-      expiresIn: "1d",
+      expiresIn: "365d",
     };
     return jsonwebtoken.sign(payload, SECRET_KEY, options);
   },
