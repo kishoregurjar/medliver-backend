@@ -1,6 +1,10 @@
 const mongoose = require("mongoose");
 
 const notificationSchema = new mongoose.Schema({
+    title: {
+        type: String,
+        required: true
+    },
     message: {
         type: String,
         required: true,
@@ -19,6 +23,14 @@ const notificationSchema = new mongoose.Schema({
         type: String,
         enum: ["read", "unread"],
         default: "unread",
+    },
+    notificationType: {
+        type: String,
+        enum: ["order_received"],
+        default: null
+    },
+    NotificationTypeId: {
+        type: mongoose.Schema.Types.ObjectId,
     },
     sentAt: {
         type: Date,

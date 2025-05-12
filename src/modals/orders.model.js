@@ -6,32 +6,22 @@ const orderSchema = new mongoose.Schema({
     enum: ["pharmacy", "pathology", "mixed"],
     required: true,
   },
-
   customerId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Customer",
     required: true,
   },
-  pathologyCenterId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "PathologyCenter",
-    required: function () {
-      return this.orderType === "pathology";
-    },
-  },
-
   deliveryPartnerId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "DeliveryPartner",
   },
-
   items: [
     {
       medicineId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Medicine",
       },
-      testName: String,
+      medicineName: String,
       quantity: Number,
       price: Number,
       prescription: String, // URL if uploaded
@@ -99,7 +89,6 @@ const orderSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  // ✅ NEW FIELDS FOR PHARMACY ASSIGNMENT QUEUE
   pharmacyQueue: [
     {
       type: mongoose.Schema.Types.ObjectId,

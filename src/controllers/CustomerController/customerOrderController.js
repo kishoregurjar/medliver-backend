@@ -8,6 +8,8 @@ const pescriptionSchema = require("../../modals/pescriptionSchema");
 const customerAddressModel = require("../../modals/customerAddress.model");
 const { sendExpoNotification } = require("../../utils/expoNotification");
 const pharmacySchema = require("../../modals/pharmacy.model");
+const notificationMode = require("../../modals/notification.model");
+const notificationModel = require("../../modals/notification.model");
 
 /**
 module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
@@ -153,7 +155,7 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
         if (item.item_type === "medicine") {
             const medicine = await medicineModel.findById(item.item_id);
             if (medicine?.isPrescriptionRequired) prescriptionRequired = true;
-            orderItems.push({ medicineId: item.item_id, quantity: item.quantity, price: item.price });
+            orderItems.push({ medicineId: item.item_id, quantity: item.quantity, price: item.price, medicineName: item.name });
         } else if (item.item_type === "test") {
             if (item.details?.available_at_home) isTestHomeCollection = true;
             orderItems.push({ testName: item.name, quantity: item.quantity, price: item.price });
@@ -199,44 +201,56 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
         return next(new CustomError("No nearby pharmacies found", 404));
     }
 
-    // Try to assign the first available pharmacy
     let assignedPharmacy = null;
     let pharmacyAttempts = [];
 
     for (const pharmacy of sortedPharmacies) {
         assignedPharmacy = pharmacy;
-        console.log(assignedPharmacy, "assignedPharmacy")
         pharmacyAttempts.push({
             pharmacyId: pharmacy._id,
             status: "pending",
             attemptAt: new Date(),
         });
-        console.log(pharmacyAttempts, "pharmacyAttempts")
-        // Create order
-        // const newOrder = new orderSchema({
-        //     customerId: userId,
-        //     orderType,
-        //     items: orderItems,
-        //     totalAmount: totalPrice,
-        //     deliveryAddressId,
-        //     paymentMethod,
-        //     prescriptionRequired,
-        //     isTestHomeCollection,
-        //     pharmacyAttempts, // Log pharmacy attempts
-        // });
 
-        // await newOrder.save();
+        const newOrder = new orderSchema({
+            customerId: userId,
+            orderType,
+            items: orderItems,
+            totalAmount: totalPrice,
+            deliveryAddressId,
+            paymentMethod,
+            prescriptionRequired,
+            isTestHomeCollection,
+            pharmacyAttempts,
+        });
 
-        // Notify pharmacy or handle rejection
-        // Implement logic to notify pharmacy and handle acceptance/rejection here
-        // return successRes(res, 201, true, "Order created successfully", {
-        //     order: newOrder,
-        //     assignedPharmacy: assignedPharmacy._id
-        // });
+        await newOrder.save();
 
-        const sendNotification = await sendExpoNotification([assignedPharmacy.deviceToken], "New Order", "You have a new order", { name: "Flexon" });
+        const updatedItems = cart.items.filter(item => !item_ids.includes(item.item_id.toString()));
 
-        return successRes(res, 201, true, "Order created successfully", null);
+        const newTotalPrice = updatedItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+
+        cart.items = updatedItems;
+        cart.total_price = newTotalPrice;
+        await cart.save();
+
+        let createNotification = new notificationModel({
+            title: "New Order",
+            message: "You have a new order",
+            recipientId: assignedPharmacy._id,
+            recipientType: "pharmacy",
+            NotificationTypeId: newOrder._id,
+            notificationType: "order_received",
+        })
+        await createNotification.save();
+
+
+        const sendNotification = await sendExpoNotification([assignedPharmacy.deviceToken], "New Order", "You have a new order", createNotification);
+
+        return successRes(res, 201, true, "Order created successfully", {
+            order: newOrder,
+            notification: createNotification
+        });
     }
 
     // If no pharmacies accepted, return error
