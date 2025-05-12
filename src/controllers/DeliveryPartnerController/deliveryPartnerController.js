@@ -83,7 +83,7 @@ module.exports.verifyOtp = asyncErrorHandler(async (req, res, next) => {
 });
 
 module.exports.loginDeliveryPartner = asyncErrorHandler(async (req, res, next) => {
-    let { email, password } = req.body;
+    let { email, password , location,deviceToken} = req.body;
     if (!email || !password) {
         return next(new CustomError("Email and Password Required", 400));
     }
@@ -116,11 +116,13 @@ module.exports.loginDeliveryPartner = asyncErrorHandler(async (req, res, next) =
     const sanitizedAdmin = findPartner.toObject();
     delete sanitizedAdmin.password;
 
-    if (Object.keys(req.body.location).length > 0) {
-        findPartner.location.lat = req.body.location.lat;
-        findPartner.location.long = req.body.location.long;
+    if (Object.keys(location).length > 0) {
+        findPartner.location.lat = location.lat;
+        findPartner.location.long = location.long;
+        findPartner.deviceToken = deviceToken
         await findPartner.save();
     }
+
 
     return successRes(res, 200, true, "Logged In Successfully", {
         ...sanitizedAdmin,

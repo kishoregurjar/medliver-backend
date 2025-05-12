@@ -1937,6 +1937,7 @@ const loginSchema = Joi.object({
   }).optional().messages({
     "number.base": "Location coordinates must be numbers",
   }),
+  deviceToken: Joi.string().optional().default(null),
 });
 
 const editDeliveryPartnerSchema = Joi.object({
