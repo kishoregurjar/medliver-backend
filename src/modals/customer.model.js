@@ -32,6 +32,7 @@ const customerSchema = new mongoose.Schema({
   },
   profilePicture: {
     type: String,
+    default: null,
   },
   height: {
     type: String,

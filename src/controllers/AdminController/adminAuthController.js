@@ -183,6 +183,8 @@ module.exports.updateAdminProfile = asyncErrorHandler(async (req, res, next) => 
   if (req.body.email) {
     delete req.body.email;
   }
+
+  console.log(req.body,"req.body");
   const updateAdmin = await adminSchema.findByIdAndUpdate(adminId, req.body, {
     new: true,
     runValidators: true,
