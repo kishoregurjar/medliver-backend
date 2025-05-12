@@ -1,7 +1,6 @@
 const axios = require('axios');
 
 module.exports.sendExpoNotification = async (tokens, title, body, data = {}) => {
-    console.log("tokens", tokens, title, body, data);
     if (tokens.length === 0) return false;
 
     const messages = tokens.map(token => ({

@@ -16,7 +16,7 @@ module.exports.updatePharmacyAddress = asyncErrorHandler(async (req, res, next) 
             completeAddress: locationData.formatted_address,
             pharmacyCoordinates: {
                 lat: locationData.lat,
-                lng: locationData.lng
+                long: locationData.long
             }
         },
         { new: true }

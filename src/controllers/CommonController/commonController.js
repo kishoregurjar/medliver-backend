@@ -43,9 +43,8 @@ module.exports.getDistanceBetweenCoords = asyncErrorHandler(async (req, res, nex
         return next(new CustomError("Both origin and destination coordinates are required", 400));
     }
 
-    // Expected format: origin = { lat: 22.7, lng: 75.8 }, destination = { lat: 22.8, lng: 75.9 }
-    const originStr = `${origin.lat},${origin.lng}`;
-    const destinationStr = `${destination.lat},${destination.lng}`;
+    const originStr = `${origin.lat},${origin.long}`;
+    const destinationStr = `${destination.lat},${destination.long}`;
 
     try {
         const response = await axios.get('https://maps.googleapis.com/maps/api/distancematrix/json', {
@@ -89,8 +88,8 @@ module.exports.getRouteBetweenCoords = asyncErrorHandler(async (req, res, next) 
         return next(new CustomError("Both origin and destination coordinates are required", 400));
     }
 
-    const originStr = `${origin.lat},${origin.lng}`;
-    const destinationStr = `${destination.lat},${destination.lng}`;
+    const originStr = `${origin.lat},${origin.long}`;
+    const destinationStr = `${destination.lat},${destination.long}`;
 
     try {
         const response = await axios.get('https://maps.googleapis.com/maps/api/directions/json', {

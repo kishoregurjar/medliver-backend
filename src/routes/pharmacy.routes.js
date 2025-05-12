@@ -18,6 +18,7 @@ router.delete("/delete-stock", verifyAdminToken("pharmacy"), validateQuery(delet
 /*=======================================Order Route=================================== */
 
 router.get('/get-all-assigned-orders', verifyAdminToken("pharmacy"), indexController.pharmacyOrderController.getAllAssignedOrder);
+router.put('/accept-reject-order', verifyAdminToken("pharmacy"), indexController.pharmacyOrderController.acceptOrRejectOrder);
 // router.get('/get-order-by-id', validateQuery(getOrderByIdValidation), verifyAdminToken("pharmacy"), indexController.pharmacyOrderController.getOrderById);
 // router.put('/cancel-order', validateQuery(getOrderByIdValidation), verifyAdminToken("pharmacy"), indexController.pharmacyOrderController.cancleOrder);
 

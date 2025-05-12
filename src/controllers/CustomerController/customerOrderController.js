@@ -10,6 +10,7 @@ const { sendExpoNotification } = require("../../utils/expoNotification");
 const pharmacySchema = require("../../modals/pharmacy.model");
 const notificationMode = require("../../modals/notification.model");
 const notificationModel = require("../../modals/notification.model");
+const { getDistance } = require("../../utils/helper");
 
 /**
 module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
@@ -108,19 +109,6 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
     });
 });
  */
-
-const getDistance = (coord1, coord2) => {
-    const toRad = (value) => (value * Math.PI) / 180;
-    const R = 6371; // Earth's radius in km
-    const dLat = toRad(coord2.lat - coord1.lat);
-    const dLon = toRad(coord2.lng - coord1.long);
-    const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(toRad(coord1.lat)) * Math.cos(toRad(coord2.lat)) *
-        Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c; // returns distance in km
-};
 
 module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
     const userId = req.user._id;
@@ -222,6 +210,17 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
             prescriptionRequired,
             isTestHomeCollection,
             pharmacyAttempts,
+            assignedPharmacyId: assignedPharmacy._id,
+            deliveryAddress: {
+                stree: findAddress?.street,
+                city: findAddress?.city,
+                state: findAddress?.state,
+                pincode: findAddress?.pincode,
+                coordinates: {
+                    lat: findAddress?.location?.lat,
+                    long: findAddress?.location?.long
+                }
+            }
         });
 
         await newOrder.save();

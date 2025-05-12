@@ -41,7 +41,7 @@ const AddressSchema = new mongoose.Schema({
     },
     location: {
         lat: Number,
-        lng: Number,
+        long: Number,
     },
     is_default: {
         type: Boolean,

@@ -52,9 +52,7 @@ const orderSchema = new mongoose.Schema({
     type: String,
     enum: [
       "pending",
-      "confirmed",
       "assigned",
-      "dispatched",
       "out-for-delivery",
       "delivered",
       "cancelled",
@@ -99,6 +97,10 @@ const orderSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Pharmacy",
     default: null,
+  },
+  assignedPharmacyCoordinates: {
+    lat: Number,
+    long: Number
   },
   pharmacyResponseStatus: {
     type: String,

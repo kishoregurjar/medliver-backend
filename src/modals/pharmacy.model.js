@@ -38,7 +38,7 @@ const pharmacySchema = new mongoose.Schema(
     completeAddress: String,
     pharmacyCoordinates: {
       lat: Number,
-      lng: Number,
+      long: Number,
     },
     documents: {
       licenseNumber: String,

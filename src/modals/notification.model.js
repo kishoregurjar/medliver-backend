@@ -26,7 +26,7 @@ const notificationSchema = new mongoose.Schema({
     },
     notificationType: {
         type: String,
-        enum: ["order_received"],
+        enum: ["order_received", "pickup_request"],
         default: null
     },
     NotificationTypeId: {

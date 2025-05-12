@@ -154,13 +154,13 @@ const createPathologyCenter = Joi.object({
     "string.email": "Email must be a valid format",
   }),
 
-phoneNumber: Joi.string()
-  .pattern(/^(\+91)?[6-9]\d{9}$/)
-  .optional()
-  .messages({
-    "string.empty": "Phone number cannot be empty",
-    "string.pattern.base": "Phone number must be 10 digits, optionally prefixed with +91",
-  }),
+  phoneNumber: Joi.string()
+    .pattern(/^(\+91)?[6-9]\d{9}$/)
+    .optional()
+    .messages({
+      "string.empty": "Phone number cannot be empty",
+      "string.pattern.base": "Phone number must be 10 digits, optionally prefixed with +91",
+    }),
 
   password: Joi.string()
     .pattern(
@@ -1513,7 +1513,7 @@ const addAddressValidation = Joi.object({
     lat: Joi.number().required().messages({
       "number.base": "Latitude must be a number",
     }),
-    lng: Joi.number().required().messages({
+    long: Joi.number().required().messages({
       "number.base": "Longitude must be a number",
     }),
   }),
@@ -1535,7 +1535,7 @@ const editAddressSchema = Joi.object({
   country: Joi.string().optional(),
   location: Joi.object({
     lat: Joi.number().required(),
-    lng: Joi.number().required(),
+    long: Joi.number().required(),
   }).optional(),
 });
 
@@ -1606,11 +1606,11 @@ const emergencyVehicleRequestSchema = Joi.object({
     lat: Joi.number().required().messages({
       'any.required': 'Latitude (lat) is required in location',
     }),
-    lng: Joi.number().required().messages({
-      'any.required': 'Longitude (lng) is required in location',
+    long: Joi.number().required().messages({
+      'any.required': 'Longitude (long) is required in location',
     }),
   }).required().messages({
-    'any.required': 'Location is required and must be an object with lat and lng',
+    'any.required': 'Location is required and must be an object with lat and long',
   }),
   address: Joi.string().required().messages({
     'any.required': 'Address is required',
@@ -1690,7 +1690,7 @@ const getDistanceBetweenCoordsValidation = Joi.object({
       "number.base": "Latitude of origin must be a number",
       "any.required": "Latitude of origin is required",
     }),
-    lng: Joi.number().required().messages({
+    long: Joi.number().required().messages({
       "number.base": "Longitude of origin must be a number",
       "any.required": "Longitude of origin is required",
     }),
@@ -1703,7 +1703,7 @@ const getDistanceBetweenCoordsValidation = Joi.object({
       "number.base": "Latitude of destination must be a number",
       "any.required": "Latitude of destination is required",
     }),
-    lng: Joi.number().required().messages({
+    long: Joi.number().required().messages({
       "number.base": "Longitude of destination must be a number",
       "any.required": "Longitude of destination is required",
     }),
@@ -1718,7 +1718,7 @@ const getRouteBetweenCoordsValidation = Joi.object({
       "number.base": "Latitude of origin must be a number",
       "any.required": "Latitude of origin is required"
     }),
-    lng: Joi.number().required().messages({
+    long: Joi.number().required().messages({
       "number.base": "Longitude of origin must be a number",
       "any.required": "Longitude of origin is required"
     })
@@ -1730,7 +1730,7 @@ const getRouteBetweenCoordsValidation = Joi.object({
       "number.base": "Latitude of destination must be a number",
       "any.required": "Latitude of destination is required"
     }),
-    lng: Joi.number().required().messages({
+    long: Joi.number().required().messages({
       "number.base": "Longitude of destination must be a number",
       "any.required": "Longitude of destination is required"
     })
@@ -2017,9 +2017,9 @@ const coordinateSchema = Joi.object({
     "any.required": "Latitude (lat) is required",
     "number.base": "Latitude (lat) must be a number",
   }),
-  lng: Joi.number().required().messages({
-    "any.required": "Longitude (lng) is required",
-    "number.base": "Longitude (lng) must be a number",
+  long: Joi.number().required().messages({
+    "any.required": "Longitude (long) is required",
+    "number.base": "Longitude (long) must be a number",
   }),
 });
 
@@ -2027,17 +2027,17 @@ const coordinateSchema = Joi.object({
 const getCompleteRouteDetailsSchema = Joi.object({
   deliveryPartner: Joi.object({
     lat: Joi.number().required().label("Delivery Partner Latitude"),
-    lng: Joi.number().required().label("Delivery Partner Longitude"),
+    long: Joi.number().required().label("Delivery Partner Longitude"),
   }).required().label("Delivery Partner"),
 
   pharmacy: Joi.object({
     lat: Joi.number().required().label("Pharmacy Latitude"),
-    lng: Joi.number().required().label("Pharmacy Longitude"),
+    long: Joi.number().required().label("Pharmacy Longitude"),
   }).required().label("Pharmacy"),
 
   user: Joi.object({
     lat: Joi.number().required().label("User Latitude"),
-    lng: Joi.number().required().label("User Longitude"),
+    long: Joi.number().required().label("User Longitude"),
   }).required().label("User"),
 });
 
@@ -2204,11 +2204,11 @@ const getAndDeleteCommissionById = Joi.object({
 });
 
 const getAllCommissionValidation = Joi.object({
-  page: Joi.number().min(1).optional().allow('',null).messages({
+  page: Joi.number().min(1).optional().allow('', null).messages({
     "number.base": "Page must be a number",
     "number.min": "Page must be at least 1",
   }),
-  limit: Joi.number().min(1).optional().allow('',null).messages({
+  limit: Joi.number().min(1).optional().allow('', null).messages({
     "number.base": "Limit must be a number",
     "number.min": "Limit must be at least 1",
   }),
@@ -2226,7 +2226,7 @@ const updateCommissionValidation = Joi.object({
       'string.pattern.base': 'Invalid Commission ID format',
     }),
 
-  commissionType: Joi.string().valid('flat','percentage').optional().messages({
+  commissionType: Joi.string().valid('flat', 'percentage').optional().messages({
     'string.base': 'Commission type must be a string',
     'any.only': 'Commission type must be either "flat" or "percentage"',
   }),
@@ -2392,7 +2392,7 @@ module.exports = {
   updateStockValidation,
   getAndDeleteCommissionById,
   getAllCommissionValidation,
-updateCommissionValidation
+  updateCommissionValidation
 
 
 };

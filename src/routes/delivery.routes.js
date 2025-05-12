@@ -27,4 +27,8 @@ router.post('/verify-forgot-password-otp', validate(verifyForgotPasswordOtpSchem
 
 router.post('/calculate-distance-rate', validate(getCompleteRouteDetailsSchema), indexController.deliveryPartnerController.getCompleteRouteDetailsForDeliveryPartner);
 
+//************************ */
+
+router.get('/get-requested-order', verifyDeliveryPartnerToken(), indexController.deliveryOrderController.getRequestedOrder);
+
 module.exports = router;

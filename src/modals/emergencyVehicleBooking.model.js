@@ -19,7 +19,7 @@ const EmergencyVehicleBookingSchema = new mongoose.Schema({
     location: {
         type: {
             lat: Number,
-            lng: Number,
+            long: Number,
         },
         required: true,
     },
@@ -44,7 +44,7 @@ const EmergencyVehicleBookingSchema = new mongoose.Schema({
     is_archived: {
         type: Boolean,
         default: false
-      },
+    },
     // assigned_vehicle_id: {
     //     type: mongoose.Schema.Types.ObjectId,
     //     ref: 'EmergencyVehicle',

@@ -42,7 +42,7 @@ const getLatLngFromPlaceId = async (placeId) => {
 
     return {
       lat: location.lat,
-      lng: location.lng,
+      long: location.long,
       formatted_address: result.formatted_address,
       address
     };
