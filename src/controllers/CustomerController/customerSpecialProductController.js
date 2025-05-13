@@ -28,18 +28,8 @@ module.exports.getAllFeaturedProducts = asyncErrorHandler(async (req, res, next)
         return successRes(res, 200, false, "No featured products found", []);
     }
 
-    // 🔄 Flatten the product object and rename _id to medicineId
-    const flattenedProducts = featuredProducts.map(item => {
-        const product = item.product?.toObject?.() || {};
-        return {
-            ...product,
-            medicineId: product._id,
-            featuredAt: item.featuredAt
-        };
-    });
-
     return successRes(res, 200, true, "Featured products fetched successfully", {
-        featuredProducts: flattenedProducts,
+        featuredProducts,
         totalFeaturedProducts,
         currentPage: page,
         totalPages: Math.ceil(totalFeaturedProducts / limit),
@@ -82,16 +72,6 @@ module.exports.getAllSellingProduct = asyncErrorHandler(async (req, res, next) =
 
     const combinedResults = [...adminProducts, ...nonAdminProducts];
 
-    // 🔄 Flatten the data and rename _id to medicineId
-    const flattenedProducts = combinedResults.map(item => {
-        const product = item.product?.toObject?.() || {};
-        return {
-            ...product,
-            medicineId: product._id,
-            soldCount: item.soldCount
-        };
-    });
-
     const total = await BestSellerModel.countDocuments({
         isActive: true
     });
@@ -100,7 +80,7 @@ module.exports.getAllSellingProduct = asyncErrorHandler(async (req, res, next) =
         total,
         currentPage: page,
         totalPages: Math.ceil(total / limit),
-        products: flattenedProducts
+        products: combinedResults
     });
 });
 
@@ -128,20 +108,8 @@ module.exports.getallSpecialOffers = asyncErrorHandler(
             return successRes(res, 200, false, "No special offers found", []);
         }
 
-        // 🔄 Flatten the product and rename _id to medicineId
-        const flattenedOffers = specialOffers.map(item => {
-            const product = item.product?.toObject?.() || {};
-            return {
-                ...product,
-                medicineId: product._id,
-                offerId: item._id, // optional: include special offer id if needed
-                createdAt: item.createdAt, // optional: include other offer-specific fields
-                updatedAt: item.updatedAt
-            };
-        });
-
         return successRes(res, 200, true, "Special offers fetched successfully", {
-            specialOffers: flattenedOffers,
+            specialOffers,
             totalSpecialOffers,
             currentPage: page,
             totalPages: Math.ceil(totalSpecialOffers / limit),
