@@ -719,4 +719,12 @@ router.delete("/delete-commission-by-id",validateQuery(getAndDeleteCommissionByI
 router.put("/update-commission-by-id",validate(updateCommissionValidation),verifyAdminToken("superadmin"),indexController.adminPathologyController.updateCommissionById);
 router.get('/get-all-commission',validateQuery(getAllCommissionValidation),verifyAdminToken("superadmin"),indexController.adminPathologyController.getAllCommission);
 
+// get notification routes for admin
+router.get('/get-notification-by-recipientId',verifyAdminToken(),indexController.commonController.getNotifications);
+router.put('/update-notification-status',verifyAdminToken(),indexController.commonController.updateNotificationStatus);
+
+// get notification routes for pathology
+router.get('/get-notification-by-recipientId',verifyAdminToken(),indexController.commonController.getNotifications);
+router.put('/update-notification-status',verifyAdminToken(),indexController.commonController.updateNotificationStatus);
+
 module.exports = router;

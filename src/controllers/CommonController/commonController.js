@@ -4,7 +4,10 @@ const CustomError = require('../../utils/customError');
 const { successRes } = require('../../services/response');
 const { getLatLngFromPlaceId } = require('../../services/helper');
 const API_KEY = process.env.GOOGLE_API_KEY_FOR_MAP; // Replace with your real key
-
+const Notification = require('../../modals/notification.model');
+const User = require('../../modals/customer.model');
+const Pharmacy = require('../../modals/pharmacy.model')
+const Pathology = require("../../modals/pathology.model");
 
 module.exports.autoCompleteAddress = asyncErrorHandler(async (req, res, next) => {
     const { query } = req.body;
@@ -139,3 +142,106 @@ module.exports.getRouteBetweenCoords = asyncErrorHandler(async (req, res, next) 
     }
 });
 
+module.exports.getNotifications = asyncErrorHandler(async (req, res, next) => {
+  const userId = req.user?._id;
+  const partnerId = req.partner?._id;
+  const admin = req.admin;
+
+  let recipientId;
+  let recipientType;
+
+  if (userId) {
+    recipientId = userId;
+  } else if (partnerId) {
+    recipientId = partnerId;
+  } else if (admin) {
+    const pharmacy = await Pharmacy.findOne({ adminId: admin._id });
+    const pathology = await Pathology.findOne({ adminId: admin._id });
+
+    if (pharmacy) {
+      recipientId = pharmacy._id;
+      recipientType = "pharmacy";
+    } else if (pathology) {
+      recipientId = pathology._id;
+      recipientType = "pathology";
+    } else {
+      recipientId = admin._id;
+      recipientType = "admin";
+    }
+  } else {
+    return successRes(res, 200, false, "User Type not found", []);
+  }
+
+  const notifications = await Notification.find({
+    recipientId,
+    recipientType,
+  }).sort({ sentAt: -1 });
+
+  if (!notifications || notifications.length === 0) {
+    return successRes(res, 200, false, "Notification not found", []);
+  }
+
+  return successRes(res, 200, true, "Notifications fetched successfully", notifications);
+});
+
+module.exports.updateNotificationStatus = asyncErrorHandler(async (req, res, next) => {
+  const { notificationId } = req.body;
+
+  const userId = req.user?._id;
+  const partnerId = req.partner?._id;
+  const admin = req.admin; 
+
+  if (!notificationId) {
+    return next(new CustomError("Notification ID is required", 400));
+  }
+
+//   console.log(admin,"admin---------------");
+  let recipientId;
+  let recipientType;
+
+  if (userId) {
+    recipientId = userId;
+    recipientType = "customer";
+  } else if (partnerId) {
+    recipientId = partnerId;
+    recipientType = "delivery_partner"
+  } else if (admin) {
+    const pharmacy = await Pharmacy.findOne({adminId:admin._id});
+    console.log("pharmacy",pharmacy);
+    const pathology = await Pathology.findOne({ adminId: admin._id });
+    console.log("pthology",pathology);
+    if (pharmacy) {
+      recipientId = pharmacy._id;
+      recipientType = "pharmacy";
+    } else if (pathology) {
+      recipientId = pathology._id;
+      recipientType = "pathology";
+    } else {
+      recipientId = admin._id;
+      recipientType = "admin";
+    }
+  } else {
+    return successRes(res, 200, false, "User Type not found", []);
+  }
+
+  const notification = await Notification.findOne({
+    _id: notificationId,
+    recipientId: recipientId,
+    recipientType: recipientType,
+  });
+
+  if (!notification) {
+    return successRes(res, 200, false, "Notification not found", []);
+  }
+
+  if (notification.status === "read") {
+    return successRes(res, 200, false, "Notification is already marked as read", notification);
+  }
+
+  await Notification.updateOne(
+    { _id: notificationId },
+    { $set: { status: "read" } }
+  );
+
+  return successRes(res, 200, true, "Notification status updated to 'read'", notification);
+});
