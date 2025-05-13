@@ -69,16 +69,11 @@ router.post('/get-routes-bw-coords', validate(getRouteBetweenCoordsValidation), 
 
 /**Medicine */
 router.get('/search-medicine', validateQuery(searchUMedicineValidation), indexController.customerMedicineController.searchMedicine);
-router.get(
-    "/get-all-medicines",
-    indexController.medicineController.getAllMedicines
-);
-router.get(
-    "/get-medicine-by-id",
-    indexController.medicineController.getMedicineById
-);
+router.get("/get-all-medicines", indexController.medicineController.getAllMedicines);
+router.get("/get-medicine-by-id", indexController.medicineController.getMedicineById);
 router.post('/log-medicine-click', validate(logMedicineClickValidation), indexController.customerMedicineController.logMedicineClick);
 router.get('/get-top-picks', indexController.customerMedicineController.getUserTopPicksWithSimilar)
+router.get('/medicines-by-manufacturer', indexController.customerMedicineController.getMedicinesByManufacturer)
 
 /**DoctoreLead Routes */
 router.post("/create-doctoreLead", validate(createDoctorLeadValidation), indexController.customerMissLiniesController.createDoctoreLead);

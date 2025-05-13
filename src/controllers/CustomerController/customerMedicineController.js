@@ -102,26 +102,75 @@ module.exports.getUserTopPicksWithSimilar = asyncErrorHandler(async (req, res, n
 
     const medicineIds = clickHistory.map(item => item.medicine_id);
 
+    let topPicks = [];
+
     if (medicineIds.length === 0) {
-        return successRes(res, 200, true, "No clicks found for user", []);
+        // No click history, return 10 random medicines
+        topPicks = await medicineModel.aggregate([{ $sample: { size: 10 } }]);
+
+        return successRes(res, 200, true, "Showing random top picks", topPicks);
     }
 
-    const topPicks = await medicineModel.find({ _id: { $in: medicineIds } });
+    topPicks = await medicineModel.find({ _id: { $in: medicineIds } });
 
-    // Enhance each top pick with similar medicines
-    const enrichedTopPicks = await Promise.all(
-        topPicks.map(async (medicine) => {
-            const similar = await medicineModel.find({
-                short_composition1: medicine.short_composition1,
-                _id: { $ne: medicine._id }
-            }).limit(5);
+    let allMedicinesMap = new Map();
 
-            return {
-                ...medicine.toObject(),
-                similarMedicines: similar
-            };
-        })
-    );
+    // Add top picks
+    topPicks.forEach(med => {
+        allMedicinesMap.set(med._id.toString(), med.toObject());
+    });
 
-    return successRes(res, 200, true, "Top picks with similar medicines", enrichedTopPicks);
+    // Add similar medicines
+    for (const medicine of topPicks) {
+        const similar = await medicineModel.find({
+            short_composition1: medicine.short_composition1,
+            _id: { $ne: medicine._id }
+        }).limit(5);
+
+        similar.forEach(sim => {
+            allMedicinesMap.set(sim._id.toString(), sim.toObject());
+        });
+    }
+
+    const flattenedMedicines = Array.from(allMedicinesMap.values());
+
+    return successRes(res, 200, true, "Top picks with similar medicines", flattenedMedicines);
+});
+
+module.exports.getMedicinesByManufacturer = asyncErrorHandler(async (req, res, next) => {
+    const { medicineId, page = 1, limit = 10 } = req.query;
+
+    if (!medicineId) {
+        return next(new CustomError("medicineId is required", 400));
+    }
+
+    const medicine = await medicineModel.findById(medicineId);
+
+    if (!medicine) {
+        return next(new CustomError("Medicine not found", 404));
+    }
+
+    const manufacturerName = medicine.manufacturer;
+
+    // Pagination calculations
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const similarMedicines = await medicineModel.find({
+        manufacturer: manufacturerName,
+        _id: { $ne: medicine._id }
+    })
+        .skip(skip)
+        .limit(parseInt(limit));
+
+    const total = await medicineModel.countDocuments({
+        manufacturer: manufacturerName,
+        _id: { $ne: medicine._id }
+    });
+
+    return successRes(res, 200, true, "Medicines with same manufacturer", {
+        total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        medicines: similarMedicines
+    });
 });
