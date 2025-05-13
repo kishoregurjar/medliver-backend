@@ -6,7 +6,7 @@ require('dotenv').config();
 const mongoose = require("mongoose")
 
 module.exports.createTestCategory = asyncErrorHandler(async (req, res, next) => {
-  const { name, description, image_url,tests  } = req.body;
+  const { name, description, image_url, tests } = req.body;
 
   if (!name) {
     return next(new CustomError("Category name is required", 400));
@@ -39,7 +39,7 @@ module.exports.getAllTestCategories = asyncErrorHandler(async (req, res, next) =
   const [total, categories] = await Promise.all([
     TestCategory.countDocuments(),
     TestCategory.find()
-      // .populate("tests")
+      .populate("tests")
       .skip(skip)
       .limit(limit)
       .sort({ created_at: -1 })
@@ -84,7 +84,7 @@ module.exports.updateTestCategory = asyncErrorHandler(async (req, res, next) => 
   if (name) updateFields.name = name;
   if (description) updateFields.description = description;
   if (image_url) updateFields.image_url = image_url;
-  
+
   if (tests) {
     if (!Array.isArray(tests)) {
       return next(new CustomError("Tests should be an array of IDs", 400));
@@ -125,34 +125,33 @@ module.exports.deleteTestCategoryById = asyncErrorHandler(async (req, res, next)
 });
 
 module.exports.uploadTestCatgImg = asyncErrorHandler(async (req, res, next) => {
-    if (!req.file) {
-      return next(new CustomError("No file uploaded.", 400));
-    }
-  
-    const imageUrl = `${process.env.UPLOAD_CATG_IMG}${req.file.filename}`;
-    return successRes(res, 200, true, "File Uploaded Successfully", { imageUrl });
-  
-  });
-  
-  module.exports.removeTestFromCategory = asyncErrorHandler(async (req, res, next) => {
-    const { testCatgId, testId } = req.body;
-  
-    if (!testCatgId || !testId) {
-      return next(new CustomError("Both categoryId and testId are required", 400));
-    }
-  
-    const category = await TestCategory.findById(testCatgId);
-    if (!category) {
-      return next(new CustomError("Test Category not found", 404));
-    }
-  
-    const isTestPresent = category.tests.includes(testId);
-    if (!isTestPresent) {
-      return next(new CustomError("Test not found in this category", 404));
-    }
-      category.tests.pull(testId);
-    await category.save();
-  
-    return successRes(res, 200, true, "Test removed from category successfully", category);
-  });
-  
+  if (!req.file) {
+    return next(new CustomError("No file uploaded.", 400));
+  }
+
+  const imageUrl = `${process.env.UPLOAD_CATG_IMG}${req.file.filename}`;
+  return successRes(res, 200, true, "File Uploaded Successfully", { imageUrl });
+
+});
+
+module.exports.removeTestFromCategory = asyncErrorHandler(async (req, res, next) => {
+  const { testCatgId, testId } = req.body;
+
+  if (!testCatgId || !testId) {
+    return next(new CustomError("Both categoryId and testId are required", 400));
+  }
+
+  const category = await TestCategory.findById(testCatgId);
+  if (!category) {
+    return next(new CustomError("Test Category not found", 404));
+  }
+
+  const isTestPresent = category.tests.includes(testId);
+  if (!isTestPresent) {
+    return next(new CustomError("Test not found in this category", 404));
+  }
+  category.tests.pull(testId);
+  await category.save();
+
+  return successRes(res, 200, true, "Test removed from category successfully", category);
+});
