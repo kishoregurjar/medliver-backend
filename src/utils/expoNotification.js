@@ -1,21 +1,26 @@
 const axios = require('axios');
 
 module.exports.sendExpoNotification = async (tokens, title, body, data = {}) => {
-    if (tokens.length === 0) return false;
+    console.log(tokens, title, body, data, "1111111111111111111")
+    try {
+        if (tokens.length === 0) return false;
 
-    const messages = tokens.map(token => ({
-        to: token,
-        sound: 'default',
-        title,
-        body,
-        data // pass any custom data here
-    }));
+        const messages = tokens.map(token => ({
+            to: token,
+            sound: 'default',
+            title,
+            body,
+            data // pass any custom data here
+        }));
 
-    const response = await axios.post('https://exp.host/--/api/v2/push/send', messages, {
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    });
-
-    return response.data;
+        const response = await axios.post('https://exp.host/--/api/v2/push/send', messages, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        console.log(response.data, "response")
+        return response.data;
+    } catch (error) {
+        console.log(error, "error")
+    }
 };

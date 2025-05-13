@@ -39,7 +39,6 @@ module.exports.acceptOrRejectOrder = asyncErrorHandler(async (req, res, next) =>
 
     const order = await ordersModel.findById(orderId);
     if (!order) return next(new CustomError("Order not found", 404));
-    console.log(order, "orer")
     if (order.orderStatus === "accepted") {
         return next(new CustomError("Order already accepted", 400));
     }
@@ -67,6 +66,7 @@ module.exports.acceptOrRejectOrder = asyncErrorHandler(async (req, res, next) =>
         const availablePartners = await DeliveryPartner.find({
             availabilityStatus: "available",
             isBlocked: false,
+            deviceToken: { $ne: null },
             "location.lat": { $ne: null },
             "location.long": { $ne: null }
         });
@@ -99,7 +99,7 @@ module.exports.acceptOrRejectOrder = asyncErrorHandler(async (req, res, next) =>
             });
 
             await newNotification.save();
-
+            console.log(nearestPartner, "nearestPartner.deviceToken")
             if (nearestPartner.deviceToken) {
                 await sendExpoNotification(
                     [nearestPartner.deviceToken],
