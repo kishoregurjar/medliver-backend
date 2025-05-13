@@ -19,6 +19,7 @@ module.exports.getAllAssignedOrder = asyncErrorHandler(async (req, res, next) =>
 
     const pharmacyId = findPharmacy._id;
     const orders = await ordersModel.find({
+        pharmacyResponseStatus: "pending",
         pharmacyAttempts: {
             $elemMatch: {
                 pharmacyId: pharmacyId,
@@ -60,7 +61,7 @@ module.exports.acceptOrRejectOrder = asyncErrorHandler(async (req, res, next) =>
 
     if (status === "accepted") {
         order.pharmacyResponseStatus = "accepted";
-        order.orderStatus = "confirmed";
+        order.orderStatus = "accepted";
         order.assignedPharmacyCoordinates = pharmacyCoordinates;
 
         const availablePartners = await DeliveryPartner.find({
@@ -80,7 +81,7 @@ module.exports.acceptOrRejectOrder = asyncErrorHandler(async (req, res, next) =>
         if (sortedPartners.length > 0) {
             const nearestPartner = sortedPartners[0];
             order.deliveryPartnerId = nearestPartner._id;
-            order.orderStatus = "assigned";
+            // order.orderStatus = "assigned";
 
             order.deliveryPartnerAttempts.push({
                 deliveryPartnerId: nearestPartner._id,
