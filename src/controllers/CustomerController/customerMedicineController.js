@@ -82,9 +82,10 @@ module.exports.logMedicineClick = asyncErrorHandler(async (req, res, next) => {
 
 module.exports.getUserTopPicksWithSimilar = asyncErrorHandler(async (req, res, next) => {
     const token = req.headers.authorization;
-
+    let topPicks = [];
     if (!token) {
-        return next(new CustomError("Authorization token missing", 401));
+        topPicks = await medicineModel.aggregate([{ $sample: { size: 10 } }]);
+        return successRes(res, 200, true, "Showing random top picks", topPicks);
     }
 
     let decoded;
@@ -101,8 +102,6 @@ module.exports.getUserTopPicksWithSimilar = asyncErrorHandler(async (req, res, n
         .limit(5);
 
     const medicineIds = clickHistory.map(item => item.medicine_id);
-
-    let topPicks = [];
 
     if (medicineIds.length === 0) {
         // No click history, return 10 random medicines

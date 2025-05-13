@@ -40,7 +40,7 @@ module.exports.acceptOrRejectOrder = asyncErrorHandler(async (req, res, next) =>
     const order = await ordersModel.findById(orderId);
     if (!order) return next(new CustomError("Order not found", 404));
     console.log(order, "orer")
-    if (order.orderStatus === "assigned") {
+    if (order.orderStatus === "accepted") {
         return next(new CustomError("Order already accepted", 400));
     }
 
@@ -113,10 +113,7 @@ module.exports.acceptOrRejectOrder = asyncErrorHandler(async (req, res, next) =>
 
         await order.save();
 
-        return res.status(200).json({
-            success: true,
-            message: "Order accepted successfully! Assigning delivery partner...",
-        });
+        return successRes(res, 200, true, "Order accepted successfully", order);
     }
 
     // If rejected
