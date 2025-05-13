@@ -42,7 +42,7 @@ router.put('/change-cart-product-quantity', validate(changeQuantitySchema), veri
 router.put('/remove-item-from-cart', validate(removeItemFromCartSchema), verifyUserToken(), indexController.customerCartController.removeItemFromCart);
 
 /** Insurance route */
-router.post("/apply-for-insurance", validate(applyInsuranceSchema), indexController.customerMissLiniesController.applyInsurance);
+router.post("/apply-for-insurance", indexController.customerMissLiniesController.applyInsurance);
 router.post("/request-for-emergency-vehicle", validate(emergencyVehicleRequestSchema), indexController.customerMissLiniesController.requestEmergencyVehicle)
 
 
@@ -76,7 +76,7 @@ router.get('/get-top-picks', indexController.customerMedicineController.getUserT
 router.get('/medicines-by-manufacturer', indexController.customerMedicineController.getMedicinesByManufacturer)
 
 /**DoctoreLead Routes */
-router.post("/create-doctoreLead", validate(createDoctorLeadValidation), indexController.customerMissLiniesController.createDoctoreLead);
+router.post("/create-doctoreLead", indexController.customerMissLiniesController.createDoctoreLead);
 module.exports = router;
 
 // get notification routes

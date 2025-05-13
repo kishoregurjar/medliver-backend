@@ -19,6 +19,7 @@ module.exports.getAllAssignedOrder = asyncErrorHandler(async (req, res, next) =>
 
     const pharmacyId = findPharmacy._id;
     const orders = await ordersModel.find({
+        pharmacyResponseStatus: "pending",
         pharmacyAttempts: {
             $elemMatch: {
                 pharmacyId: pharmacyId,
@@ -39,7 +40,6 @@ module.exports.acceptOrRejectOrder = asyncErrorHandler(async (req, res, next) =>
 
     const order = await ordersModel.findById(orderId);
     if (!order) return next(new CustomError("Order not found", 404));
-    console.log(order, "orer")
     if (order.orderStatus === "accepted") {
         return next(new CustomError("Order already accepted", 400));
     }
@@ -61,12 +61,13 @@ module.exports.acceptOrRejectOrder = asyncErrorHandler(async (req, res, next) =>
 
     if (status === "accepted") {
         order.pharmacyResponseStatus = "accepted";
-        order.orderStatus = "confirmed";
+        order.orderStatus = "accepted";
         order.assignedPharmacyCoordinates = pharmacyCoordinates;
 
         const availablePartners = await DeliveryPartner.find({
             availabilityStatus: "available",
             isBlocked: false,
+            deviceToken: { $ne: null },
             "location.lat": { $ne: null },
             "location.long": { $ne: null }
         });
@@ -80,7 +81,7 @@ module.exports.acceptOrRejectOrder = asyncErrorHandler(async (req, res, next) =>
         if (sortedPartners.length > 0) {
             const nearestPartner = sortedPartners[0];
             order.deliveryPartnerId = nearestPartner._id;
-            order.orderStatus = "assigned";
+            // order.orderStatus = "assigned";
 
             order.deliveryPartnerAttempts.push({
                 deliveryPartnerId: nearestPartner._id,
@@ -99,7 +100,7 @@ module.exports.acceptOrRejectOrder = asyncErrorHandler(async (req, res, next) =>
             });
 
             await newNotification.save();
-
+            console.log(nearestPartner, "nearestPartner.deviceToken")
             if (nearestPartner.deviceToken) {
                 await sendExpoNotification(
                     [nearestPartner.deviceToken],
