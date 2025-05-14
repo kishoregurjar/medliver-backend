@@ -5,6 +5,30 @@ const { successRes } = require("../../services/response")
 require('dotenv').config();
 const mongoose = require("mongoose")
 
+// module.exports.createTestCategory = asyncErrorHandler(async (req, res, next) => {
+//   const { name, description, image_url, tests } = req.body;
+
+//   if (!name) {
+//     return next(new CustomError("Category name is required", 400));
+//   }
+
+//   const existing = await TestCategory.findOne({ name: name.trim() });
+//   if (existing) {
+//     return next(new CustomError("Category with this name already exists", 409));
+//   }
+//   if (tests && !Array.isArray(tests)) {
+//     return next(new CustomError("Tests should be an array of IDs", 400));
+//   }
+
+//   const newCategory = await TestCategory.create({
+//     name,
+//     description,
+//     image_url,
+//     tests
+//   });
+
+//   return successRes(res, 201, true, "Test Category created successfully", newCategory);
+// });
 module.exports.createTestCategory = asyncErrorHandler(async (req, res, next) => {
   const { name, description, image_url, tests } = req.body;
 
@@ -16,19 +40,23 @@ module.exports.createTestCategory = asyncErrorHandler(async (req, res, next) => 
   if (existing) {
     return next(new CustomError("Category with this name already exists", 409));
   }
+
   if (tests && !Array.isArray(tests)) {
     return next(new CustomError("Tests should be an array of IDs", 400));
   }
 
   const newCategory = await TestCategory.create({
-    name,
+    name: name.trim(),
     description,
     image_url,
-    tests
+    tests,
   });
 
-  return successRes(res, 201, true, "Test Category created successfully", newCategory);
+  const populatedCategory = await TestCategory.findById(newCategory._id).populate("tests");
+
+  return successRes(res, 201, true, "Test Category created successfully", populatedCategory);
 });
+
 
 module.exports.getAllTestCategories = asyncErrorHandler(async (req, res, next) => {
   let { page, limit } = req.query;
