@@ -1557,7 +1557,7 @@ const addToCartSchema = Joi.object({
     "number.base": "Quantity must be a number",
     "number.min": "Quantity must be at least 1",
   }),
-  type: Joi.string().valid("medicine", "test").required().messages({
+  type: Joi.string().valid("Medicine", "test").required().messages({
     "any.required": "Type is required",
     "any.only": "Type must be either 'medicine' or 'test'",
   }),
