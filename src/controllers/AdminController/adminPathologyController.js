@@ -346,7 +346,7 @@ module.exports.getAllPathologyCenters = asyncErrorHandler(async (req, res, next)
 
   const [totalPathologyCenters, allPathologyCenters] = await Promise.all([
     PathologyCenter.countDocuments(),
-    PathologyCenter.find().populate("adminId").populate("commissionId").sort({ createdAt: -1 }).skip(skip).limit(limit),
+    PathologyCenter.find().populate("adminId").populate("commissionId","type value").sort({ createdAt: -1 }).skip(skip).limit(limit),
   ]);
 
   if (allPathologyCenters.length === 0) {
