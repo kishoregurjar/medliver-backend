@@ -14,6 +14,7 @@ const {
     updatePathologyCenter,
     searchPathologyCenter,
     createFeature,
+    searchTestCategoryValidation,
     getOrDeleteFeatureById,
     updateFeatureStatus,
     getAllFeatures,
@@ -534,6 +535,12 @@ router.put(
     validate(removeTestFromCategory),
     verifyAdminToken("superadmin"),
     indexController.adminTestCatgController.removeTestFromCategory
+);
+router.get(
+    "/search-test-category",
+    validateQuery(searchTestCategoryValidation),
+    verifyAdminToken("superadmin"),
+    indexController.adminTestCatgController.searchTestCategory
 );
 
 // Insurance routes

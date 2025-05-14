@@ -1215,6 +1215,20 @@ const getAllTestCatgValidation = Joi.object({
     "number.min": "Limit must be at least 1",
   }),
 });
+const searchTestCategoryValidation = Joi.object({
+  value: Joi.string().trim().required().messages({
+    "string.empty": "Search value is required",
+  }),
+  page: Joi.number().integer().min(1).optional().messages({
+    "number.base": "Page must be a number",
+    "number.min": "Page must be at least 1",
+  }),
+  limit: Joi.number().integer().min(1).optional().messages({
+    "number.base": "Limit must be a number",
+    "number.min": "Limit must be at least 1",
+  }),
+});
+
 
 //vehicle validation
 const getAllVehicleRequestsValidation = Joi.object({
@@ -2393,7 +2407,8 @@ module.exports = {
   updateStockValidation,
   getAndDeleteCommissionById,
   getAllCommissionValidation,
-  updateCommissionValidation
+  updateCommissionValidation,
+  searchTestCategoryValidation
 
 
 };
