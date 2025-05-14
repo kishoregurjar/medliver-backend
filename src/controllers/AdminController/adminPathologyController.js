@@ -7,6 +7,98 @@ const CustomError = require('../../utils/customError')
 const { successRes } = require('../../services/response');
 const Commission = require('../../modals/pathologyCommission.model');
 
+// module.exports.createPathologyCenter = asyncErrorHandler(async (req, res, next) => {
+//   const admin = req.admin;
+//   const {
+//     centerName,
+//     email,
+//     phoneNumber,
+//     address,
+//     password,
+//     commissionType, 
+//     commissionValue
+//   } = req.body;
+
+//   if (!admin.role || admin.role !== "superadmin") {
+//     return next(new CustomError("Only superadmin can create a pathology center", 403));
+//   }
+
+//   if (!centerName || !email || !phoneNumber || !address || !password || !commissionType || !commissionValue) {
+//     return next(new CustomError("All required fields must be provided", 400));
+//   }
+
+//   const session = await mongoose.startSession();
+
+//   try {
+//     await session.startTransaction();
+
+//     // Sequentially check for existing email or phone
+//     const existingCenter = await PathologyCenter.findOne({
+//       $or: [{ email }, { phoneNumber }]
+//     }).session(session);
+
+//     const existingAdmin = await Admin.findOne({ email }).session(session);
+
+//     if (existingCenter || existingAdmin) {
+//       throw new CustomError("Email or phone already exists", 400);
+//     }
+
+//     const hashedPassword = await bcrypt.hash(password, 12);
+
+//     // Create new admin
+//     const newAdmin = new Admin({
+//       name: centerName,
+//       email,
+//       password: hashedPassword,
+//       role: "pathology",
+//       avatar: null,
+//       isActive: true,
+//     });
+
+//     await newAdmin.save({ session });
+
+//     // Create new pathology center
+//     const newCenter = new PathologyCenter({
+//       centerName,
+//       email,
+//       phoneNumber,
+//       address,
+//       adminId: newAdmin._id,
+//     });
+
+//     await newCenter.save({ session });
+
+//     // Link pathology center to admin
+//     newAdmin.pathologyCenterId = newCenter._id;
+//     await newAdmin.save({ session });
+
+//     // Create commission for this pathology center
+//       const newCommission = new Commission({
+//       pathologyCenterId: newCenter._id,
+//       type: commissionType,  // 'flat' or 'percentage'
+//       value: commissionValue,  // The commission value
+//     });
+
+//     await newCommission.save({ session });
+    
+//     await session.commitTransaction();
+
+//     const sanitizedAdmin = newAdmin.toObject();
+//     delete sanitizedAdmin.password;
+
+//     return successRes(res, 201, true, "Pathology Center and Admin created successfully, along with Commission", {
+//       admin: sanitizedAdmin,
+//       pathologyCenter: newCenter,
+//       commission: newCommission,
+//     });
+//   } catch (error) {
+//     await session.abortTransaction();
+//     return next(error);
+//   } finally {
+//     session.endSession();
+//   }
+// });
+
 module.exports.createPathologyCenter = asyncErrorHandler(async (req, res, next) => {
   const admin = req.admin;
   const {
@@ -32,7 +124,6 @@ module.exports.createPathologyCenter = asyncErrorHandler(async (req, res, next) 
   try {
     await session.startTransaction();
 
-    // Sequentially check for existing email or phone
     const existingCenter = await PathologyCenter.findOne({
       $or: [{ email }, { phoneNumber }]
     }).session(session);
@@ -45,7 +136,6 @@ module.exports.createPathologyCenter = asyncErrorHandler(async (req, res, next) 
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // Create new admin
     const newAdmin = new Admin({
       name: centerName,
       email,
@@ -57,7 +147,6 @@ module.exports.createPathologyCenter = asyncErrorHandler(async (req, res, next) 
 
     await newAdmin.save({ session });
 
-    // Create new pathology center
     const newCenter = new PathologyCenter({
       centerName,
       email,
@@ -73,20 +162,24 @@ module.exports.createPathologyCenter = asyncErrorHandler(async (req, res, next) 
     await newAdmin.save({ session });
 
     // Create commission for this pathology center
-      const newCommission = new Commission({
+    const newCommission = new Commission({
       pathologyCenterId: newCenter._id,
-      type: commissionType,  // 'flat' or 'percentage'
-      value: commissionValue,  // The commission value
+      type: commissionType,
+      value: commissionValue,
     });
 
     await newCommission.save({ session });
-    
+
+    //  Update pathology center with commissionId
+    newCenter.commissionId = newCommission._id;
+    await newCenter.save({ session });
+
     await session.commitTransaction();
 
     const sanitizedAdmin = newAdmin.toObject();
     delete sanitizedAdmin.password;
 
-    return successRes(res, 201, true, "Pathology Center and Admin created successfully, along with Commission", {
+    return successRes(res, 201, true, "Pathology Center, Admin, and Commission created successfully", {
       admin: sanitizedAdmin,
       pathologyCenter: newCenter,
       commission: newCommission,
@@ -99,6 +192,7 @@ module.exports.createPathologyCenter = asyncErrorHandler(async (req, res, next) 
   }
 });
 
+
 module.exports.getPathologyCenterById = asyncErrorHandler(async (req, res, next) => {
   const { pathologyCenterId } = req.query;
 
@@ -106,7 +200,7 @@ module.exports.getPathologyCenterById = asyncErrorHandler(async (req, res, next)
     return next(new CustomError('Please provide pathologyCenterId', 404));
   }
 
-  const pathologyCenter = await PathologyCenter.findById(pathologyCenterId).populate('adminId');
+  const pathologyCenter = await PathologyCenter.findById(pathologyCenterId).populate('adminId').populate("commissionId"); ;
 
   if (!pathologyCenter) {
     return next(new CustomError('Pathology Center not found', 404));
@@ -118,9 +212,8 @@ module.exports.getPathologyCenterById = asyncErrorHandler(async (req, res, next)
     delete pathologyCenterData.adminId.password;
   }
 
-  return successRes(res, 200, true, 'Pathology Center fetched successfully.', {
-    pathologyCenter: pathologyCenterData,
-  });
+  return successRes(res, 200, true, 'Pathology Center fetched successfully.', pathologyCenterData,
+  );
 });
 
 module.exports.deletePathologyCenter = asyncErrorHandler(async (req, res, next) => {
@@ -253,7 +346,7 @@ module.exports.getAllPathologyCenters = asyncErrorHandler(async (req, res, next)
 
   const [totalPathologyCenters, allPathologyCenters] = await Promise.all([
     PathologyCenter.countDocuments(),
-    PathologyCenter.find().populate("adminId").sort({ createdAt: -1 }).skip(skip).limit(limit),
+    PathologyCenter.find().populate("adminId").populate("commissionId").sort({ createdAt: -1 }).skip(skip).limit(limit),
   ]);
 
   if (allPathologyCenters.length === 0) {
