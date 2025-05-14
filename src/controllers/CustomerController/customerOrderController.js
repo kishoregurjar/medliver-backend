@@ -8,11 +8,10 @@ const pescriptionSchema = require("../../modals/pescriptionSchema");
 const customerAddressModel = require("../../modals/customerAddress.model");
 const { sendExpoNotification } = require("../../utils/expoNotification");
 const pharmacySchema = require("../../modals/pharmacy.model");
-const notificationMode = require("../../modals/notification.model");
 const notificationModel = require("../../modals/notification.model");
 const { getDistance } = require("../../utils/helper");
+const adminSchema = require("../../modals/admin.Schema");
 
-/**
 module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
     const userId = req.user._id;
     const { item_ids, deliveryAddressId, paymentMethod } = req.body;
@@ -27,111 +26,10 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
     }
 
     const itemsToOrder = cart.items.filter(item => item_ids.includes(item.item_id.toString()));
-
     if (itemsToOrder.length === 0) {
         return next(new CustomError("No valid items found in the cart for the provided item IDs", 404));
     }
 
-    let totalPrice = 0;
-    let prescriptionRequired = false;
-    let isTestHomeCollection = false;
-    let orderType = null;
-
-    const orderItems = [];
-
-    for (const item of itemsToOrder) {
-        totalPrice += item.price * item.quantity;
-
-        if (item.item_type === "medicine") {
-            const medicine = await medicineModel.findById(item.item_id);
-            if (medicine?.isPrescriptionRequired) prescriptionRequired = true;
-
-            orderItems.push({
-                medicineId: item.item_id,
-                quantity: item.quantity,
-                price: item.price,
-            });
-
-        } else if (item.item_type === "test") {
-            if (item.details?.available_at_home) isTestHomeCollection = true;
-
-            orderItems.push({
-                testName: item.name,
-                quantity: item.quantity,
-                price: item.price,
-            });
-        }
-    }
-
-    const hasMedicine = itemsToOrder.some(i => i.item_type === "medicine");
-    const hasTest = itemsToOrder.some(i => i.item_type === "test");
-
-    orderType = hasMedicine && hasTest ? "mixed" : hasMedicine ? "pharmacy" : hasTest ? "pathology" : null;
-
-    if (!orderType) {
-        return next(new CustomError("Invalid items in cart", 400));
-    }
-    console.log(userId, "userId", deliveryAddressId, "deliveryAddressId")
-    let findAddress = await customerAddressModel.findOne({
-        customer_id: userId,
-        _id: deliveryAddressId
-    });
-
-    if (!findAddress) {
-        return next(new CustomError("Delivery address not found", 404));
-    }
-    console.log(findAddress, "findAddress")
-    const newOrder = new orderSchema({
-        customerId: userId,
-        orderType,
-        items: orderItems,
-        totalAmount: totalPrice,
-        deliveryAddressId,
-        paymentMethod,
-        prescriptionRequired,
-        isTestHomeCollection,
-    });
-
-    await newOrder.save();
-
-    // Remove ordered items from cart
-    const updatedItems = cart.items.filter(item => !item_ids.includes(item.item_id.toString()));
-
-    // Recalculate cart total
-    const newTotalPrice = updatedItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-
-    cart.items = updatedItems;
-    cart.total_price = newTotalPrice;
-    await cart.save();
-
-    return successRes(res, 201, true, "Order created successfully", {
-        order: newOrder,
-    });
-});
- */
-
-module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
-    const userId = req.user._id;
-    const { item_ids, deliveryAddressId, paymentMethod } = req.body;
-
-    // Validate item_ids
-    if (!item_ids || !Array.isArray(item_ids) || item_ids.length === 0) {
-        return next(new CustomError("Item IDs are required", 400));
-    }
-
-    // Get user's cart and validate
-    const cart = await cartSchema.findOne({ user_id: userId });
-    if (!cart || cart.items.length === 0) {
-        return next(new CustomError("Cart is empty or not found", 404));
-    }
-
-    // Filter out the items that the user wants to order
-    const itemsToOrder = cart.items.filter(item => item_ids.includes(item.item_id.toString()));
-    if (itemsToOrder.length === 0) {
-        return next(new CustomError("No valid items found in the cart for the provided item IDs", 404));
-    }
-
-    // Calculate total price and check if prescription or test collection is required
     let totalPrice = 0;
     let prescriptionRequired = false;
     let isTestHomeCollection = false;
@@ -150,16 +48,12 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
         }
     }
 
-    // Determine order type
     const hasMedicine = itemsToOrder.some(i => i.item_type === "medicine");
     const hasTest = itemsToOrder.some(i => i.item_type === "test");
     const orderType = hasMedicine && hasTest ? "mixed" : hasMedicine ? "pharmacy" : hasTest ? "pathology" : null;
 
-    if (!orderType) {
-        return next(new CustomError("Invalid items in cart", 400));
-    }
+    if (!orderType) return next(new CustomError("Invalid items in cart", 400));
 
-    // Get the delivery address for the user
     const findAddress = await customerAddressModel.findOne({
         customer_id: userId,
         _id: deliveryAddressId
@@ -169,13 +63,12 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
         return next(new CustomError("Delivery address not found", 404));
     }
 
-    // Get all available pharmacies
     const allPharmacies = await pharmacySchema.find({
         status: "active",
         availabilityStatus: "available",
         pharmacyCoordinates: { $ne: null }
     });
-    // Sort pharmacies by distance from delivery address
+
     const userCoords = findAddress.location;
     const sortedPharmacies = allPharmacies
         .map(pharmacy => ({
@@ -185,76 +78,85 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
         .sort((a, b) => a.distance - b.distance)
         .map(entry => entry.pharmacy);
 
-    if (sortedPharmacies.length === 0) {
-        return next(new CustomError("No nearby pharmacies found", 404));
-    }
+    const pharmacyQueue = sortedPharmacies.map(p => p._id);
+    const assignedPharmacy = sortedPharmacies[0] || null;
 
-    let assignedPharmacy = null;
-    let pharmacyAttempts = [];
+    const pharmacyAttempts = assignedPharmacy ? [{
+        pharmacyId: assignedPharmacy._id,
+        status: "pending",
+        attemptAt: new Date(),
+    }] : [];
 
-    for (const pharmacy of sortedPharmacies) {
-        assignedPharmacy = pharmacy;
-        pharmacyAttempts.push({
-            pharmacyId: pharmacy._id,
-            status: "pending",
-            attemptAt: new Date(),
-        });
-
-        const newOrder = new orderSchema({
-            customerId: userId,
-            orderType,
-            items: orderItems,
-            totalAmount: totalPrice,
-            deliveryAddressId,
-            paymentMethod,
-            prescriptionRequired,
-            isTestHomeCollection,
-            pharmacyAttempts,
-            assignedPharmacyId: assignedPharmacy._id,
-            deliveryAddress: {
-                stree: findAddress?.street,
-                city: findAddress?.city,
-                state: findAddress?.state,
-                pincode: findAddress?.pincode,
-                coordinates: {
-                    lat: findAddress?.location?.lat,
-                    long: findAddress?.location?.long
-                }
+    const newOrder = new orderSchema({
+        customerId: userId,
+        orderType,
+        items: orderItems,
+        totalAmount: totalPrice,
+        deliveryAddressId,
+        paymentMethod,
+        prescriptionRequired,
+        isTestHomeCollection,
+        assignedPharmacyId: assignedPharmacy?._id || null,
+        pharmacyQueue,
+        pharmacyAttempts,
+        deliveryAddress: {
+            street: findAddress?.street,
+            city: findAddress?.city,
+            state: findAddress?.state,
+            pincode: findAddress?.pincode,
+            coordinates: {
+                lat: findAddress?.location?.lat,
+                long: findAddress?.location?.long
             }
-        });
+        }
+    });
 
-        await newOrder.save();
+    await newOrder.save();
 
-        const updatedItems = cart.items.filter(item => !item_ids.includes(item.item_id.toString()));
+    // Update cart
+    const updatedItems = cart.items.filter(item => !item_ids.includes(item.item_id.toString()));
+    cart.items = updatedItems;
+    cart.total_price = updatedItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+    await cart.save();
 
-        const newTotalPrice = updatedItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+    // Notify pharmacy or admin
+    let notification;
 
-        cart.items = updatedItems;
-        cart.total_price = newTotalPrice;
-        await cart.save();
-
-        let createNotification = new notificationModel({
+    if (assignedPharmacy) {
+        notification = new notificationModel({
             title: "New Order",
             message: "You have a new order",
             recipientId: assignedPharmacy._id,
             recipientType: "pharmacy",
             NotificationTypeId: newOrder._id,
-            notificationType: "order_received",
-        })
-        await createNotification.save();
-
-
-        const sendNotification = await sendExpoNotification([assignedPharmacy.deviceToken], "New Order", "You have a new order", createNotification);
-
-        return successRes(res, 201, true, "Order created successfully", {
-            order: newOrder,
-            notification: createNotification
+            notificationType: "pharmacy_order_request",
         });
+        await sendExpoNotification([assignedPharmacy.deviceToken], "New Order", "You have a new order", notification);
+    } else {
+        // No pharmacy found — notify admin for manual assignment
+        const admins = await adminSchema.find({ role: 'superadmin' });
+        for (const admin of admins) {
+            notification = new notificationModel({
+                title: "Manual Order Assignment",
+                message: "No pharmacy available for new order. Manual assignment required.",
+                recipientId: admin._id,
+                recipientType: "admin",
+                NotificationTypeId: newOrder._id,
+                notificationType: "manual_pharmacy_assignment",
+            });
+            await sendExpoNotification([admin.deviceToken], "Manual Assignment Needed", "No pharmacy available for order", notification);
+        }
     }
 
-    // If no pharmacies accepted, return error
-    return next(new CustomError("All pharmacies rejected the order", 400));
+    if (notification) await notification.save();
+
+    return successRes(res, 201, true, "Order placed successfully", {
+        order: newOrder,
+        notification,
+        assignedTo: assignedPharmacy ? "pharmacy" : "admin"
+    });
 });
+
 
 module.exports.getAllOrders = asyncErrorHandler(async (req, res, next) => {
     const userId = req.user._id;

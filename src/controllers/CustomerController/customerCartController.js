@@ -82,7 +82,7 @@ module.exports.addToCart = asyncErrorHandler(async (req, res, next) => {
 
 module.exports.getCart = asyncErrorHandler(async (req, res, next) => {
     const userId = req.user._id;
-    const cart = await cartModel.findOne({ user_id: userId });
+    const cart = await cartModel.findOne({ user_id: userId }).populate("items.item_id");
     if (!cart) {
         return next(new CustomError("Cart not found", 404));
     }

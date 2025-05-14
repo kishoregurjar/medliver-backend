@@ -52,7 +52,8 @@ const orderSchema = new mongoose.Schema({
     type: String,
     enum: [
       "pending",
-      "accepted",
+      "accepted_by_pharmacy",
+      "accepted_by_delivery_partner",
       "out-for-delivery",
       "delivered",
       "cancelled",
@@ -91,6 +92,12 @@ const orderSchema = new mongoose.Schema({
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Pharmacy",
+    }
+  ],
+  deliveryPartnerQueue: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "DeliveryPartner",
     }
   ],
   assignedPharmacyId: {
