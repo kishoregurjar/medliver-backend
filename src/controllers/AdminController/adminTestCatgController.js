@@ -183,3 +183,43 @@ module.exports.removeTestFromCategory = asyncErrorHandler(async (req, res, next)
 
   return successRes(res, 200, true, "Test removed from category successfully", category);
 });
+
+module.exports.searchTestCategory = asyncErrorHandler(async (req, res, next) => {
+  let { value, page, limit } = req.query;
+
+  if (!value) {
+    return next(new CustomError("Search value is required", 400));
+  }
+
+  page = parseInt(page) || 1;
+  limit = parseInt(limit) || 10;
+  const skip = (page - 1) * limit;
+
+  const regex = new RegExp(value.trim(), 'i');
+  const searchQuery = {
+    $or: [
+      { name: regex },
+      { description: regex }
+    ]
+  };
+
+  const [totalCategories, allCategories] = await Promise.all([
+    TestCategory.countDocuments(searchQuery),
+    TestCategory.find(searchQuery)
+      // .populate("tests") 
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+  ]);
+
+  if (allCategories.length === 0) {
+    return successRes(res, 200, false, "No Test Categories Found", []);
+  }
+
+  return successRes(res, 200, true, "Test Categories fetched successfully", {
+    testCategories: allCategories,
+    currentPage: page,
+    totalPages: Math.ceil(totalCategories / limit),
+    totalCategories,
+  });
+});
