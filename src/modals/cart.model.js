@@ -3,14 +3,14 @@ const mongoose = require("mongoose");
 const cartItemSchema = new mongoose.Schema({
     item_type: {
         type: String,
-        enum: ["medicine", "test"],
+        enum: ["Medicine", "test"],
         required: true
     },
     item_id: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
         refPath: "items.item_type"
-    }, 
+    },
     quantity: {
         type: Number,
         default: 1
