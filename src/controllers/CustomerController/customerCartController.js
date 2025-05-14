@@ -16,7 +16,7 @@ module.exports.addToCart = asyncErrorHandler(async (req, res, next) => {
     let findOriginalProduct;
     let name, price, details;
 
-    if (type.toLowerCase() === 'medicine') {
+    if (type === 'Medicine') {
         findOriginalProduct = await medicineModel.findById(productId);
         if (!findOriginalProduct) {
             return next(new CustomError("Medicine not found", 404));
@@ -27,7 +27,7 @@ module.exports.addToCart = asyncErrorHandler(async (req, res, next) => {
             company: findOriginalProduct.company,
             description: findOriginalProduct.description
         };
-    } else if (type.toLowerCase() === 'test') {
+    } else if (type === 'test') {
         findOriginalProduct = await testModel.findById(productId);
         if (!findOriginalProduct) {
             return next(new CustomError("Test not found", 404));
@@ -82,7 +82,7 @@ module.exports.addToCart = asyncErrorHandler(async (req, res, next) => {
 
 module.exports.getCart = asyncErrorHandler(async (req, res, next) => {
     const userId = req.user._id;
-    const cart = await cartModel.findOne({ user_id: userId });
+    const cart = await cartModel.findOne({ user_id: userId }).populate("items.item_id");
     if (!cart) {
         return next(new CustomError("Cart not found", 404));
     }
