@@ -238,7 +238,7 @@ module.exports.resetPassword = asyncErrorHandler(async (req, res, next) => {
 
 module.exports.getUserDetails = asyncErrorHandler(async (req, res, next) => {
   const userId = req.user._id;
-  const findUser = await customerModel.findById(userId).select("-password -otp").populate("previousOrders.orderId").populate("medicineReminders.medicineName").populate("userCoordinates");
+  const findUser = await customerModel.findById(userId).select("-password -otp");
   if (!findUser) {
     return next(new CustomError("User not found", 404));
   }
