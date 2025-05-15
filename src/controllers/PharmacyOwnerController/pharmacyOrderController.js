@@ -418,7 +418,7 @@ module.exports.getAcceptedOrdersByPharmacy = asyncErrorHandler(async (req, res) 
     )
     .populate({
       path: "customerId",
-      select: "fullName email"
+      select: "fullName email phoneNumber"
     })
     .populate({
       path: "deliveryPartnerId",
