@@ -1598,7 +1598,7 @@ const removeItemFromCartSchema = Joi.object({
     "string.pattern.base": "Invalid item ID format",
     "any.required": "item ID is required",
   }),
-  type: Joi.string().valid("medicine", "test").required().messages({
+  type: Joi.string().valid("Medicine", "test").required().messages({
     "any.required": "Type is required",
     "any.only": "Type must be either 'medicine' or 'test'",
   }),
