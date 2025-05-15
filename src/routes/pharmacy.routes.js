@@ -25,6 +25,7 @@ router.put('/accept-reject-order', verifyAdminToken("pharmacy"), indexController
 // get notification routes
 router.get('/get-notification-by-recipientId',verifyAdminToken("pharmacy"),indexController.commonController.getNotifications);
 router.put('/update-notification-status',verifyAdminToken("pharmacy"),indexController.commonController.updateNotificationStatus);
+router.get('/order-accepted-by-pharmacy',verifyAdminToken("pharmacy"),indexController.pharmacyOrderController.getAcceptedOrdersByPharmacy)
 
 
 module.exports = router;
