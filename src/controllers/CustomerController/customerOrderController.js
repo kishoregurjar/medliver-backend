@@ -11,6 +11,7 @@ const pharmacySchema = require("../../modals/pharmacy.model");
 const notificationModel = require("../../modals/notification.model");
 const { getDistance } = require("../../utils/helper");
 const adminSchema = require("../../modals/admin.Schema");
+const getRouteBetweenCoords = require("../../utils/distance.helper");
 
 module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
     const userId = req.user._id;
@@ -48,7 +49,7 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
         }
     }
 
-    const hasMedicine = itemsToOrder.some(i => i.item_type === "medicine");
+    const hasMedicine = itemsToOrder.some(i => i.item_type === "Medicine");
     const hasTest = itemsToOrder.some(i => i.item_type === "test");
     const orderType = hasMedicine && hasTest ? "mixed" : hasMedicine ? "pharmacy" : hasTest ? "pathology" : null;
 
@@ -66,6 +67,7 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
     const allPharmacies = await pharmacySchema.find({
         status: "active",
         availabilityStatus: "available",
+        deviceToken: { $ne: null },
         pharmacyCoordinates: { $ne: null }
     });
 
@@ -132,6 +134,12 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
             notificationType: "pharmacy_order_request",
         });
         await sendExpoNotification([assignedPharmacy.deviceToken], "New Order", "You have a new order", notification);
+        if (assignedPharmacy.pharmacyCoordinates && findAddress.location) {
+
+            let pharmacyToCustomerRoute = await getRouteBetweenCoords(assignedPharmacy.pharmacyCoordinates, findAddress.location);
+            if (pharmacyToCustomerRoute) newOrder.pharmacyToCustomerRoute = pharmacyToCustomerRoute;
+            newOrder.save();
+        }
     } else {
         // No pharmacy found — notify admin for manual assignment
         const admins = await adminSchema.find({ role: 'superadmin' });

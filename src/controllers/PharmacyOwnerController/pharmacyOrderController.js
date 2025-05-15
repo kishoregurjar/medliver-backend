@@ -260,7 +260,7 @@ module.exports.acceptOrRejectOrder = asyncErrorHandler(async (req, res, next) =>
                 title: "New Pickup Order",
                 message: "You have a new pickup order request",
                 recipientType: "delivery_partner",
-                notificationType: "pickup_request",
+                notificationType: "delivery_partner_pickup_request",
                 NotificationTypeId: order._id,
                 recipientId: nearestPartner._id
             });
@@ -288,7 +288,7 @@ module.exports.acceptOrRejectOrder = asyncErrorHandler(async (req, res, next) =>
                     NotificationTypeId: order._id,
                     recipientId: admin._id
                 });
-                // await notify.save();
+                await notify.save();
                 if (admin.deviceToken) {
                     await sendExpoNotification(
                         [admin.deviceToken],
@@ -301,7 +301,7 @@ module.exports.acceptOrRejectOrder = asyncErrorHandler(async (req, res, next) =>
         }
 
 
-        // await order.save();
+        await order.save();
         return successRes(res, 200, true, "Order accepted successfully", order);
     }
 
