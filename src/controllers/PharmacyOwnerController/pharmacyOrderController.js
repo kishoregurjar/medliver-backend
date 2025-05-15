@@ -387,6 +387,7 @@ module.exports.acceptOrRejectOrder = asyncErrorHandler(async (req, res, next) =>
     }
     return successRes(res, 200, true, "Order rejected and reassigned to another pharmacy", order);
 });
+
 module.exports.getAcceptedOrdersByPharmacy = asyncErrorHandler(async (req, res) => {
   const admin = req.admin;
 
@@ -396,29 +397,34 @@ module.exports.getAcceptedOrdersByPharmacy = asyncErrorHandler(async (req, res) 
     return errorRes(res, 404, false, "Pharmacy not found");
   }
 
-  console.log("pharmacy Id", pharmacy._id);
-
-  const acceptedOrders = await ordersModel.find(
-    {
-      assignedPharmacyId: pharmacy._id,
-      pharmacyResponseStatus: "accepted"
-    },
-    {
-      _id: 1,
-      orderDate: 1,
-      customerId: 1,
-      items: 1,
-      totalAmount: 1,
-      paymentMethod: 1,
-      paymentStatus: 1,
-      orderStatus: 1,
-      prescriptionRequired: 1,
-      "deliveryAddress.deliveryAddressId": 1,
-      assignedPharmacyId: 1,
-      pharmacyResponseStatus: 1,
-      pharmacyAttempts: 1
-    }
-  ).sort({ orderDate: -1 });
+  const acceptedOrders = await ordersModel
+    .find(
+      {
+        assignedPharmacyId: pharmacy._id,
+        pharmacyResponseStatus: "accepted"
+      },
+      {
+        _id: 1,
+        orderDate: 1,
+        customerId: 1,
+        deliveryPartnerId: 1,
+        items: 1,
+        totalAmount: 1,
+        paymentMethod: 1,
+        paymentStatus: 1,
+        "deliveryAddress.deliveryAddressId": 1,
+        assignedPharmacyId: 1,
+      }
+    )
+    .populate({
+      path: "customerId",
+      select: "fullName email"
+    })
+    .populate({
+      path: "deliveryPartnerId",
+      select: "fullname email location phone"
+    })
+    .sort({ orderDate: -1 });
 
   return successRes(res, 200, true, "Accepted orders fetched", acceptedOrders);
 });
