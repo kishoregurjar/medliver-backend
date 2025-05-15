@@ -31,6 +31,11 @@ const pathologyCenterSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  commissionId: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'Commission',
+  default: null,
+},
   labs: [
     {
       labName: {

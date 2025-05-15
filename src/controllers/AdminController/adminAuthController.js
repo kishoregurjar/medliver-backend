@@ -141,7 +141,6 @@ module.exports.resetPassword = asyncErrorHandler(async (req, res, next) => {
       return next(new CustomError("Admin not found", 404));
     }
 
-
     if (!password) {
       return next(new CustomError("Please provide a new password", 400));
     }
@@ -183,14 +182,12 @@ module.exports.updateAdminProfile = asyncErrorHandler(async (req, res, next) => 
   if (req.body.email) {
     delete req.body.email;
   }
-
-  console.log(req.body,"req.body");
+  // console.log(req.body,"req.body");
   const updateAdmin = await adminSchema.findByIdAndUpdate(adminId, req.body, {
     new: true,
     runValidators: true,
   });
   return successRes(res, 200, true, "Admin updated successfully", updateAdmin);
-
 });
 
 module.exports.uploadAdminAvatar = asyncErrorHandler(async (req, res, next) => {
@@ -202,8 +199,6 @@ module.exports.uploadAdminAvatar = asyncErrorHandler(async (req, res, next) => {
   return successRes(res, 200, true, "File Uploaded Successfully", { imageUrl });
 
 });
-
-
 
 module.exports.sendNotification = asyncErrorHandler(async (req, res, next) => {
   const { deviceToken, title, body } = req.body;

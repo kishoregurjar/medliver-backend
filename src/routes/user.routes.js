@@ -78,3 +78,7 @@ router.get('/medicines-by-manufacturer', indexController.customerMedicineControl
 /**DoctoreLead Routes */
 router.post("/create-doctoreLead", indexController.customerMissLiniesController.createDoctoreLead);
 module.exports = router;
+
+// get notification routes
+router.get('/get-notification-by-recipientId',verifyUserToken(),indexController.commonController.getNotifications);
+router.put('/update-notification-status',verifyUserToken(),indexController.commonController.updateNotificationStatus);

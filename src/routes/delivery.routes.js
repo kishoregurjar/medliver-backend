@@ -31,4 +31,9 @@ router.post('/calculate-distance-rate', validate(getCompleteRouteDetailsSchema),
 
 router.get('/get-requested-order', verifyDeliveryPartnerToken(), indexController.deliveryOrderController.getRequestedOrder);
 
+
+// get notification routes
+router.get('/get-notification-by-recipientId',verifyDeliveryPartnerToken(),indexController.commonController.getNotifications);
+router.put('/update-notification-status',verifyDeliveryPartnerToken(),indexController.commonController.updateNotificationStatus);
+router.get('/check-delivery-partner-currenct-status',verifyDeliveryPartnerToken(),indexController.deliveryPartnerController.getDeliveryPartnerCurrentStatus);
 module.exports = router;

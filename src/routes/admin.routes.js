@@ -14,6 +14,7 @@ const {
     updatePathologyCenter,
     searchPathologyCenter,
     createFeature,
+    searchTestCategoryValidation,
     getOrDeleteFeatureById,
     updateFeatureStatus,
     getAllFeatures,
@@ -535,6 +536,12 @@ router.put(
     verifyAdminToken("superadmin"),
     indexController.adminTestCatgController.removeTestFromCategory
 );
+router.get(
+    "/search-test-category",
+    validateQuery(searchTestCategoryValidation),
+    verifyAdminToken("superadmin"),
+    indexController.adminTestCatgController.searchTestCategory
+);
 
 // Insurance routes
 router.get(
@@ -718,5 +725,13 @@ router.get("/get-commission-by-id",validateQuery(getAndDeleteCommissionById),ver
 router.delete("/delete-commission-by-id",validateQuery(getAndDeleteCommissionById),verifyAdminToken("superadmin"),indexController.adminPathologyController.deleteCommissionByID);
 router.put("/update-commission-by-id",validate(updateCommissionValidation),verifyAdminToken("superadmin"),indexController.adminPathologyController.updateCommissionById);
 router.get('/get-all-commission',validateQuery(getAllCommissionValidation),verifyAdminToken("superadmin"),indexController.adminPathologyController.getAllCommission);
+
+// get notification routes for admin
+router.get('/get-notification-by-recipientId',verifyAdminToken(),indexController.commonController.getNotifications);
+router.put('/update-notification-status',verifyAdminToken(),indexController.commonController.updateNotificationStatus);
+
+// get notification routes for pathology
+router.get('/get-notification-by-recipientId',verifyAdminToken(),indexController.commonController.getNotifications);
+router.put('/update-notification-status',verifyAdminToken(),indexController.commonController.updateNotificationStatus);
 
 module.exports = router;
