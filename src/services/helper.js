@@ -28,8 +28,8 @@ const getLatLngFromPlaceId = async (placeId) => {
     }
 
     const location = result.geometry.location;
+    console.log(location, "location")
     const components = result.address_components;
-    console.log(components, "componenta")
     const getComponent = (types) =>
       components.find(c => types.every(t => c.types.includes(t)))?.long_name || '';
 
@@ -42,7 +42,7 @@ const getLatLngFromPlaceId = async (placeId) => {
 
     return {
       lat: location.lat,
-      long: location.long,
+      long: location.lng,
       formatted_address: result.formatted_address,
       address
     };
