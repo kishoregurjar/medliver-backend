@@ -389,4 +389,16 @@ module.exports.getCompleteRouteDetailsForDeliveryPartner = asyncErrorHandler(asy
     })
 });
 
+module.exports.getDeliveryPartnerCurrentStatus = asyncErrorHandler(async (req, res, next) => {
+    const partnerId = req.partner._id;
 
+    const partner = await DeliveryPartner.findById(partnerId).select("availabilityStatus");
+
+    if (!partner) {
+        return next(new CustomError("Delivery Partner not found", 404));
+    }
+
+    return successRes(res, 200, true, "Delivery Partner current status", {
+        availabilityStatus: partner.availabilityStatus
+    });
+});
