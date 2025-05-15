@@ -136,6 +136,14 @@ const orderSchema = new mongoose.Schema({
       attemptedAt: { type: Date, default: Date.now }
     }
   ],
+  pharmacyToCustomerRoute: {
+    type: Array,
+    default: []
+  },
+  pharmacyToDeliveryPartnerRoute: {
+    type: Array,
+    default: []
+  },
 
 }, { timestamps: true });
 
