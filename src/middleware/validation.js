@@ -1444,7 +1444,7 @@ const updateUserProfileValidation = Joi.object({
     "string.empty": "Password cannot be empty",
   }),
 
-  address: Joi.string().optional().messages({
+  address: Joi.string().allow(null).optional().messages({
     "string.empty": "Address cannot be empty",
   }),
 
