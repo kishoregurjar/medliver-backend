@@ -83,3 +83,6 @@ module.exports = router;
 // get notification routes
 router.get('/get-notification-by-recipientId', verifyUserToken(), indexController.commonController.getNotifications);
 router.put('/update-notification-status', verifyUserToken(), indexController.commonController.updateNotificationStatus);
+
+router.get('/get-automated-answer', indexController.chatBoatController.getAnswer);
+router.get('/chat-history', indexController.chatBoatController.getChatBoatHistory);
