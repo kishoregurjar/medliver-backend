@@ -1495,6 +1495,7 @@ const updateUserProfileValidation = Joi.object({
   height: Joi.string()
     .pattern(/^\d+\s?(cm|CM)$/)
     .optional()
+    .allow(null)
     .messages({
       "string.pattern.base": "Height must be in cm (e.g., '170 cm')",
     }),
@@ -1502,6 +1503,7 @@ const updateUserProfileValidation = Joi.object({
   weight: Joi.string()
     .pattern(/^\d+\s?(kg|KG)?$/)
     .optional()
+    .allow(null)
     .messages({
       "string.pattern.base": "Weight must be in kg (e.g., '70 kg')",
     }),
@@ -1509,6 +1511,7 @@ const updateUserProfileValidation = Joi.object({
   bloodGroup: Joi.string()
     .valid("A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-")
     .optional()
+    .allow(null)
     .messages({
       "any.only": "Blood group must be a valid type (e.g., 'A+', 'O-')",
     }),
