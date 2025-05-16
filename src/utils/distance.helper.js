@@ -58,4 +58,26 @@ const getRouteBetweenCoords = async (origin, destination) => {
     }
 };
 
-module.exports = getRouteBetweenCoords;
+async function getLocationFromPincode(pincode) {
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${pincode}&region=in&key=${API_KEY}`;
+
+    try {
+        const response = await axios.get(url);
+        const result = response.data.results[0];
+
+        if (result) {
+            return {
+                formatted_address: result.formatted_address,
+                lat: result.geometry.location.lat,
+                lng: result.geometry.location.lng,
+            };
+        } else {
+            return { error: "No location found for this pincode" };
+        }
+    } catch (error) {
+        console.error(error.message);
+        return { error: "Something went wrong" };
+    }
+}
+
+module.exports = { getRouteBetweenCoords, getLocationFromPincode };
