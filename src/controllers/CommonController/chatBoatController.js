@@ -301,10 +301,9 @@ Politely say:
         // Prepare messages for API
         const messages = [
             systemMessage,
-            ...chatData.history,
+            ...chatData.history.map(({ role, content }) => ({ role, content })), // ✅ remove _id
             { role: 'user', content: question }
         ];
-
         // Call external AI API
         const response = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
             model: 'llama3-8b-8192',
