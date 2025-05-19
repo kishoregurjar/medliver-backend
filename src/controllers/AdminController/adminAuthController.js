@@ -157,7 +157,7 @@ module.exports.resetPassword = asyncErrorHandler(async (req, res, next) => {
 })
 
 module.exports.changedPassword = asyncErrorHandler(async (req, res, next) => {
-  const { password } = req.body;
+  const { newPassword, oldPassword } = req.body;
   const adminId = req.admin._id;
   const findAdmin = await adminSchema.findById(adminId);
   if (!findAdmin) {
@@ -167,7 +167,11 @@ module.exports.changedPassword = asyncErrorHandler(async (req, res, next) => {
   if (!password) {
     return next(new CustomError("Please provide a new password", 400));
   }
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const isMatch = await bcrypt.compare(oldPassword, findAdmin.password);
+  if (!isMatch) {
+    return next(new CustomError("Old password is incorrect", 400));
+  }
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
   findAdmin.password = hashedPassword;
   await findAdmin.save();
   return successRes(res, 200, true, "Password changed successfully");
