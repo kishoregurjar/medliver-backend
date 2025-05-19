@@ -29,6 +29,7 @@ const customerMedicineController = require('./CustomerController/customerMedicin
 const adminDoctoreLeadController = require("./AdminController/adminDoctoreLeadController");
 const pharmacyOrderController = require("./PharmacyOwnerController/pharmacyOrderController");
 const deliveryOrderController = require("./DeliveryPartnerController/deliveryPartnerOrderController");
+const chatBoatController = require("./CommonController/chatBoatController");
 
 module.exports = {
     adminAuthController,
@@ -61,5 +62,6 @@ module.exports = {
     customerMedicineController,
     adminDoctoreLeadController,
     pharmacyOrderController,
-    deliveryOrderController
+    deliveryOrderController,
+    chatBoatController
 }   

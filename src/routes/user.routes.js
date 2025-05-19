@@ -66,6 +66,7 @@ router.post('/upload-prescription', verifyUserToken(), uploadPrescription, index
 router.post('/search-autocomplete-address', validate(autoCompleteAddressValidation), indexController.commonController.autoCompleteAddress);
 router.post('/get-distance-between-coords', validate(getDistanceBetweenCoordsValidation), indexController.commonController.getDistanceBetweenCoords);
 router.post('/get-routes-bw-coords', validate(getRouteBetweenCoordsValidation), indexController.commonController.getRouteBetweenCoords);
+router.get('/get-address-by-pincode', indexController.commonController.getAddressByPincode);
 
 /**Medicine */
 router.get('/search-medicine', validateQuery(searchUMedicineValidation), indexController.customerMedicineController.searchMedicine);
@@ -80,5 +81,8 @@ router.post("/create-doctoreLead", indexController.customerMissLiniesController.
 module.exports = router;
 
 // get notification routes
-router.get('/get-notification-by-recipientId',verifyUserToken(),indexController.commonController.getNotifications);
-router.put('/update-notification-status',verifyUserToken(),indexController.commonController.updateNotificationStatus);
+router.get('/get-notification-by-recipientId', verifyUserToken(), indexController.commonController.getNotifications);
+router.put('/update-notification-status', verifyUserToken(), indexController.commonController.updateNotificationStatus);
+
+router.post('/get-automated-answer', indexController.chatBoatController.getAnswer);
+router.get('/chat-history', indexController.chatBoatController.getChatBoatHistory);

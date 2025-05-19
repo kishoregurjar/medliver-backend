@@ -14,6 +14,7 @@ const globalErrorHandler = require('./src/controllers/errorController');
 const CustomError = require("./src/utils/customError");
 const indexRouter = require("./src/routes/index.routes");
 const path = require("path");
+const session = require('express-session');
 
 const hpp = require('hpp');
 
@@ -40,7 +41,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
     origin: process.env.CORS_ORIGIN || "*",
-    methods: ["GET", "POST", "PUT", "DELETE","PATCH"],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
@@ -51,6 +52,12 @@ app.use(helmet());
 app.use(hpp())
 app.use(compression());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use(session({
+  secret: 'yourSecretKey',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false } // true if using HTTPS
+}));
 
 // app.use(
 //   morgan("combined", {
