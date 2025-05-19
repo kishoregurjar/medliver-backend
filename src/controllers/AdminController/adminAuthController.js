@@ -164,7 +164,7 @@ module.exports.changedPassword = asyncErrorHandler(async (req, res, next) => {
     return next(new CustomError("Admin not found", 404));
   }
 
-  if (!password) {
+  if (!newPassword || !oldPassword) {
     return next(new CustomError("Please provide a new password", 400));
   }
   const isMatch = await bcrypt.compare(oldPassword, findAdmin.password);

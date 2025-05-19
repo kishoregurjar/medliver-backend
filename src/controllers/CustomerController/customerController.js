@@ -248,7 +248,7 @@ module.exports.getUserDetails = asyncErrorHandler(async (req, res, next) => {
 module.exports.changeUserPassword = asyncErrorHandler(async (req, res, next) => {
   const userId = req.user._id;
   const { newPassword,oldPassword } = req.body;
-  if (!password) {
+  if (!newPassword || !oldPassword) {
     return next(new CustomError("Password is required", 400));
   }
   const findUser = await customerModel.findById(userId);
@@ -260,7 +260,7 @@ module.exports.changeUserPassword = asyncErrorHandler(async (req, res, next) => 
   if (!isMatch) {
     return next(new CustomError("Old password is incorrect", 400));
   }
-  
+
   const hashedPassword = await bcrypt.hash(newPassword, 12);
   findUser.password = hashedPassword;
   await findUser.save();
