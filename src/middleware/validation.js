@@ -1107,6 +1107,9 @@ const archiveInsuranceByIdValidation = Joi.object({
       "any.required": "insurance ID is required",
       "string.empty": "insurance ID cannot be empty",
     }),
+  is_archived: Joi.string().valid(true, false).required().messages({
+    "any.only": "is_archived must be either true or false",
+  })
 });
 
 //** Special Offer Validation */
@@ -1404,18 +1407,18 @@ const registerCustomerSchema = Joi.object({
     "string.email": "Invalid email format",
   }),
 
- password: Joi.string()
-  .pattern(
-    new RegExp(
-      "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&#])[A-Za-z\\d@$!%*?&#]{6,}$"
+  password: Joi.string()
+    .pattern(
+      new RegExp(
+        "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&#])[A-Za-z\\d@$!%*?&#]{6,}$"
+      )
     )
-  )
-  .required()
-  .messages({
-    "string.empty": "Password is required",
-    "string.pattern.base":
-      "Password must be at least 6 characters and include uppercase, lowercase, number, and special character",
-  }),
+    .required()
+    .messages({
+      "string.empty": "Password is required",
+      "string.pattern.base":
+        "Password must be at least 6 characters and include uppercase, lowercase, number, and special character",
+    }),
 
 
   phoneNumber: Joi.string()
