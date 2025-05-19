@@ -134,12 +134,6 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
             notificationType: "pharmacy_order_request",
         });
         await sendExpoNotification([assignedPharmacy.deviceToken], "New Order", "You have a new order", notification);
-        if (assignedPharmacy.pharmacyCoordinates && findAddress.location) {
-
-            let pharmacyToCustomerRoute = await getRouteBetweenCoords(assignedPharmacy.pharmacyCoordinates, findAddress.location);
-            if (pharmacyToCustomerRoute) newOrder.pharmacyToCustomerRoute = pharmacyToCustomerRoute;
-            newOrder.save();
-        }
     } else {
         // No pharmacy found — notify admin for manual assignment
         const admins = await adminSchema.find({ role: 'superadmin' });

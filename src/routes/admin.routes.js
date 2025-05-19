@@ -736,5 +736,6 @@ router.put('/update-notification-status', verifyAdminToken(), indexController.co
 
 /** Manual Order Assignment */
 router.get('/get-all-manual-assignment', verifyAdminToken("superadmin"), indexController.adminOrderManagementController.getAllManualOrderAssignment);
+router.get('/get-all-nearby-pharmacy-to-customer', verifyAdminToken("superadmin"), indexController.adminOrderManagementController.getNearByPharmacyToCustomer);
 
 module.exports = router;

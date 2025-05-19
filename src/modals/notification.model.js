@@ -29,6 +29,7 @@ const notificationSchema = new mongoose.Schema({
         enum: ["order_received",
             "pharmacy_order_request",
             "delivery_partner_pickup_request",
+            "delivery_partner_order_accepted",
             "manual_pharmacy_assignment",
             "manual_delivery_assignment"],
         default: null
