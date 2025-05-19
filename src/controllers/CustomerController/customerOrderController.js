@@ -152,6 +152,9 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
                 NotificationTypeId: newOrder._id,
                 notificationType: "manual_pharmacy_assignment",
             });
+            newOrder.orderStatus = "need_manual_assignment_to_pharmacy";
+            console.log(newOrder, "newOrder")
+            await newOrder.save();
             await sendExpoNotification([admin.deviceToken], "Manual Assignment Needed", "No pharmacy available for order", notification);
         }
     }
@@ -164,7 +167,6 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
         assignedTo: assignedPharmacy ? "pharmacy" : "admin"
     });
 });
-
 
 module.exports.getAllOrders = asyncErrorHandler(async (req, res, next) => {
     const userId = req.user._id;

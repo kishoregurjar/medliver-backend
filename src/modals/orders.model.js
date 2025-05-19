@@ -54,6 +54,8 @@ const orderSchema = new mongoose.Schema({
       "pending",
       "accepted_by_pharmacy",
       "accepted_by_delivery_partner",
+      "need_manual_assignment_to_pharmacy",
+      "need_manual_assignment_to_delivery_partner",
       "out-for-delivery",
       "delivered",
       "cancelled",
