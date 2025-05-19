@@ -9,6 +9,7 @@ const { getDistance } = require("../../utils/helper");
 const notificationModel = require("../../modals/notification.model");
 const adminSchema = require("../../modals/admin.Schema");
 const Pharmacy = require("../../modals/pharmacy.model");
+const { getRouteBetweenCoords } = require("../../utils/distance.helper");
 
 module.exports.getAllAssignedOrder = asyncErrorHandler(
   async (req, res, next) => {
@@ -269,7 +270,7 @@ module.exports.acceptOrRejectOrder = asyncErrorHandler(
           title: "New Pickup Order",
           message: "You have a new pickup order request",
           recipientType: "delivery_partner",
-          notificationType: "pickup_request",
+          notificationType: "delivery_partner_pickup_request",
           NotificationTypeId: order._id,
           recipientId: nearestPartner._id,
         });
@@ -291,7 +292,7 @@ module.exports.acceptOrRejectOrder = asyncErrorHandler(
           );
           if (pharmacyToCustomerRoute)
             order.pharmacyToCustomerRoute = pharmacyToCustomerRoute;
-          newOrder.save();
+          order.save();
         }
         order.pickupAddress = findPharmacy.pharmacyAddress;
       } else {

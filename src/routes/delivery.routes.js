@@ -31,6 +31,7 @@ router.post('/calculate-distance-rate', validate(getCompleteRouteDetailsSchema),
 
 router.get('/get-requested-order', verifyDeliveryPartnerToken(), indexController.deliveryOrderController.getRequestedOrder);
 router.get('/get-order-by-id', verifyDeliveryPartnerToken(), indexController.deliveryOrderController.getOrderById);
+router.post("/accept-or-reject-order", verifyDeliveryPartnerToken(), indexController.deliveryOrderController.acceptRejectOrder);
 
 
 // get notification routes
