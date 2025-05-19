@@ -227,7 +227,7 @@ router.post(
     indexController.adminPharmacyController.uploadPharmacyDocument
 );
 router.put(
-    "/change-pharmacy-status",validate(changeStatusPharmacyValidation),
+    "/change-pharmacy-status", validate(changeStatusPharmacyValidation),
     verifyAdminToken("superadmin"),
     indexController.adminPharmacyController.changeStatus
 );
@@ -335,7 +335,7 @@ router.post(
 //customer routes
 router.get(
     "/get-all-customer",
-     validateQuery(getAllCustomersValidation),
+    validateQuery(getAllCustomersValidation),
     verifyAdminToken("superadmin"),
     indexController.adminCustomerController.getAllCustomers
 );
@@ -660,7 +660,7 @@ router.put(
 
 /** Payment Routes */
 router.post(
-    "/initiate-refund",validate(initiateRefundValidation),
+    "/initiate-refund", validate(initiateRefundValidation),
     indexController.adminPaymentController.initiateRefund
 );
 
@@ -698,40 +698,43 @@ router.delete(
 
 /**DoctoreLead Routes */
 router.get(
-    "/get-all-doctoreLead",validateQuery(getAllDoctoreLeadValidation),
+    "/get-all-doctoreLead", validateQuery(getAllDoctoreLeadValidation),
     verifyAdminToken("superadmin"),
     indexController.adminDoctoreLeadController.getAllUser
 );
 router.get(
-    "/get-doctoreLead-by-id",validateQuery(getAnddeleteDoctoreLeadByIdValidation),
+    "/get-doctoreLead-by-id", validateQuery(getAnddeleteDoctoreLeadByIdValidation),
     verifyAdminToken("superadmin"),
     indexController.adminDoctoreLeadController.getDoctorLeadById
 );
 router.put(
-    "/update-doctore-lead",validate(updateDoctorLeadValidation),
+    "/update-doctore-lead", validate(updateDoctorLeadValidation),
     verifyAdminToken("superadmin"),
     indexController.adminDoctoreLeadController.updateDoctorLead
 );
 router.delete(
-    "/delete-doctore-lead",validateQuery(getAnddeleteDoctoreLeadByIdValidation),
+    "/delete-doctore-lead", validateQuery(getAnddeleteDoctoreLeadByIdValidation),
     verifyAdminToken("superadmin"),
     indexController.adminDoctoreLeadController.deleteDoctorLeadById
 );
-router.get("/search-doctore-lead",verifyAdminToken("superadmin"),indexController.adminDoctoreLeadController.searchDoctorLead);
+router.get("/search-doctore-lead", verifyAdminToken("superadmin"), indexController.adminDoctoreLeadController.searchDoctorLead);
 
 
 //commission Routes for pathology 
-router.get("/get-commission-by-id",validateQuery(getAndDeleteCommissionById),verifyAdminToken("superadmin"),indexController.adminPathologyController.getCommissionByID);
-router.delete("/delete-commission-by-id",validateQuery(getAndDeleteCommissionById),verifyAdminToken("superadmin"),indexController.adminPathologyController.deleteCommissionByID);
-router.put("/update-commission-by-id",validate(updateCommissionValidation),verifyAdminToken("superadmin"),indexController.adminPathologyController.updateCommissionById);
-router.get('/get-all-commission',validateQuery(getAllCommissionValidation),verifyAdminToken("superadmin"),indexController.adminPathologyController.getAllCommission);
+router.get("/get-commission-by-id", validateQuery(getAndDeleteCommissionById), verifyAdminToken("superadmin"), indexController.adminPathologyController.getCommissionByID);
+router.delete("/delete-commission-by-id", validateQuery(getAndDeleteCommissionById), verifyAdminToken("superadmin"), indexController.adminPathologyController.deleteCommissionByID);
+router.put("/update-commission-by-id", validate(updateCommissionValidation), verifyAdminToken("superadmin"), indexController.adminPathologyController.updateCommissionById);
+router.get('/get-all-commission', validateQuery(getAllCommissionValidation), verifyAdminToken("superadmin"), indexController.adminPathologyController.getAllCommission);
 
 // get notification routes for admin
-router.get('/get-notification-by-recipientId',verifyAdminToken(),indexController.commonController.getNotifications);
-router.put('/update-notification-status',verifyAdminToken(),indexController.commonController.updateNotificationStatus);
+router.get('/get-notification-by-recipientId', verifyAdminToken(), indexController.commonController.getNotifications);
+router.put('/update-notification-status', verifyAdminToken(), indexController.commonController.updateNotificationStatus);
 
 // get notification routes for pathology
-router.get('/get-notification-by-recipientId',verifyAdminToken(),indexController.commonController.getNotifications);
-router.put('/update-notification-status',verifyAdminToken(),indexController.commonController.updateNotificationStatus);
+router.get('/get-notification-by-recipientId', verifyAdminToken(), indexController.commonController.getNotifications);
+router.put('/update-notification-status', verifyAdminToken(), indexController.commonController.updateNotificationStatus);
+
+/** Manual Order Assignment */
+router.get('/get-all-manual-assignment', verifyAdminToken("superadmin"), indexController.adminOrderManagementController.getAllManualOrderAssignment);
 
 module.exports = router;
