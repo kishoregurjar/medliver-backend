@@ -87,31 +87,40 @@ module.exports.getInsuranceById = asyncErrorHandler(async (req, res, next) => {
 
 module.exports.archiveInsuranceById = asyncErrorHandler(
   async (req, res, next) => {
-    const { insuranceId } = req.body;
-    
+    const { insuranceId, is_archived } = req.body;
+
+    // Validate input
     if (!insuranceId) {
       return next(new CustomError("Insurance ID is required", 400));
     }
 
+    if (typeof is_archived !== 'boolean') {
+      return next(new CustomError("is_archived must be a boolean value", 400));
+    }
+
+    // Update the insurance lead
     const insurance = await InsuranceLead.findByIdAndUpdate(
       insuranceId,
-      { $set: { is_archived: true } },
+      { $set: { is_archived } },
       { new: true }
     );
 
+    // If insurance not found
     if (!insurance) {
       return next(new CustomError("Insurance Lead not found", 404));
     }
 
+    // Return success response
     return successRes(
       res,
       200,
       true,
-      "Insurance Lead archived successfully",
+      `Insurance Lead ${is_archived ? "archived" : "unarchived"} successfully`,
       insurance
     );
   }
 );
+
 
 module.exports.searchInsuranceLead = asyncErrorHandler(async (req, res, next) => {
   const { query } = req.query;

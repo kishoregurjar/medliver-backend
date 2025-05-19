@@ -111,7 +111,7 @@ module.exports.manuallyAssignOrderToPhramacy = asyncErrorHandler(async (req, res
         recipientId: pharmacyDeviceToken
     });
 
-    // await newNotification.save();
+    await newNotification.save();
 
     await sendExpoNotification(
         [pharmacyDeviceToken],
@@ -120,7 +120,7 @@ module.exports.manuallyAssignOrderToPhramacy = asyncErrorHandler(async (req, res
         newNotification
     );
 
-    // await order.save();
+    await order.save();
 
     return successRes(res, 200, true, "Order assigned to pharmacy successfully", order);
 });
