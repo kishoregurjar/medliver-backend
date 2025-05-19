@@ -647,7 +647,11 @@ const resetPasswordValidation = Joi.object({
 });
 
 const changePasswordValidation = Joi.object({
-  password: Joi.string().min(6).required().messages({
+  oldPassword: Joi.string().min(6).required().messages({
+    "string.min": "Password must be at least 6 characters long",
+    "any.required": "Password is required",
+  }),
+  newPassword: Joi.string().min(6).required().messages({
     "string.min": "Password must be at least 6 characters long",
     "any.required": "Password is required",
   }),
