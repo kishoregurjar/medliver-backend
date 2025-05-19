@@ -1,7 +1,6 @@
 const axios = require('axios');
 
 module.exports.sendExpoNotification = async (tokens, title, body, data = {}) => {
-    console.log(tokens, title, body, data, "1111111111111111111")
     try {
         if (tokens.length === 0) return false;
 

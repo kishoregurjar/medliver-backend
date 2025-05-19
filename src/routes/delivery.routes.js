@@ -37,4 +37,7 @@ router.get('/get-order-by-id', verifyDeliveryPartnerToken(), indexController.del
 router.get('/get-notification-by-recipientId', verifyDeliveryPartnerToken(), indexController.commonController.getNotifications);
 router.put('/update-notification-status', verifyDeliveryPartnerToken(), indexController.commonController.updateNotificationStatus);
 router.get('/check-delivery-partner-currenct-status', verifyDeliveryPartnerToken(), indexController.deliveryPartnerController.getDeliveryPartnerCurrentStatus);
+
+/**  */
+
 module.exports = router;
