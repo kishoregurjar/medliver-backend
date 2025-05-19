@@ -9,6 +9,7 @@ const DeliveryPartner = require("../../modals/delivery.model");
 const customerModel = require("../../modals/customer.model");
 const pharmacyModel = require("../../modals/pharmacy.model");
 const { getRouteBetweenCoords } = require("../../utils/distance.helper");
+const adminSchema = require("../../modals/admin.Schema");
 
 module.exports.getRequestedOrder = asyncErrorHandler(async (req, res, next) => {
   const deliveryPartnerId = req.partner._id;
@@ -92,16 +93,19 @@ module.exports.acceptRejectOrder = asyncErrorHandler(async (req, res, next) => {
         NotificationTypeId: order._id,
         recipientId: customer._id,
       });
+
+    //   console.log(customer.deviceToken,"customer.deviceToken");
   
       if (customer.deviceToken) {
-        await sendExpoNotification(
+        console.log(customer.deviceToken,"customer.deviceToken");
+       const result = await sendExpoNotification(
           [customer.deviceToken],
           "Order Accepted",
           "Your Order has been accepted by delivery partner",
           notification
         );
+        console.log(result,"result");
       }
-  
     //   await Promise.all([order.save(), notification.save()]);
       return successRes(res, 200, true, "Order accepted successfully", order);
     }
