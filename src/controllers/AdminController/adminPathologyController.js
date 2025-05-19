@@ -7,6 +7,8 @@ const CustomError = require('../../utils/customError')
 const { successRes } = require('../../services/response');
 const Commission = require('../../modals/pathologyCommission.model');
 
+
+
 module.exports.createPathologyCenter = asyncErrorHandler(async (req, res, next) => {
   const admin = req.admin;
   const {
@@ -15,8 +17,8 @@ module.exports.createPathologyCenter = asyncErrorHandler(async (req, res, next) 
     phoneNumber,
     address,
     password,
-    commissionType, 
-    commissionValue
+    commissionType,
+    commissionValue,
   } = req.body;
 
   if (!admin.role || admin.role !== "superadmin") {
@@ -33,7 +35,7 @@ module.exports.createPathologyCenter = asyncErrorHandler(async (req, res, next) 
     await session.startTransaction();
 
     const existingCenter = await PathologyCenter.findOne({
-      $or: [{ email }, { phoneNumber }]
+      $or: [{ email }, { phoneNumber }],
     }).session(session);
 
     const existingAdmin = await Admin.findOne({ email }).session(session);
@@ -78,20 +80,21 @@ module.exports.createPathologyCenter = asyncErrorHandler(async (req, res, next) 
 
     await newCommission.save({ session });
 
-    //  Update pathology center with commissionId
+    // Update pathology center with commissionId
     newCenter.commissionId = newCommission._id;
     await newCenter.save({ session });
 
     await session.commitTransaction();
 
-    const sanitizedAdmin = newAdmin.toObject();
-    delete sanitizedAdmin.password;
+    // 🔥 Fetch populated pathology center with admin and commission
+    const populatedCenter = await PathologyCenter.findById(newCenter._id)
+      .populate("adminId")
+      .populate("commissionId", "type value");
 
     return successRes(res, 201, true, "Pathology Center, Admin, and Commission created successfully", {
-      admin: sanitizedAdmin,
-      pathologyCenter: newCenter,
-      commission: newCommission,
+      pathologyCenter: populatedCenter,
     });
+
   } catch (error) {
     await session.abortTransaction();
     return next(error);
@@ -141,7 +144,9 @@ module.exports.deletePathologyCenter = asyncErrorHandler(async (req, res, next) 
 
 
 // module.exports.updatePathologyCenter = asyncErrorHandler(async (req, res, next) => {
-//   const { pathologyCenterId, email, centerName, ownerName, phoneNumber, address } = req.body;
+//   const admin = req.admin; // coming from middleware
+
+//   const { pathologyCenterId, email, centerName, phoneNumber, address } = req.body;
 
 //   if (!pathologyCenterId) {
 //     return next(new CustomError("Pathology Center Id is required", 400));
@@ -149,7 +154,6 @@ module.exports.deletePathologyCenter = asyncErrorHandler(async (req, res, next) 
 
 //   const updateFields = {};
 //   if (centerName) updateFields.centerName = centerName;
-//   if (ownerName) updateFields.ownerName = ownerName;
 //   if (phoneNumber) updateFields.phoneNumber = phoneNumber;
 //   if (address) updateFields.address = address;
 //   if (email) updateFields.email = email;
@@ -158,24 +162,56 @@ module.exports.deletePathologyCenter = asyncErrorHandler(async (req, res, next) 
 //     return next(new CustomError("No fields provided for update", 400));
 //   }
 
-//   // Update PathologyCenter
-//   const updatedPathologyCenter = await PathologyCenter.findByIdAndUpdate(
-//     pathologyCenterId,
-//     { $set: updateFields },
-//     { new: true, runValidators: true }
-//   );
+//   const session = await mongoose.startSession();
 
-//   if (email) {
-//     const adminUpdateFields = { email };
-//     await Admin.findOneAndUpdate(
-//       { pathologyCenterId: pathologyCenterId },
-//       { $set: adminUpdateFields },
-//       { new: true }
+//   try {
+//     await session.startTransaction();
+
+//     // Update Pathology Center
+//     const updatedPathologyCenter = await PathologyCenter.findByIdAndUpdate(
+//       pathologyCenterId,
+//       { $set: updateFields },
+//       { new: true, runValidators: true, session }
 //     );
-//   }
 
-//   return successRes(res, 200, true, "Pathology Center and Admin updated successfully", updatedPathologyCenter);
+//     if (!updatedPathologyCenter) {
+//       return next(new CustomError("Pathology Center not found", 404));
+//     }
+
+//     //  Update the associated Admin using admin._id
+//     // let updatedAdmin = null;
+//     // if (email || centerName) {
+//     //   const adminUpdateFields = {};
+//     //   if (email) adminUpdateFields.email = email;
+//     //   if (centerName) adminUpdateFields.name = centerName;
+
+//     //   updatedAdmin = await Admin.findByIdAndUpdate(
+//     //     admin._id,
+//     //     { $set: adminUpdateFields },
+//     //     { new: true, session }
+//     //   );
+
+//     //   if (!updatedAdmin) {
+//     //     return next(new CustomError("Admin not found", 400));
+//     //   }
+//     // }
+
+//     await session.commitTransaction();
+
+//     // const sanitizedAdmin = updatedAdmin ? updatedAdmin.toObject() : {};
+//     // if (sanitizedAdmin.password) delete sanitizedAdmin.password;
+
+//     return successRes(res, 200, true, "Pathology Center and Admin updated successfully", {
+//       pathologyCenter: updatedPathologyCenter,
+//     });
+//   } catch (error) {
+//     await session.abortTransaction();
+//     return next(error);
+//   } finally {
+//     session.endSession();
+//   }
 // });
+
 module.exports.updatePathologyCenter = asyncErrorHandler(async (req, res, next) => {
   const admin = req.admin; // coming from middleware
 
@@ -234,8 +270,13 @@ module.exports.updatePathologyCenter = asyncErrorHandler(async (req, res, next) 
     // const sanitizedAdmin = updatedAdmin ? updatedAdmin.toObject() : {};
     // if (sanitizedAdmin.password) delete sanitizedAdmin.password;
 
-    return successRes(res, 200, true, "Pathology Center and Admin updated successfully", {
-      pathologyCenter: updatedPathologyCenter,
+    // 🔥 Fetch populated updated pathology center with admin and commission
+    const populatedCenter = await PathologyCenter.findById(pathologyCenterId)
+      .populate("adminId")
+      .populate("commissionId", "type value");
+
+    return successRes(res, 200, true, "Pathology Center updated successfully", {
+      pathologyCenter: populatedCenter,
     });
   } catch (error) {
     await session.abortTransaction();
@@ -244,6 +285,8 @@ module.exports.updatePathologyCenter = asyncErrorHandler(async (req, res, next) 
     session.endSession();
   }
 });
+
+
 
 module.exports.getAllPathologyCenters = asyncErrorHandler(async (req, res, next) => {
   let { page, limit } = req.query;
@@ -373,6 +416,50 @@ module.exports.getAllCommission = asyncErrorHandler(async (req, res, next) => {
 });
 
 
+// module.exports.updateCommissionById = asyncErrorHandler(async (req, res, next) => {
+//   const { CommisionId, commissionType, commissionValue } = req.body;
+
+//   if (!CommisionId) {
+//     return next(new CustomError("Commission ID is required", 400));
+//   }
+
+//   const updateFields = {};
+//   if (commissionType) updateFields.type = commissionType;
+//   if (commissionValue) updateFields.value = commissionValue;
+  
+//   if (Object.keys(updateFields).length === 0) {
+//     return next(new CustomError("No fields provided for update", 400));
+//   }
+
+//   const session = await mongoose.startSession();
+
+//   try {
+//     await session.startTransaction();
+
+//     const updatedCommission = await Commission.findByIdAndUpdate(
+//        CommisionId ,
+//       { $set: updateFields },
+//       { new: true, runValidators: true, session }
+//     );
+    
+//     if (!updatedCommission) {
+//       return next(new CustomError("Commission not found for this Id", 404));
+//     }
+
+//     await session.commitTransaction();
+
+//     return successRes(res, 200, true, "Commission updated successfully", {
+//       commission: updatedCommission,
+//     });
+//   } catch (error) {
+//     await session.abortTransaction();
+//     return next(error);
+//   } finally {
+//     session.endSession();
+//   }
+// }); 
+
+
 module.exports.updateCommissionById = asyncErrorHandler(async (req, res, next) => {
   const { CommisionId, commissionType, commissionValue } = req.body;
 
@@ -383,7 +470,7 @@ module.exports.updateCommissionById = asyncErrorHandler(async (req, res, next) =
   const updateFields = {};
   if (commissionType) updateFields.type = commissionType;
   if (commissionValue) updateFields.value = commissionValue;
-  
+
   if (Object.keys(updateFields).length === 0) {
     return next(new CustomError("No fields provided for update", 400));
   }
@@ -394,27 +481,38 @@ module.exports.updateCommissionById = asyncErrorHandler(async (req, res, next) =
     await session.startTransaction();
 
     const updatedCommission = await Commission.findByIdAndUpdate(
-       CommisionId ,
+      CommisionId,
       { $set: updateFields },
       { new: true, runValidators: true, session }
     );
-    
+
     if (!updatedCommission) {
-      return next(new CustomError("Commission not found for this Id", 404));
+      throw new CustomError("Commission not found for this ID", 404);
+    }
+
+    // 🔍 Fetch associated Pathology Center and update it (if needed)
+    const pathologyCenter = await PathologyCenter.findOne({ commissionId: CommisionId })
+      .populate("adminId")
+      .populate("commissionId", "type value")
+      .session(session);
+
+    if (!pathologyCenter) {
+      throw new CustomError("Pathology Center associated with this commission not found", 404);
     }
 
     await session.commitTransaction();
 
-    return successRes(res, 200, true, "Commission updated successfully", {
-      commission: updatedCommission,
+    return successRes(res, 200, true, "Commission updated and Pathology Center fetched successfully", {
+      pathologyCenter,
     });
+
   } catch (error) {
     await session.abortTransaction();
     return next(error);
   } finally {
     session.endSession();
   }
-}); 
+});
 
 
 
