@@ -58,6 +58,8 @@ const orderSchema = new mongoose.Schema({
       "accepted_by_delivery_partner",
       "need_manual_assignment_to_pharmacy",
       "need_manual_assignment_to_delivery_partner",
+      "out-for-pickup",
+      "picked-up",
       "out-for-delivery",
       "delivered",
       "cancelled",

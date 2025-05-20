@@ -2398,6 +2398,29 @@ const searchOrderValidation = Joi.object({
   }),
 });
 
+//pathology test management validation
+const TestListApiValidation = Joi.object({
+  page: Joi.number().min(1).optional().messages({
+    "number.base": "Page must be a number",
+    "number.min": "Page must be at least 1",
+  }),
+  limit: Joi.number().min(1).optional().messages({
+    "number.base": "Limit must be a number",
+    "number.min": "Limit must be at least 1",
+  }),
+});
+
+
+const addTestToPathology = Joi.object({
+    testId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "string.pattern.base": "Invalid test ID format",
+      "string.empty": "Test Id is required",
+    }),
+});
+
 
 const validate = (schema) => {
   return (req, res, next) => {
@@ -2555,5 +2578,7 @@ module.exports = {
   getAllCommissionValidation,
   updateCommissionValidation,
   searchTestCategoryValidation,
-  searchOrderValidation
+  searchOrderValidation,
+  TestListApiValidation,
+  addTestToPathology
 };
