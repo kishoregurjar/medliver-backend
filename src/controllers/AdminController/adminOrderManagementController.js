@@ -169,4 +169,72 @@ module.exports.getNearyByDeliveryToPharmacy = asyncErrorHandler(async (req, res,
 
 });
 
+module.exports.manuallyAssignOrderToDeliveryPartner = asyncErrorHandler(async (req, res, next) => {
+    let { deliveryPartnerId, orderId } = req.body;
+
+    if (!deliveryPartnerId || !orderId) {
+        return next(new CustomError("Delivery Partner ID and Order ID are required", 400));
+    }
+
+    let order = await ordersModel.findById(orderId);
+    if (!order) {
+        return next(new CustomError("Order not found", 404));
+    }
+
+    if (order.orderStatus !== "need_manual_assignment_to_delivery_partner") {
+        return next(new CustomError("This order cannot be assigned manually to a delivery partner", 400));
+    }
+
+    let findDeliveryPartner = await deliveryModel.findById(deliveryPartnerId);
+    if (!findDeliveryPartner) {
+        return next(new CustomError("Delivery Partner not found", 404));
+    }
+    if (findDeliveryPartner.availabilityStatus !== "available") {
+        return next(new CustomError("Delivery Partner is not online", 400));
+    }
+    if (findDeliveryPartner.status !== 'active') {
+        return next(new CustomError("Delivery Partner is not active", 400));
+    }
+    if (!findDeliveryPartner.location?.lat || !findDeliveryPartner.location?.long) {
+        return next(new CustomError("Delivery Partner location is not available", 400));
+    }
+    if (!findDeliveryPartner.deviceToken) {
+        return next(new CustomError("Delivery Partner device token is not available", 400));
+    }
+    let deliveryPartnerDeviceToken = findDeliveryPartner.deviceToken;
+    // Assign pharmacy and update status
+    order.assignedDeliveryPartnerId = deliveryPartnerId;
+    order.orderStatus = "assigned_to_delivery_partner";
+
+    // Push to pharmacyAttempts
+    order.deliveryPartnerAttempts.push({
+        deliveryPartnerId: deliveryPartnerId,
+        status: "pending", // can later be updated by pharmacy
+        attemptedAt: new Date()
+    });
+
+    // Create and send notification
+    let newNotification = new notificationModel({
+        title: "New Order",
+        message: "You have a new order",
+        recipientType: "delivery_partner",
+        notificationType: "delivery_partner_order_request",
+        NotificationTypeId: order._id,
+        recipientId: deliveryPartnerDeviceToken
+    });
+
+    await newNotification.save();
+
+    await sendExpoNotification(
+        [deliveryPartnerDeviceToken],
+        "New Order",
+        "You have a new order",
+        newNotification
+    );
+
+    await order.save();
+
+    return successRes(res, 200, true, "Order assigned to delivery partner successfully", order);
+});
+
 
