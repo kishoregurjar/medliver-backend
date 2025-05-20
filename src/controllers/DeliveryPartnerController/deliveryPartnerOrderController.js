@@ -31,13 +31,15 @@ module.exports.getOrderById = asyncErrorHandler(async (req, res, next) => {
   const order = await ordersModel
     .findOne({ _id: orderId, deliveryPartnerId: deliveryPartnerId })
     .select(
-      "-orderStatus -pharmacyQueue -deliveryPartnerQueue -pharmacyResponseStatus -pharmacyAttempts -deliveryPartnerAttempts"
+      " -pharmacyQueue -deliveryPartnerQueue -pharmacyResponseStatus -pharmacyAttempts -deliveryPartnerAttempts"
     )
     .populate(
       "assignedPharmacyId",
       "pharmacyName address phone completeAddress"
     )
     .populate("customerId", "fullName phoneNumber profilePicture");
+
+    console.log(order.orderStatus,"order.orderStatus");
   if (!order) {
     return next(new CustomError("Order not found", 404));
   }
