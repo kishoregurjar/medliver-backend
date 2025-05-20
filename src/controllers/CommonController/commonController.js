@@ -147,7 +147,7 @@ module.exports.getNotifications = asyncErrorHandler(async (req, res, next) => {
   const userId = req.user?._id;
   const partnerId = req.partner?._id;
   const admin = req.admin;
-
+  console.log(userId, "userId")
   let recipientId;
   let recipientType;
 
@@ -174,8 +174,7 @@ module.exports.getNotifications = asyncErrorHandler(async (req, res, next) => {
   }
 
   const notifications = await Notification.find({
-    recipientId,
-    recipientType,
+    recipientId
   }).sort({ sentAt: -1 });
 
   if (!notifications || notifications.length === 0) {
