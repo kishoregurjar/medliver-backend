@@ -6,6 +6,7 @@ const CustomError = require("../../utils/customError");
 const { sendExpoNotification } = require("../../utils/expoNotification");
 const { getDistance } = require("../../utils/helper");
 const notificationModel = require("../../modals/notification.model");
+const deliveryModel = require("../../modals/delivery.model");
 
 
 module.exports.getAllManualOrderAssignment = asyncErrorHandler(async (req, res, next) => {
@@ -123,6 +124,49 @@ module.exports.manuallyAssignOrderToPhramacy = asyncErrorHandler(async (req, res
     await order.save();
 
     return successRes(res, 200, true, "Order assigned to pharmacy successfully", order);
+});
+
+module.exports.getNearyByDeliveryToPharmacy = asyncErrorHandler(async (req, res, next) => {
+    let { orderId } = req.query;
+
+    if (!orderId) {
+        return next(new CustomError("Order ID is required", 400));
+    }
+
+    let order = await ordersModel.findById(orderId).select('assignedPharmacyId orderStatus deliveryAddress');
+    if (!order) {
+        return next(new CustomError("Order not found", 404));
+    }
+    if (order.orderStatus !== "need_manual_assignment_to_delivery_partner") {
+        return next(new CustomError("This order cannot be assigned manually to a delivery partner", 400));
+    }
+
+
+
+    const nearByDeliveryPartners = await deliveryModel.find({
+        deviceToken: { $ne: null },
+        location: { $ne: null },
+        availabilityStatus: "available",
+        isBlocked: false,
+        isVerified: true,
+        approvalStatus: "approved"
+    });
+
+    const sortedPartnerWithDistance = await Promise.all(
+        nearByDeliveryPartners.map(async (partner) => {
+            const distance = await getDistance(order.deliveryAddress.coordinates, partner.location);
+            return {
+                ...partner.toObject(),
+                distanceInKm: parseFloat(distance.toFixed(2))
+            };
+        })
+    );
+
+    sortedPartnerWithDistance.sort((a, b) => a.distanceInKm - b.distanceInKm);
+
+
+    return successRes(res, 200, true, "Delivery Partners fetched successfully", sortedPartnerWithDistance);
+
 });
 
 
