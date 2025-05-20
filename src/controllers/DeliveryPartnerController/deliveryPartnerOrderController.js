@@ -228,7 +228,7 @@ module.exports.updateDeliveryStatus = asyncErrorHandler(
       200,
       true,
       "Order status updated successfully",
-      order
+      {orderStatus:order.orderStatus}
     );
   }
 );
