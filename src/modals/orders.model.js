@@ -53,6 +53,8 @@ const orderSchema = new mongoose.Schema({
     enum: [
       "pending",
       "accepted_by_pharmacy",
+      "assigned_to_delivery_partner",
+      "assigned_to_pharmacy",
       "accepted_by_delivery_partner",
       "need_manual_assignment_to_pharmacy",
       "need_manual_assignment_to_delivery_partner",

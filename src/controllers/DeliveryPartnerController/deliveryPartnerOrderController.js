@@ -13,8 +13,9 @@ const adminSchema = require("../../modals/admin.Schema");
 
 module.exports.getRequestedOrder = asyncErrorHandler(async (req, res, next) => {
   const deliveryPartnerId = req.partner._id;
+  let { orderStatus } = req.query;
   const orders = await ordersModel
-    .find({ deliveryPartnerId: deliveryPartnerId })
+    .find({ deliveryPartnerId: deliveryPartnerId , orderStatus: orderStatus })
     .populate("assignedPharmacyId");
   return successRes(res, 200, true, "Orders fetched successfully", orders);
 });
@@ -80,6 +81,7 @@ module.exports.acceptRejectOrder = asyncErrorHandler(async (req, res, next) => {
         status: "accepted",
       });
   
+      partner.availabilityStatus = "on-delivery";
       if (pharmacyCoordinates && partner.location) {
         const route = await getRouteBetweenCoords(pharmacyCoordinates, partner.location);
         if (route) order.pharmacyToDeliveryPartnerRoute = route;
@@ -106,7 +108,7 @@ module.exports.acceptRejectOrder = asyncErrorHandler(async (req, res, next) => {
         );
         console.log(result,"result");
       }
-    //   await Promise.all([order.save(), notification.save()]);
+    //   await Promise.all([order.save(), notification.save(), partner.save()]);
       return successRes(res, 200, true, "Order accepted successfully", order);
     }
   
