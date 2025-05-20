@@ -295,11 +295,11 @@ module.exports.acceptOrRejectOrder = asyncErrorHandler(
           order.save();
         }
         order.pickupAddress = findPharmacy.pharmacyAddress;
+        order.orderStatus = "assigned_to_delivery_partner";
       } else {
         // No delivery partner available → notify admin
-        const admins = await adminSchema.find({ role: "superadmin" });
-        console.log(admins, "admins");
-        for (let admin of admins) {
+        const admin = await adminSchema.findOne({ role: "superadmin" });
+        console.log(admin, "admins");
           const notify = new notificationModel({
             title: "Manual Delivery Partner Assignment Required",
             message: `No delivery partner available for order ${order._id}`,
@@ -308,7 +308,7 @@ module.exports.acceptOrRejectOrder = asyncErrorHandler(
             NotificationTypeId: order._id,
             recipientId: admin._id,
           });
-          // await notify.save();
+          await notify.save();
           if (admin.deviceToken) {
             await sendExpoNotification(
               [admin.deviceToken],
@@ -317,7 +317,8 @@ module.exports.acceptOrRejectOrder = asyncErrorHandler(
               notify
             );
           }
-        }
+   
+        order.orderStatus = "need_manual_assignment_to_delivery_partner";
       }
 
       // await order.save();
