@@ -2,7 +2,7 @@ const express = require("express");
 const indexController = require("../controllers/indexController");
 const { verifyUserToken } = require("../utils/jsonWebToken");
 const { uploadUserProfilePic, uploadPrescription } = require("../services/multer");
-const { validate, validateQuery, getAllSpecialOfferValidation, getAllFeatureProductValidation, getAllSellingProductValidation, createDoctorLeadValidation, registerCustomerSchema, CustomerverifyOtpSchema, loginCustomerSchema, forgetPasswordCustomerValidation, resetPasswordCustomerValidation, signUpSignInWithGoogleValidation, addAddressValidation, editAddressSchema, getOrDeleteCustomerAddress, addToCartSchema, changeQuantitySchema, removeItemFromCartSchema, applyInsuranceSchema, emergencyVehicleRequestSchema, updateUserProfileValidation, createOrderValidation, getOrderByIdValidation, createRazorpayOrderValidation, verifyRazorpayPaymentValidation, autoCompleteAddressValidation, getDistanceBetweenCoordsValidation, getRouteBetweenCoordsValidation, searchUMedicineValidation, logMedicineClickValidation } = require("../middleware/validation")
+const { validate, validateQuery, getAllSpecialOfferValidation, getAllFeatureProductValidation, getAllSellingProductValidation, createDoctorLeadValidation, registerCustomerSchema, CustomerverifyOtpSchema, loginCustomerSchema, forgetPasswordCustomerValidation, resetPasswordCustomerValidation, signUpSignInWithGoogleValidation, addAddressValidation, editAddressSchema, getOrDeleteCustomerAddress, addToCartSchema, changeQuantitySchema, removeItemFromCartSchema, applyInsuranceSchema, emergencyVehicleRequestSchema, updateUserProfileValidation, createOrderValidation, getOrderByIdValidation, createRazorpayOrderValidation, verifyRazorpayPaymentValidation, autoCompleteAddressValidation, getDistanceBetweenCoordsValidation, getRouteBetweenCoordsValidation, searchUMedicineValidation, logMedicineClickValidation ,searchOrderValidation} = require("../middleware/validation")
 
 const router = express.Router();
 
@@ -52,6 +52,7 @@ router.post("/create-order", validate(createOrderValidation), verifyUserToken(),
 router.get("/get-all-orders", verifyUserToken(), indexController.customerOrderController.getAllOrders);
 router.get("/get-order-by-id", validateQuery(getOrderByIdValidation), verifyUserToken(), indexController.customerOrderController.getOrderById);
 router.put("/cancel-order", validateQuery(getOrderByIdValidation), verifyUserToken(), indexController.customerOrderController.cancleOrder);
+router.get('/search-order',validateQuery(searchOrderValidation),verifyUserToken(),indexController.customerOrderController.searchOrder);
 
 /** Payment Routes */
 

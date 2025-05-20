@@ -232,3 +232,44 @@ module.exports.uploadPrescription = asyncErrorHandler(async (req, res, next) => 
 });
 
 
+module.exports.searchOrder = asyncErrorHandler(async (req, res, next) => {
+  let { value, page, limit } = req.query;
+
+  if (!value) {
+    return next(new CustomError("Search value is required", 400));
+  }
+
+  page = parseInt(page) || 1;
+  limit = parseInt(limit) || 10;
+  const skip = (page - 1) * limit;
+
+  const regex = new RegExp(value.trim(), 'i'); 
+
+  const searchQuery = {
+    $or: [
+      { orderStatus: regex },
+      { paymentStatus: regex },
+      { orderType: regex },
+      { paymentMethod: regex }
+    ]
+  };
+
+  const [totalOrders, allOrders] = await Promise.all([
+    orderSchema.countDocuments(searchQuery),
+    orderSchema.find(searchQuery)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+  ]);
+
+  if (allOrders.length === 0) {
+    return successRes(res, 200, false, "No Orders Found", []);
+  }
+
+  return successRes(res, 200, true, "Orders fetched successfully", {
+    orders: allOrders,
+    currentPage: page,
+    totalPages: Math.ceil(totalOrders / limit),
+    totalOrders
+  });
+});

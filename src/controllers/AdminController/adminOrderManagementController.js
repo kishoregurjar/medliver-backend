@@ -2,6 +2,10 @@ const ordersModel = require("../../modals/orders.model");
 const pharmacyModel = require("../../modals/pharmacy.model");
 const { successRes } = require("../../services/response");
 const asyncErrorHandler = require("../../utils/asyncErrorHandler");
+const CustomError = require("../../utils/customError");
+const { sendExpoNotification } = require("../../utils/expoNotification");
+const { getDistance } = require("../../utils/helper");
+const notificationModel = require("../../modals/notification.model");
 
 
 module.exports.getAllManualOrderAssignment = asyncErrorHandler(async (req, res, next) => {
@@ -25,21 +29,100 @@ module.exports.getNearByPharmacyToCustomer = asyncErrorHandler(async (req, res, 
     if (!order) {
         return next(new CustomError("Order not found", 404));
     }
+
     if (order.orderStatus !== "need_manual_assignment_to_pharmacy") {
         return next(new CustomError("This order cannot be assigned manually to a pharmacy", 400));
     }
 
     const nearbyPharmacies = await pharmacyModel.find({
-        pharmacyCoordinates1: {
-            $near: {
-                $geometry: {
-                    type: 'Point',
-                    coordinates: [22.69992214152458, 75.83582576647855] // [longitude, latitude]
-                },
-                $maxDistance: 500000 // in meters
-            }
-        }
+        deviceToken: { $ne: null },
+        pharmacyCoordinates: { $ne: null },
+        availabilityStatus: "available",
+        status: 'active'
     });
 
-    return successRes(res, 200, true, "Orders fetched successfully", nearbyPharmacies);
-})
+    const sortedPharmaciesWithDistance = await Promise.all(
+        nearbyPharmacies.map(async (pharmacy) => {
+            const distance = await getDistance(order.deliveryAddress.coordinates, pharmacy.pharmacyCoordinates);
+            return {
+                ...pharmacy.toObject(),
+                distanceInKm: parseFloat(distance.toFixed(2))
+            };
+        })
+    );
+
+    sortedPharmaciesWithDistance.sort((a, b) => a.distanceInKm - b.distanceInKm);
+
+
+    return successRes(res, 200, true, "Pharmacies fetched successfully", sortedPharmaciesWithDistance);
+});
+
+module.exports.manuallyAssignOrderToPhramacy = asyncErrorHandler(async (req, res, next) => {
+    let { pharmacyId, orderId } = req.body;
+
+    if (!pharmacyId || !orderId) {
+        return next(new CustomError("Pharmacy ID and Order ID are required", 400));
+    }
+
+    let order = await ordersModel.findById(orderId);
+    if (!order) {
+        return next(new CustomError("Order not found", 404));
+    }
+
+    if (order.orderStatus !== "need_manual_assignment_to_pharmacy") {
+        return next(new CustomError("This order cannot be assigned manually to a pharmacy", 400));
+    }
+
+    let findPharmacy = await pharmacyModel.findById(pharmacyId);
+    if (!findPharmacy) {
+        return next(new CustomError("Pharmacy not found", 404));
+    }
+    if (findPharmacy.availabilityStatus !== "available") {
+        return next(new CustomError("Pharmacy is not online", 400));
+    }
+    if (findPharmacy.status !== 'active') {
+        return next(new CustomError("Pharmacy is not active", 400));
+    }
+    if (!findPharmacy.pharmacyCoordinates?.lat || !findPharmacy.pharmacyCoordinates?.long) {
+        return next(new CustomError("Pharmacy coordinates are not available", 400));
+    }
+    if (!findPharmacy.deviceToken) {
+        return next(new CustomError("Pharmacy device token is not available", 400));
+    }
+    let pharmacyDeviceToken = findPharmacy.deviceToken;
+    // Assign pharmacy and update status
+    order.assignedPharmacyId = pharmacyId;
+    order.orderStatus = "assigned_to_pharmacy";
+
+    // Push to pharmacyAttempts
+    order.pharmacyAttempts.push({
+        pharmacyId: pharmacyId,
+        status: "pending", // can later be updated by pharmacy
+        attemptedAt: new Date()
+    });
+
+    // Create and send notification
+    let newNotification = new notificationModel({
+        title: "New Order",
+        message: "You have a new order",
+        recipientType: "pharmacy",
+        notificationType: "pharmacy_order_request",
+        NotificationTypeId: order._id,
+        recipientId: pharmacyDeviceToken
+    });
+
+    await newNotification.save();
+
+    await sendExpoNotification(
+        [pharmacyDeviceToken],
+        "New Order",
+        "You have a new order",
+        newNotification
+    );
+
+    await order.save();
+
+    return successRes(res, 200, true, "Order assigned to pharmacy successfully", order);
+});
+
+
