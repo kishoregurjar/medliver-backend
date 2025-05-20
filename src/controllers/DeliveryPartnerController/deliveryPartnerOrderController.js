@@ -108,7 +108,7 @@ module.exports.acceptRejectOrder = asyncErrorHandler(async (req, res, next) => {
         );
         console.log(result,"result");
       }
-    //   await Promise.all([order.save(), notification.save(), partner.save()]);
+      await Promise.all([order.save(), notification.save(), partner.save()]);
       return successRes(res, 200, true, "Order accepted successfully", order);
     }
   
@@ -162,7 +162,7 @@ module.exports.acceptRejectOrder = asyncErrorHandler(async (req, res, next) => {
           );
         }
   
-        // await Promise.all([order.save(), notification.save()]);
+        await Promise.all([order.save(), notification.save()]);
       } else {
         const admins = await adminSchema.find({ role: "superadmin" });
   
@@ -185,10 +185,10 @@ module.exports.acceptRejectOrder = asyncErrorHandler(async (req, res, next) => {
             );
           }
   
-        //   return notify.save();
+          return notify.save();
         }));
   
-        // await order.save();
+        await order.save();
       }
   
       return successRes(res, 200, true, "Order rejected and reassigned", order);
