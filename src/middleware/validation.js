@@ -1497,9 +1497,9 @@ const updateUserProfileValidation = Joi.object({
     .pattern(/^[6-9]\d{9}$/)
     .optional()
     .messages({
-      "string.pattern.base":
-        "Phone number must be a valid 10-digit Indian number",
+      "string.pattern.base": "Phone number must be a valid 10-digit Indian number",
     }),
+
   height: Joi.string()
     .pattern(/^\d+\s?(cm|CM)$/)
     .optional()
@@ -1523,7 +1523,15 @@ const updateUserProfileValidation = Joi.object({
     .messages({
       "any.only": "Blood group must be a valid type (e.g., 'A+', 'O-')",
     }),
+
+  profilePicture: Joi.string()
+    .optional()
+    .allow(null)
+    .messages({
+      "string.base": "Profile picture must be a string (e.g., a URL or filename)",
+    }),
 });
+
 
 const signUpSignInWithGoogleValidation = Joi.object({
   fullName: Joi.string().min(2).max(50).required().messages({
@@ -2412,7 +2420,7 @@ const TestListApiValidation = Joi.object({
 
 
 const addTestToPathology = Joi.object({
-    testId: Joi.string()
+  testId: Joi.string()
     .pattern(/^[0-9a-fA-F]{24}$/)
     .required()
     .messages({
