@@ -800,7 +800,15 @@ const createMedicineValidation = Joi.object({
     "string.empty": "Pack size label is required",
     "any.required": "Pack size label is required",
   }),
-});
+   short_composition1: Joi.string().trim().required().messages({
+    "string.empty": "short_composition is required",
+   
+  }),
+   short_composition2: Joi.string().trim().required().optional().messages({
+    "string.empty": "short_composition is required",
+   
+  }).optional(),
+}).optional();
 
 const updateMedicineValidation = Joi.object({
   medicineId: Joi.string()
