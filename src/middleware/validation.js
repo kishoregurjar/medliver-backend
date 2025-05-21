@@ -783,6 +783,39 @@ const getAllDoctoreProfile = Joi.object({
 });
 
 //medicine validation
+// const createMedicineValidation = Joi.object({
+//   name: Joi.string().trim().required().messages({
+//     "string.empty": "Medicine name is required",
+//     "any.required": "Medicine name is required",
+//   }),
+//   price: Joi.number().positive().required().messages({
+//     "number.base": "Price must be a number",
+//     "number.positive": "Price must be a positive number",
+//     "any.required": "Price is required",
+//   }),
+//   manufacturer: Joi.string().trim().required().messages({
+//     "string.empty": "Manufacturer is required",
+//     "any.required": "Manufacturer is required",
+//   }),
+//   packSizeLabel: Joi.string().trim().required().messages({
+//     "string.empty": "Pack size label is required",
+//     "any.required": "Pack size label is required",
+//   }),
+//   short_composition1: Joi.string().trim().required().messages({
+//     "string.empty": "short_composition is required",
+
+//   }),
+//   short_composition2: Joi.string().trim().required().optional().messages({
+//     "string.empty": "short_composition is required",
+
+//   }).optional(),
+//   images: Joi.array().items(Joi.string()).trim().required().optional().messages({
+//     "string.empty": "image url is required",
+
+//   }).optional(),
+// }).optional();
+
+
 const createMedicineValidation = Joi.object({
   name: Joi.string().trim().required().messages({
     "string.empty": "Medicine name is required",
@@ -802,18 +835,20 @@ const createMedicineValidation = Joi.object({
     "any.required": "Pack size label is required",
   }),
   short_composition1: Joi.string().trim().required().messages({
-    "string.empty": "short_composition is required",
-
+    "string.empty": "Short composition is required",
   }),
-  short_composition2: Joi.string().trim().required().optional().messages({
-    "string.empty": "short_composition is required",
+  short_composition2: Joi.string().trim().allow("").messages({
+    "string.empty": "Short composition is required",
+  }),
+  images: Joi.array()
+    .items(Joi.string().trim().messages({
+      "string.empty": "Image URL is required",
+    }))
+    .messages({
+      "array.base": "Images must be an array of strings",
+    }),
+});
 
-  }).optional(),
-  images: Joi.string().trim().required().optional().messages({
-    "string.empty": "image url is required",
-
-  }).optional(),
-}).optional();
 
 const updateMedicineValidation = Joi.object({
   medicineId: Joi.string()
