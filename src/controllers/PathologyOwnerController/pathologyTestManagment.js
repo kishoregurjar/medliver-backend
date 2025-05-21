@@ -135,12 +135,12 @@ module.exports.getAvailableTestsForPathology = asyncErrorHandler(async (req, res
   const admin = req.admin;
 
   const pathology = await PathologyCenter.findOne({ adminId: admin._id })
-    .populate("")
+    .populate("availableTests")
     .lean();
 
   if (!pathology) {
     return errorRes(res, 404, false, "Pathology Center not found");
-  }availableTests
+  }
 
   return successRes(res, 200, true, "Available tests fetched successfully", pathology.availableTests);
 });
