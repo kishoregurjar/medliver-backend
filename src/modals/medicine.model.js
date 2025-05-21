@@ -39,9 +39,9 @@ const medicineSchema = new mongoose.Schema(
             default: null
         },
         images: {
-            type: String,
-            default: null
-        },
+            type: [String],
+            default: []
+          },
         type: {
             type: String,
             default: "allopathy"
