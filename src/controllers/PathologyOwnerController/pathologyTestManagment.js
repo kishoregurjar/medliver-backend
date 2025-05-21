@@ -57,66 +57,28 @@ module.exports.testList = asyncErrorHandler(async (req, res, next) => {
   });
 });
 
-// module.exports.addTestToPathology = asyncErrorHandler(async (req, res, next) => {
-//   const { testId } = req.body;
-//     const admin = req.admin;
+module.exports.addTestToStock = asyncErrorHandler(async (req, res, next) => {
+  const { testId,price,deliveryTime, availabilityAtHome} = req.body;
+    const admin = req.admin;
   
-//     const pathology = await PathologyCenter.findOne({ adminId: admin._id });
-//     const pathologyCenterId = pathology._id;
-//      console.log("pathology id",pathologyCenterId)
-//       if (!pathologyCenterId) {
-//         return errorRes(res, 404, false, "Pathology not found");
-//       }
+    const pathology = await PathologyCenter.findOne({ adminId: admin._id });
+    const pathologyCenterId = pathology._id;
 
-//      if (!testId) {
-//     return next(new CustomError("test ID is required",400));
-//    }
+     console.log("pathology id",pathologyCenterId)
+      if (!pathologyCenterId) {
+        return errorRes(res, 404, false, "Pathology not found");
+      }
+
+     if (!testId || !price || !deliveryTime || !availabilityAtHome) {
+    return next(new CustomError("All fields are required",400));
+   }
  
-//   const test = await TestModel.findById(testId);
-//   if (!test) {
-//     return next(new CustomError("Test not found", 404));
-//   }
-
-//   const pathologyCenter = await PathologyCenter.findById(pathologyCenterId);
-//   if (!pathologyCenter) {
-//     return next(new CustomError("Pathology Center not found", 404));
-//   }
-
-//   if (pathologyCenter.availableTests.includes(testId)) {
-//     return successRes(res, 200, true, "Test already added to Pathology Center", pathologyCenter);
-//   }
-
-//   pathologyCenter.availableTests.push(testId);
-//   await pathologyCenter.save();
-
-//   return successRes(res, 200, true, "Test added to Pathology Center successfully", pathologyCenter);
-// });
-
-
-module.exports.addTestToPathology = asyncErrorHandler(async (req, res, next) => {
-  const { testId } = req.body;
-  const admin = req.admin;
-
-  if (!testId) {
-    return next(new CustomError("Test ID is required", 400));
-  }
-
-  const pathology = await PathologyCenter.findOne({ adminId: admin._id });
-  if (!pathology) {
-    return errorRes(res, 404, false, "Pathology Center not found");
-  }
-
-  const pathologyCenterId = pathology._id;
-
-  const [test, pathologyCenter] = await Promise.all([
-    TestModel.findById(testId),
-    PathologyCenter.findById(pathologyCenterId),
-  ]);
-
+  const test = await TestModel.findById(testId);
   if (!test) {
     return next(new CustomError("Test not found", 404));
   }
 
+  const pathologyCenter = await PathologyCenter.findById(pathologyCenterId);
   if (!pathologyCenter) {
     return next(new CustomError("Pathology Center not found", 404));
   }
@@ -125,7 +87,7 @@ module.exports.addTestToPathology = asyncErrorHandler(async (req, res, next) => 
     return successRes(res, 200, true, "Test already added to Pathology Center", pathologyCenter);
   }
 
-  pathologyCenter.availableTests.push(testId);
+  pathologyCenter.availableTests.push({testId:testId,price:price,deliveryTime:deliveryTime,availabilityAtHome:availabilityAtHome});
   await pathologyCenter.save();
 
   return successRes(res, 200, true, "Test added to Pathology Center successfully", pathologyCenter);
@@ -134,14 +96,13 @@ module.exports.addTestToPathology = asyncErrorHandler(async (req, res, next) => 
 module.exports.getAvailableTestsForPathology = asyncErrorHandler(async (req, res, next) => {
   const admin = req.admin;
 
-  const pathology = await PathologyCenter.findOne({ adminId: admin._id })
-    .populate("availableTests")
-    .lean();
+  const pathology = await PathologyCenter.findOne({ adminId: admin._id }).select('availableTests').populate("availableTests.testId");
+   
 
   if (!pathology) {
     return errorRes(res, 404, false, "Pathology Center not found");
   }
 
-  return successRes(res, 200, true, "Available tests fetched successfully", pathology.availableTests);
+  return successRes(res, 200, true, "Available tests fetched successfully", pathology);
 });
 
