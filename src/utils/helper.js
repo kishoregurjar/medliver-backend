@@ -6,9 +6,9 @@ module.exports.getDistance = async (coord1, coord2) => {
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(toRad(coord1.lat)) *
-      Math.cos(toRad(coord2.lat)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos(toRad(coord2.lat)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c; // returns distance in km
 };
@@ -21,9 +21,11 @@ module.exports.deliveryOrderStatus = [
   "accepted_by_delivery_partner",
   "need_manual_assignment_to_pharmacy",
   "need_manual_assignment_to_delivery_partner",
-  "out-for-delivery",
+  "accepted_by_delivery_partner_and_reached_pharmacy",
+  "out_for_pickup",
+  "picked_up",
+  "out_for_delivery",
   "delivered",
   "cancelled",
-  "out-for-pickup",
-  "picked-up",
+  "reached_pharmacy"
 ];

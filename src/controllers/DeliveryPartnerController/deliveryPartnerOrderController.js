@@ -10,7 +10,9 @@ const customerModel = require("../../modals/customer.model");
 const pharmacyModel = require("../../modals/pharmacy.model");
 const { getRouteBetweenCoords } = require("../../utils/distance.helper");
 const adminSchema = require("../../modals/admin.Schema");
-const {deliveryOrderStatus} = require("../../utils/helper");
+const { deliveryOrderStatus } = require("../../utils/helper");
+const { generateOTPNumber } = require("../../services/helper");
+const { pickupOrderMail } = require("../../services/sendMail");
 
 module.exports.getRequestedOrder = asyncErrorHandler(async (req, res, next) => {
   const deliveryPartnerId = req.partner._id;
@@ -39,7 +41,7 @@ module.exports.getOrderById = asyncErrorHandler(async (req, res, next) => {
     )
     .populate("customerId", "fullName phoneNumber profilePicture");
 
-    console.log(order.orderStatus,"order.orderStatus");
+  console.log(order.orderStatus, "order.orderStatus");
   if (!order) {
     return next(new CustomError("Order not found", 404));
   }
@@ -58,7 +60,7 @@ module.exports.acceptRejectOrder = asyncErrorHandler(async (req, res, next) => {
   });
   if (!order) return next(new CustomError("Order not found", 404));
 
-  if (order.orderStatus === "accepted_by_delivery_partner" || order.orderStatus === "out_for_delivery" || order.orderStatus === "delivered" || order.orderStatus  == "picked-up" ) {
+  if (order.orderStatus === "accepted_by_delivery_partner" || order.orderStatus === "out_for_delivery" || order.orderStatus === "delivered" || order.orderStatus == "picked-up") {
     return next(new CustomError("Order already accepted", 400));
   }
 
@@ -228,7 +230,65 @@ module.exports.updateDeliveryStatus = asyncErrorHandler(
       200,
       true,
       "Order status updated successfully",
-      {orderStatus:order.orderStatus}
+      { orderStatus: order.orderStatus }
     );
   }
 );
+
+module.exports.reachedPharmacy = asyncErrorHandler(async (req, res, next) => {
+  const deliveryPartnerId = req.partner._id;
+  const { orderId } = req.body;
+
+  if (!orderId) {
+    return next(new CustomError("Order ID is required", 400));
+  }
+
+  // Fetch both order and delivery partner details in parallel
+  const [order, deliveryPartner] = await Promise.all([
+    ordersModel.findOne({ _id: orderId, deliveryPartnerId }),
+    DeliveryPartner.findById(deliveryPartnerId),
+  ]);
+
+  if (!order) {
+    return next(new CustomError("Order not found", 404));
+  }
+
+  if (!deliveryPartner) {
+    return next(new CustomError("Delivery partner not found", 404));
+  }
+
+  if (order.orderStatus !== "accepted_by_delivery_partner") {
+    return next(new CustomError("Order is not accepted by delivery partner", 400));
+  }
+
+  let findPharmacy = await pharmacyModel.findOne({ _id: order.assignedPharmacyId }).select("deviceToken");
+  let pharmacyDeviceToken = findPharmacy.deviceToken;
+
+  const otp = generateOTPNumber(4);
+  order.orderStatus = "reached_pharmacy";
+  order.deliveryPartnerOTP = otp;
+  // Pass full details to the mail function
+  pickupOrderMail(
+    deliveryPartner.email,
+    deliveryPartner.fullname, otp, order._id);
+
+  let newNotification = new notificationModel({
+    title: "Delivery Partner Reached Pharmacy",
+    message: "Delivery Partner Reached Pharmacy",
+    recipientType: "pharmacy",
+    notificationType: "delivery_partner_reached_pharmacy",
+    NotificationTypeId: order._id,
+    recipientId: order.assignedPharmacyId
+  });
+  await newNotification.save();
+  await sendExpoNotification(
+    [pharmacyDeviceToken],
+    "Delivery Partner Reached Pharmacy",
+    "Delivery Partner Reached Pharmacy",
+    newNotification
+  );
+
+  await order.save();
+
+  return successRes(res, 200, true, "Delivery partner reached pharmacy successfully", order);
+});

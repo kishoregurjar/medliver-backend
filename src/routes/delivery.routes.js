@@ -33,6 +33,7 @@ router.get('/get-requested-order', verifyDeliveryPartnerToken(), indexController
 router.get('/get-order-by-id', verifyDeliveryPartnerToken(), indexController.deliveryOrderController.getOrderById);
 router.post("/accept-or-reject-order", verifyDeliveryPartnerToken(), indexController.deliveryOrderController.acceptRejectOrder);
 router.put("/update-order-delivery-current-status", verifyDeliveryPartnerToken(), indexController.deliveryOrderController.updateDeliveryStatus);
+router.put('/reached-assigned-pharmacy', verifyDeliveryPartnerToken(), indexController.deliveryOrderController.reachedPharmacy);
 
 // get notification routes
 router.get('/get-notification-by-recipientId', verifyDeliveryPartnerToken(), indexController.commonController.getNotifications);

@@ -31,7 +31,9 @@ const notificationSchema = new mongoose.Schema({
             "delivery_partner_pickup_request",
             "delivery_partner_order_accepted",
             "manual_pharmacy_assignment",
-            "manual_delivery_assignment"],
+            "manual_delivery_assignment",
+            "delivery_partner_reached_pharmacy"
+        ],
         default: null
     },
     NotificationTypeId: {
