@@ -808,6 +808,10 @@ const createMedicineValidation = Joi.object({
     "string.empty": "short_composition is required",
    
   }).optional(),
+   images: Joi.string().trim().required().optional().messages({
+    "string.empty": "image url is required",
+   
+  }).optional(),
 }).optional();
 
 const updateMedicineValidation = Joi.object({

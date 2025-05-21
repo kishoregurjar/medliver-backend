@@ -12,7 +12,7 @@ const capitalizeWords = (str) => {
 };
 
 module.exports.createMedicine = asyncErrorHandler(async (req, res, next) => {
-    let { name, price, manufacturer, packSizeLabel,short_composition1,short_composition2 } = req.body;
+    let { name, price, manufacturer, packSizeLabel,short_composition1,short_composition2 ,images} = req.body;
     let adminId = req.admin._id;
 
     const regex = new RegExp(name, 'i');
@@ -32,7 +32,8 @@ module.exports.createMedicine = asyncErrorHandler(async (req, res, next) => {
         packSizeLabel,
         createdBy: adminId,
         short_composition1,
-        short_composition2
+        short_composition2,
+        images
     });
 
     return successRes(res, 201, true, "Medicine Created Successfully", newMedicine)
