@@ -58,11 +58,13 @@ const orderSchema = new mongoose.Schema({
       "accepted_by_delivery_partner",
       "need_manual_assignment_to_pharmacy",
       "need_manual_assignment_to_delivery_partner",
-      "out-for-pickup",
-      "picked-up",
-      "out-for-delivery",
+      "accepted_by_delivery_partner_and_reached_pharmacy",
+      "out_for_pickup",
+      "picked_up",
+      "out_for_delivery",
       "delivered",
       "cancelled",
+      "reached_pharmacy"
     ],
     default: "pending",
   },
@@ -150,6 +152,10 @@ const orderSchema = new mongoose.Schema({
     type: Array,
     default: []
   },
+  deliveryPartnerOTP: {
+    type: String,
+    default: null
+  }
 
 }, { timestamps: true });
 

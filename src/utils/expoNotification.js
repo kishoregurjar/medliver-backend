@@ -3,7 +3,7 @@ const axios = require('axios');
 module.exports.sendExpoNotification = async (tokens, title, body, data = {}) => {
     try {
         if (tokens.length === 0) return false;
-
+        console.log(tokens, "tokens")
         const messages = tokens.map(token => ({
             to: token,
             sound: 'default',
@@ -20,6 +20,6 @@ module.exports.sendExpoNotification = async (tokens, title, body, data = {}) => 
         console.log(response.data, "response")
         return response.data;
     } catch (error) {
-        console.log(error, "error")
+        console.log(error.message, "error")
     }
 };

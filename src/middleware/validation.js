@@ -664,6 +664,7 @@ const updateAdminProfileValidation = Joi.object({
   email: Joi.any().forbidden().messages({
     "any.unknown": "Email update is not allowed",
   }),
+  avatar: Joi.string().optional(),
 });
 
 //admin best selling product validation
@@ -800,17 +801,17 @@ const createMedicineValidation = Joi.object({
     "string.empty": "Pack size label is required",
     "any.required": "Pack size label is required",
   }),
-   short_composition1: Joi.string().trim().required().messages({
+  short_composition1: Joi.string().trim().required().messages({
     "string.empty": "short_composition is required",
-   
+
   }),
-   short_composition2: Joi.string().trim().required().optional().messages({
+  short_composition2: Joi.string().trim().required().optional().messages({
     "string.empty": "short_composition is required",
-   
+
   }).optional(),
-   images: Joi.string().trim().required().optional().messages({
+  images: Joi.string().trim().required().optional().messages({
     "string.empty": "image url is required",
-   
+
   }).optional(),
 }).optional();
 
