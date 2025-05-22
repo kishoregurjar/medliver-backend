@@ -34,9 +34,12 @@ module.exports.autoCompleteAddress = asyncErrorHandler(async (req, res, next) =>
 
   let address = await getLatLngFromPlaceId(suggestions[0].place_id);
 
+  // let randomImage = await getRandomMedicineImage();
+
   return successRes(res, 200, true, "Address suggestions fetched successfully", {
     suggestions,
-    address
+    address,
+    randomImage
   });
 });
 
@@ -254,3 +257,35 @@ module.exports.getAddressByPincode = asyncErrorHandler(async (req, res, next) =>
   const address = await getLocationFromPincode(pincode);
   return successRes(res, 200, true, "Address fetched successfully", address);
 })
+
+async function getRandomMedicineImage() {
+  try {
+    const response = await axios.get('https://api.pexels.com/v1/search', {
+      headers: {
+        Authorization: 'y3vflvRUtVdFNLgcNAaqgDdOzP39F3LAje1nigTAszmupSfVvqwSbnHk',
+      },
+      params: {
+        query: 'medicine',
+        per_page: 4,
+      },
+    });
+
+    const photos = response.data.photos;
+    if (photos.length === 0) {
+      throw new Error('No images found for this query.');
+    }
+
+    const random = photos[Math.floor(Math.random() * photos.length)];
+    return {
+      imageUrl: random.src.medium,
+      fullImage: random.src.original,
+      photographer: random.photographer,
+      photoLink: random.url,
+    };
+  } catch (error) {
+    console.error('Error fetching image:', error.message);
+    return null;
+  }
+}
+
+
