@@ -69,7 +69,7 @@ module.exports.addTestToStock = asyncErrorHandler(async (req, res, next) => {
         return errorRes(res, 404, false, "Pathology not found");
       }
 
-     if (!testId || !price || !deliveryTime || !availabilityAtHome) {
+     if (testId === undefined  || price === undefined|| deliveryTime=== undefined || availabilityAtHome=== undefined) {
     return next(new CustomError("All fields are required",400));
    }
  
