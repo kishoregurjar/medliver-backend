@@ -395,6 +395,7 @@ router.put(
     verifyAdminToken("superadmin"),
     indexController.adminSpecialOfferController.activeDeactiveSpecialOffer
 );
+router.get('/search-special-offer',verifyAdminToken("superadmin"),indexController.adminSpecialOfferController.searchSpecialOffers);
 
 /** Best Selling Product */
 
