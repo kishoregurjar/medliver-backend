@@ -4,41 +4,22 @@ const pathologyOrderSchema = new mongoose.Schema({
   customerId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Customer",
-    // required: true,
+    required: true,
   },
   pathologyCenterId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "PathologyCenter",
+    required: true,
   },
   selectedTests: [
     {
-      testName: {
-        type: String,
-        required: true,
-      },
-      price: {
-        type: Number,
-        required: true,
-      },
-      testType: {
-        type: String,
-        enum: ['blood', 'urine', 'X-ray', 'ultrasound', 'other'],
-        required: true,
-      },
-      labName: {
-        type: String,
-        required: true,
-      }
+      testId: { type: mongoose.Schema.Types.ObjectId, ref: "Test" }, 
     }
   ],
-  totalAmount: {
-    type: Number,
-    required: true,
-  },
-  isHomeCollection: {
-    type: Boolean,
-    default: false,
-  },
+  totalAmount: { type: Number, required: true },
+
+  isHomeCollection: { type: Boolean, default: false },
+  sampleCollectionDateTime: { type: Date },
   homeCollectionAddress: {
     street: String,
     city: String,
@@ -49,16 +30,20 @@ const pathologyOrderSchema = new mongoose.Schema({
       long: Number
     }
   },
-  deliveryPartnerId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "DeliveryPartner",
-    default: null,
-  },
+
   orderStatus: {
     type: String,
     enum: ['pending', 'confirmed', 'sample_collected', 'completed', 'cancelled'],
     default: 'pending',
   },
+  cancellationReason: { type: String },
+  reportStatus: {
+    type: String,
+    enum: ['not_uploaded', 'uploaded', 'in_progress'],
+    default: 'not_uploaded'
+  },
+  reportUrl: { type: String },
+
   paymentStatus: {
     type: String,
     enum: ['pending', 'paid', 'failed'],
@@ -66,7 +51,8 @@ const pathologyOrderSchema = new mongoose.Schema({
   },
   paymentMethod: {
     type: String,
-    enum: ['UPI', 'card', 'cash', 'wallet', 'COD'],
+    enum: ['UPI', 'card', 'cash', 'wallet', 'COD', null],
+    default: null
   },
   orderDate: {
     type: Date,
@@ -75,6 +61,7 @@ const pathologyOrderSchema = new mongoose.Schema({
   deliveryDate: {
     type: Date,
   }
-}, { timestamps: true });
+}, { timestamps: true }); 
+
 
 module.exports = mongoose.model("PathologyOrder", pathologyOrderSchema);
