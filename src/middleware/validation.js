@@ -2467,16 +2467,39 @@ const TestListApiValidation = Joi.object({
 });
 
 
+
 const addTestToPathology = Joi.object({
   testId: Joi.string()
     .pattern(/^[0-9a-fA-F]{24}$/)
     .required()
     .messages({
-      "string.pattern.base": "Invalid test ID format",
-      "string.empty": "Test Id is required",
+      "string.empty": "Test ID is required",
+      "any.required": "Test ID is required",
+      "string.pattern.base": "Invalid Test ID format",
+    }),
+
+  price: Joi.number()
+    .positive().allow(0)
+    .required()
+    .messages({
+      "number.base": "Price must be a number",
+      "number.positive": "Price must be a positive number",
+      "any.required": "Price is required",
+    }),
+  deliveryTime: Joi.string()
+    .trim()
+    .required()
+    .messages({
+      "string.empty": "Delivery time is required",
+      "any.required": "Delivery time is required",
+    }),
+  availabilityAtHome: Joi.boolean()
+    .required()
+    .messages({
+      "boolean.base": "Availability at home must be true or false",
+      "any.required": "Availability at home is required",
     }),
 });
-
 
 const validate = (schema) => {
   return (req, res, next) => {
