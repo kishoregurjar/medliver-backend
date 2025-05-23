@@ -59,6 +59,10 @@ const pathologyCenterSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+      available: {
+      type: Boolean,
+      default: false,
+    },
   }
 ],
     createdAt: {

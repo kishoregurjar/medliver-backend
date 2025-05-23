@@ -2466,8 +2466,6 @@ const TestListApiValidation = Joi.object({
   }),
 });
 
-
-
 const addTestToPathology = Joi.object({
   testId: Joi.string()
     .pattern(/^[0-9a-fA-F]{24}$/)
@@ -2498,6 +2496,50 @@ const addTestToPathology = Joi.object({
     .messages({
       "boolean.base": "Availability at home must be true or false",
       "any.required": "Availability at home is required",
+    }),
+    available: Joi.boolean()
+    .required()
+    .messages({
+      "boolean.base": "Available must be true or false",
+      "any.required": "available or not is required",
+    }),
+});
+
+
+const updateTest = Joi.object({
+  testId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "any.required": "Test ID is required",
+      "string.pattern.base": "Invalid Test ID format",
+    }),
+
+  price: Joi.number().positive().optional().messages({
+    "number.base": "Price must be a number",
+    "number.positive": "Price must be a positive number",
+  }),
+
+  deliveryTime: Joi.string().trim().optional().messages({
+    "string.base": "Delivery time must be a string",
+  }),
+
+  availabilityAtHome: Joi.boolean().optional().messages({
+    "boolean.base": "Availability must be true or false",
+  }),
+
+  available: Joi.boolean().optional().messages({
+    "boolean.base": "Available must be true or false",
+  }),
+});
+
+const removeAndGetInfoTest = Joi.object({
+  testId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "any.required": "Test ID is required",
+      "string.pattern.base": "Invalid Test ID format",
     }),
 });
 
@@ -2659,5 +2701,7 @@ module.exports = {
   searchTestCategoryValidation,
   searchOrderValidation,
   TestListApiValidation,
-  addTestToPathology
+  addTestToPathology,
+  updateTest,
+  removeAndGetInfoTest
 };

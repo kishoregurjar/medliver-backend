@@ -53,16 +53,59 @@ module.exports.testList = asyncErrorHandler(async (req, res, next) => {
   });
 });
 
+// module.exports.addTestToStock = asyncErrorHandler(async (req, res, next) => {
+//   const { testId, price, deliveryTime, availabilityAtHome } = req.body;
+//   const admin = req.admin;
+
+//   const pathology = await PathologyCenter.findOne({ adminId: admin._id });
+//   const pathologyCenterId = pathology._id;
+
+//   console.log("pathology id", pathologyCenterId);
+//   if (!pathologyCenterId) {
+//     return errorRes(res, 404, false, "Pathology not found");
+//   }
+
+//   const test = await TestModel.findById(testId);
+//   if (!test) {
+//     return next(new CustomError("Test not found", 404));
+//   }
+
+//   const pathologyCenter = await PathologyCenter.findById(pathologyCenterId)
+//   if (!pathologyCenter) {
+//     return next(new CustomError("Pathology Center not found", 404));
+//   }
+
+//    const index = pathology.availableTests.findIndex(
+//     (t) => t.testId.toString() === testId
+//   );
+
+//   if (index !== -1) {
+//     return next(new CustomError("Test already added to Pathology Center", 400));
+//   }
+  
+//    pathologyCenter.availableTests.push({
+//     testId: testId,
+//     price: price,
+//     deliveryTime: deliveryTime,
+//     availabilityAtHome: availabilityAtHome,
+//   });
+//   await pathologyCenter.save();
+
+//   return successRes(
+//     res,
+//     200,
+//     true,
+//     "Test added to Pathology Center successfully",
+//     pathologyCenter
+//   );
+// });
 module.exports.addTestToStock = asyncErrorHandler(async (req, res, next) => {
-  const { testId, price, deliveryTime, availabilityAtHome } = req.body;
+  const { testId, price, deliveryTime, availabilityAtHome,available } = req.body;
   const admin = req.admin;
 
   const pathology = await PathologyCenter.findOne({ adminId: admin._id });
-  const pathologyCenterId = pathology._id;
-
-  console.log("pathology id", pathologyCenterId);
-  if (!pathologyCenterId) {
-    return errorRes(res, 404, false, "Pathology not found");
+  if (!pathology) {
+    return next(new CustomError("Pathology not found", 404));
   }
 
   const test = await TestModel.findById(testId);
@@ -70,37 +113,41 @@ module.exports.addTestToStock = asyncErrorHandler(async (req, res, next) => {
     return next(new CustomError("Test not found", 404));
   }
 
-  const pathologyCenter = await PathologyCenter.findById(pathologyCenterId);
-  if (!pathologyCenter) {
-    return next(new CustomError("Pathology Center not found", 404));
+  const index = pathology.availableTests.findIndex(
+    (t) => t.testId.toString() === testId
+  );
+
+  if (index !== -1) {
+    return next(new CustomError("Test already added to Pathology Center", 400));
   }
 
-  if (pathologyCenter.availableTests.includes(testId)) {
-    return successRes(
-      res,
-      200,
-      true,
-      "Test already added to Pathology Center",
-      pathologyCenter
-    );
-  }
+  const newTest = {
+    testId,
+    price,
+    deliveryTime,
+    availabilityAtHome,
+    available
+  };
 
-  pathologyCenter.availableTests.push({
-    testId: testId,
-    price: price,
-    deliveryTime: deliveryTime,
-    availabilityAtHome: availabilityAtHome,
-  });
-  await pathologyCenter.save();
+  pathology.availableTests.push(newTest);
+  await pathology.save();
 
-  return successRes(
-    res,
-    200,
-    true,
-    "Test added to Pathology Center successfully",
-    pathologyCenter
+  const populatedTest = {
+    testId: {
+      _id: test._id,
+      name: test.name,
+      description: test.description,
+    },
+    price,
+    deliveryTime,
+    availabilityAtHome,
+    available
+  };
+  return successRes(res, 200, true, "Test added successfully", 
+    populatedTest,
   );
 });
+
 
 module.exports.getAvailableTestsForPathology = asyncErrorHandler(
   async (req, res, next) => {
@@ -126,7 +173,7 @@ module.exports.getAvailableTestsForPathology = asyncErrorHandler(
 
 module.exports.updateTest = asyncErrorHandler(async (req, res, next) => {
   const admin = req.admin;
-  const { testId, price, deliveryTime, availabilityAtHome } = req.body;
+  const { testId, price, deliveryTime, availabilityAtHome,available} = req.body;
 
   if (!testId) {
     return next(new CustomError("testId is required", 400));
@@ -140,8 +187,6 @@ module.exports.updateTest = asyncErrorHandler(async (req, res, next) => {
    const testIndex = pathology.availableTests.findIndex((t)=>{
    return t.testId.toString() === testId;
   })
-
-
   console.log("test id ",testIndex)
 
   if (testIndex === -1) {
@@ -151,6 +196,8 @@ module.exports.updateTest = asyncErrorHandler(async (req, res, next) => {
   if (price !== undefined) pathology.availableTests[testIndex].price = price;
   if (deliveryTime !== undefined || deliveryTime !== null) pathology.availableTests[testIndex].deliveryTime = deliveryTime;
   if (availabilityAtHome !== undefined || availabilityAtHome !== null) pathology.availableTests[testIndex].availabilityAtHome = availabilityAtHome;
+
+    if (available !== undefined || available !== null) pathology.availableTests[testIndex].available = available;
 
   await pathology.save();
 
@@ -202,13 +249,15 @@ module.exports.getSingleTestInfo = asyncErrorHandler(async (req,res,next)=>{
     return t.testId.toString() === testId
   })
 
+  if (findTestIndex === -1) {
+    return next(new CustomError("Test not found in pathology center", 404));
+  }
   console.log("test id's index is",findTestIndex);
 
   const test = pathology.availableTests[findTestIndex];
   return successRes(res, 200, true, "Test fethched successfully", test);
 
 })
-
 
 module.exports.searchTestInMyStock = asyncErrorHandler(async (req, res, next) => {
   const admin = req.admin;
@@ -240,3 +289,35 @@ module.exports.searchTestInMyStock = asyncErrorHandler(async (req, res, next) =>
 
   return successRes(res, 200, true, "Matching tests fetched", matchingTests);
 });
+
+module.exports.changeTestStatus = asyncErrorHandler(async (req, res, next) => {
+  const { testId } = req.body;
+  const admin = req.admin;
+
+  if (!testId) {
+    return next(new CustomError("testId is required", 400));
+  }
+
+  const pathology = await PathologyCenter.findOne({ adminId: admin._id });
+  if (!pathology) {
+    return next(new CustomError("Pathology center not found", 404));
+  }
+
+  const index = pathology.availableTests.findIndex(
+    (t) => t.testId.toString() === testId
+  );
+
+  if (index === -1) {
+    return next(new CustomError("Test does not belong to your pathology center", 403));
+  }
+
+  pathology.availableTests[index].available = !pathology.availableTests[index].available;
+
+  await pathology.save();
+
+  return successRes(res, 200, true, "Test availability changed successfully", {
+    
+  available: pathology.availableTests[index].available
+  })
+});
+
