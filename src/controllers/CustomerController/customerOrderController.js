@@ -273,3 +273,13 @@ module.exports.searchOrder = asyncErrorHandler(async (req, res, next) => {
     totalOrders
   });
 });
+
+
+module.exports.getAllPrescriptions = asyncErrorHandler(async (req, res, next) => {
+    const userId = req.user._id;
+    const prescriptions = await pescriptionSchema.find({ user_id: userId });
+    if (!prescriptions || prescriptions.length === 0) {
+        return next(new CustomError("No prescriptions found", 404));
+    }
+    return successRes(res, 200, true, "Prescriptions fetched successfully", { prescriptions });
+})
