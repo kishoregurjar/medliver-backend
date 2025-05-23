@@ -5,47 +5,99 @@ const CustomError = require("../../utils/customError");
 const { successRes } = require("../../services/response");
 const { default: mongoose } = require("mongoose");
 
-module.exports.createSpecialOffer = asyncErrorHandler(
-  async (req, res, next) => {
-    const { product, offerPercentage, validTill } = req.body;
-    if (!product || !offerPercentage || !validTill) {
-      return next(new CustomError("All fields are required", 400));
-    }
+// module.exports.createSpecialOffer = asyncErrorHandler(
+//   async (req, res, next) => {
+//     const { product, offerPercentage, validTill } = req.body;
+//     if (!product || !offerPercentage || !validTill) {
+//       return next(new CustomError("All fields are required", 400));
+//     }
 
-    if(offerPercentage < 0 || offerPercentage > 100){
-      return next(new CustomError("Offer percentage must be between 0 and 100", 400));
-    }
-    if(mongoose.Types.ObjectId.isValid(product) === false){
-      return next(new CustomError("Invalid product ID", 400));
-    }
-    const medicine = await medicineModel.findById(product);
-    if (!medicine) {
-      return next(new CustomError("Product not found", 404));
-    }
-    const originalPrice = medicine.price;
+//     if(offerPercentage < 0 || offerPercentage > 100){
+//       return next(new CustomError("Offer percentage must be between 0 and 100", 400));
+//     }
+//     if(mongoose.Types.ObjectId.isValid(product) === false){
+//       return next(new CustomError("Invalid product ID", 400));
+//     }
+//     const medicine = await medicineModel.findById(product);
+//     if (!medicine) {
+//       return next(new CustomError("Product not found", 404));
+//     }
+//     const originalPrice = medicine.price;
 
-    const offerPrice = originalPrice - (originalPrice * offerPercentage) / 100;
-    if (offerPrice < 0) {
-      return next(new CustomError("Offer price cannot be negative", 400));
-    }
-    const specialOffer = await specialOfferModel.create({
-      product,
-      offerPrice: offerPrice.toFixed(2),
-      originalPrice: originalPrice.toFixed(2),
-      offerPercentage,
-      validTill,
-    });
-    if (!specialOffer) {
-      return next(new CustomError("Unable to create special offer", 400));
-    }
-    return successRes(
-      res,
-      201,
-      "Special offer created successfully",
-      specialOffer
-    );
+//     const offerPrice = originalPrice - (originalPrice * offerPercentage) / 100;
+//     if (offerPrice < 0) {
+//       return next(new CustomError("Offer price cannot be negative", 400));
+//     }
+//     const specialOffer = await specialOfferModel.create({
+//       product,
+//       offerPrice: offerPrice.toFixed(2),
+//       originalPrice: originalPrice.toFixed(2),
+//       offerPercentage,
+//       validTill,
+//     });
+//     if (!specialOffer) {
+//       return next(new CustomError("Unable to create special offer", 400));
+//     }
+//     return successRes(
+//       res,
+//       201,
+//       "Special offer created successfully",
+//       specialOffer
+//     );
+//   }
+// );
+
+module.exports.createSpecialOffer = asyncErrorHandler(async (req, res, next) => {
+  const { product, offerPercentage, validTill } = req.body;
+
+  if (!product || !offerPercentage || !validTill) {
+    return next(new CustomError("All fields are required", 400));
   }
-);
+
+  if (offerPercentage < 0 || offerPercentage > 100) {
+    return next(new CustomError("Offer percentage must be between 0 and 100", 400));
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(product)) {
+    return next(new CustomError("Invalid product ID", 400));
+  }
+
+  const medicine = await medicineModel.findById(product);
+  if (!medicine) {
+    return next(new CustomError("Product not found", 404));
+  }
+
+  const originalPrice = medicine.price;
+  const offerPrice = originalPrice - (originalPrice * offerPercentage) / 100;
+
+  if (offerPrice < 0) {
+    return next(new CustomError("Offer price cannot be negative", 400));
+  }
+
+  const specialOffer = await specialOfferModel.create({
+    product,
+    offerPrice: offerPrice.toFixed(2),
+    originalPrice: originalPrice.toFixed(2),
+    offerPercentage,
+    validTill,
+  });
+
+  if (!specialOffer) {
+    return next(new CustomError("Unable to create special offer", 400));
+  }
+
+  // Populate product data
+  const populatedOffer = await specialOfferModel
+    .findById(specialOffer._id)
+    .populate("product", "name image price");
+
+  return successRes(res, 201, true, "Special offer created successfully", {
+    specialOffers: [populatedOffer],
+    totalSpecialOffers: 1,
+    currentPage: 1,
+    totalPages: 1,
+  });
+});
 
 module.exports.getAllSpecialOffers = asyncErrorHandler(
   async (req, res, next) => {
