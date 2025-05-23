@@ -157,3 +157,64 @@ module.exports.activeDeactiveSpecialOffer = asyncErrorHandler(async (req, res, n
 
     return successRes(res, 200, true, "Special offer status updated successfully", specialOffer);
 });
+
+// module.exports.searchSpecialOffers = asyncErrorHandler(async (req, res, next) => {
+//   let { query } = req.query;
+
+//   if (!query) {
+//     return next(new CustomError("Search value is required", 400));
+//   }
+
+//   const regex = new RegExp(query.trim(), "i");
+
+//   const offers = await specialOfferModel
+//     .find()
+//     .populate("product", "name image price")
+//     .sort({ createdAt: -1 });
+
+//   const filteredOffers = offers.filter((offer) =>
+//     regex.test(offer.product?.name || "")
+//   );
+
+//   if (filteredOffers.length === 0) {
+//     return successRes(res, 200, false, "No Special Offers Found", []);
+//   }
+
+//   return successRes(res, 200, true, "Special Offers fetched successfully", filteredOffers);
+// });
+
+module.exports.searchSpecialOffers = asyncErrorHandler(async (req, res, next) => {
+  let { query, page, limit } = req.query;
+
+  if (!query) {
+    return next(new CustomError("Search value is required", 400));
+  }
+
+  const regex = new RegExp(query.trim(), "i");
+  page = parseInt(page) || 1;
+  limit = parseInt(limit) || 10;
+  const skip = (page - 1) * limit;
+
+  const offers = await specialOfferModel
+    .find()
+    .populate("product", "name image price")
+    .sort({ createdAt: -1 });
+
+  const filteredOffers = offers.filter((offer) =>
+    regex.test(offer.product?.name || "")
+  );
+
+  const totalResults = filteredOffers.length;
+  const paginatedResults = filteredOffers.slice(skip, skip + limit);
+
+  if (paginatedResults.length === 0) {
+    return successRes(res, 200, false, "No Special Offers Found", []);
+  }
+
+  return successRes(res, 200, true, "Special Offers fetched successfully", {
+    specialOffers: paginatedResults,
+    totalResults,
+    currentPage: page,
+    totalPages: Math.ceil(totalResults / limit),
+  });
+});

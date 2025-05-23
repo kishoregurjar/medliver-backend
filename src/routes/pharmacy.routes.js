@@ -12,8 +12,7 @@ router.get("/get-medicine-by-pharmacy-id", validateQuery(getStockByPharmacyIdVal
 router.get("/get-all-stock", verifyAdminToken("pharmacy"), validateQuery(getAllStockValidation), indexController.stockController.getAllStock)
 router.put("/update-stock", verifyAdminToken("pharmacy"), validate(updateStockValidation), indexController.stockController.updateStock)
 router.delete("/delete-stock", verifyAdminToken("pharmacy"), validateQuery(deleteStockValidation), indexController.stockController.deleteStock)
-
-
+router.get("/search-stock", verifyAdminToken("pharmacy"), indexController.stockController.searchStock)
 
 /*=======================================Order Route=================================== */
 

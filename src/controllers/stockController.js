@@ -133,3 +133,44 @@ module.exports.createStock = asyncErrorHandler(async (req, res, next) => {
   
     return successRes(res, 200, true, 'stock deleted successfully.');
   });
+
+  module.exports.searchStock = asyncErrorHandler(async (req, res, next) => {
+  let { query, page, limit } = req.query;
+
+  if (!query) {
+    return next(new CustomError("Search value is required", 400));
+  }
+
+  const regex = new RegExp(query.trim(), "i");
+  page = parseInt(page) || 1;
+  limit = parseInt(limit) || 10;
+  const skip = (page - 1) * limit;
+
+  const allStocks = await Stock.find()
+    .populate("pharmacyId")
+    .populate("medicineId")
+    .sort({ createdAt: -1 });
+
+  const filteredStocks = allStocks.filter((stock) => {
+    const pharmacy = stock.pharmacyId;
+    return (
+      regex.test(pharmacy?.pharmacyName || "") ||
+      regex.test(pharmacy?.ownerName || "") ||
+      regex.test(pharmacy?.email || "")
+    );
+  });
+
+  const totalResults = filteredStocks.length;
+  const paginatedResults = filteredStocks.slice(skip, skip + limit);
+
+  if (paginatedResults.length === 0) {
+    return successRes(res, 200, false, "No stock found", []);
+  }
+
+  return successRes(res, 200, true, "Stocks fetched successfully", {
+    stocks: paginatedResults,
+    totalResults,
+    currentPage: page,
+    totalPages: Math.ceil(totalResults / limit),
+  });
+});

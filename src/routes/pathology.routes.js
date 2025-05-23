@@ -15,8 +15,8 @@ router.put('/update-notification-status',verifyAdminToken("pathology"),indexCont
 // test routes
 router.get('/search-test-pathology',verifyAdminToken('pathology'),indexController.pathologyController.searchTest);
 router.get('/test-list',validateQuery(TestListApiValidation),verifyAdminToken('pathology'),indexController.pathologyController.testList);
-router.post('/add-test-to-Stock',verifyAdminToken('pathology'),indexController.pathologyController.addTestToStock)
+router.post('/add-test-to-Stock',validate(addTestToPathology),verifyAdminToken('pathology'),indexController.pathologyController.addTestToStock)
 router.get('/available-test-for-pathology',verifyAdminToken('pathology'),indexController.pathologyController.getAvailableTestsForPathology)
-
+router.put('/update-test',verifyAdminToken('pathology'),indexController.pathologyController.updateTest);
 
 module.exports = router;

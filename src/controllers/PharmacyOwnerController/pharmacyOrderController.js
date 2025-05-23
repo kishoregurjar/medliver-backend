@@ -405,8 +405,60 @@ module.exports.acceptOrRejectOrder = asyncErrorHandler(async (req, res, next) =>
 });
 
 
+// module.exports.getAcceptedOrdersByPharmacy = asyncErrorHandler(
+//   async (req, res) => {
+//     const admin = req.admin;
+
+//     const pharmacy = await Pharmacy.findOne({ adminId: admin._id });
+
+//     if (!pharmacy) {
+//       return errorRes(res, 404, false, "Pharmacy not found");
+//     }
+
+//     const acceptedOrders = await ordersModel
+//       .find(
+//         {
+//           assignedPharmacyId: pharmacy._id,
+//           pharmacyResponseStatus: "accepted",
+//         },
+//         {
+//           _id: 1,
+//           orderDate: 1,
+//           customerId: 1,
+//           deliveryPartnerId: 1,
+//           items: 1,
+//           totalAmount: 1,
+//           paymentMethod: 1,
+//           paymentStatus: 1,
+//           "deliveryAddress.deliveryAddressId": 1,
+//           assignedPharmacyId: 1,
+//           orderStatus:1,
+//           pharmacyResponseStatus:1
+//         }
+//       )
+//       .populate({
+//         path: "customerId",
+//         select: "fullName email phoneNumber",
+//       })
+//       .populate({
+//         path: "deliveryPartnerId",
+//         select: "fullname email location phone",
+//       })
+//       .sort({ orderDate: -1 });
+
+//     return successRes(
+//       res,
+//       200,
+//       true,
+//       "Accepted orders fetched",
+//       acceptedOrders
+//     );
+//   }
+// );
+
 module.exports.getAcceptedOrdersByPharmacy = asyncErrorHandler(
   async (req, res) => {
+    let {page,limit} = req.query;
     const admin = req.admin;
 
     const pharmacy = await Pharmacy.findOne({ adminId: admin._id });
@@ -414,6 +466,15 @@ module.exports.getAcceptedOrdersByPharmacy = asyncErrorHandler(
     if (!pharmacy) {
       return errorRes(res, 404, false, "Pharmacy not found");
     }
+
+     page = parseInt(page) || 1;
+     limit = parseInt(limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const totalOrders = await ordersModel.countDocuments({
+      assignedPharmacyId: pharmacy._id,
+      pharmacyResponseStatus: "accepted",
+    });
 
     const acceptedOrders = await ordersModel
       .find(
@@ -432,6 +493,8 @@ module.exports.getAcceptedOrdersByPharmacy = asyncErrorHandler(
           paymentStatus: 1,
           "deliveryAddress.deliveryAddressId": 1,
           assignedPharmacyId: 1,
+          orderStatus: 1,
+          pharmacyResponseStatus: 1,
         }
       )
       .populate({
@@ -442,17 +505,20 @@ module.exports.getAcceptedOrdersByPharmacy = asyncErrorHandler(
         path: "deliveryPartnerId",
         select: "fullname email location phone",
       })
-      .sort({ orderDate: -1 });
+      .sort({ orderDate: -1 })
+      .skip(skip)
+      .limit(limit);
 
-    return successRes(
-      res,
-      200,
-      true,
-      "Accepted orders fetched",
-      acceptedOrders
-    );
+    return successRes(res, 200, true, "Accepted orders fetched", {
+      results: acceptedOrders,
+      totalOrders,
+      currentPage: page,
+      totalPages: Math.ceil(totalOrders / limit),
+     
+    });
   }
 );
+
 
 module.exports.searchPharmacyOrder = asyncErrorHandler(async (req, res, next) => {
   let { value, page, limit } = req.query;
