@@ -741,4 +741,14 @@ router.get('/get-all-nearby-pharmacy-to-customer', verifyAdminToken("superadmin"
 router.post('/assign-manual-order-to-pharmacy', verifyAdminToken("superadmin"), indexController.adminOrderManagementController.manuallyAssignOrderToPhramacy);
 router.get('/get-all-nearby-partner-to-pharmacy', verifyAdminToken("superadmin"), indexController.adminOrderManagementController.getNearyByDeliveryToPharmacy);
 
+
+/** Send Global Notification */
+
+router.post(
+    "/send-global-notification",
+    verifyAdminToken("superadmin"),
+    indexController.adminNotificationController.sendGlobalNotification
+);
+
+
 module.exports = router;
