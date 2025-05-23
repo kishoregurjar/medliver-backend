@@ -78,7 +78,11 @@ const {
     initiateRefundValidation,
     getAndDeleteCommissionById,
     getAllCommissionValidation,
-    updateCommissionValidation
+    updateCommissionValidation,
+    updateNotificationStatus,
+    manuallyAssignOrderToPharmacy,
+    getNearbyDeliveryToPharmacy,
+    manuallyAssignOrderToDeliveryPartner
 } = require("../middleware/validation");
 const router = express.Router();
 const {
@@ -729,7 +733,7 @@ router.get('/get-all-commission', validateQuery(getAllCommissionValidation), ver
 
 // get notification routes for admin
 router.get('/get-notification-by-recipientId', verifyAdminToken(), indexController.commonController.getNotifications);
-router.put('/update-notification-status', verifyAdminToken(), indexController.commonController.updateNotificationStatus);
+router.put('/update-notification-status', verifyAdminToken(),validate(updateNotificationStatus), indexController.commonController.updateNotificationStatus);
 
 // get notification routes for pathology
 router.get('/get-notification-by-recipientId', verifyAdminToken(), indexController.commonController.getNotifications);
@@ -737,9 +741,9 @@ router.put('/update-notification-status', verifyAdminToken(), indexController.co
 
 /** Manual Order Assignment */
 router.get('/get-all-manual-assignment', verifyAdminToken("superadmin"), indexController.adminOrderManagementController.getAllManualOrderAssignment);
-router.get('/get-all-nearby-pharmacy-to-customer', verifyAdminToken("superadmin"), indexController.adminOrderManagementController.getNearByPharmacyToCustomer);
-router.post('/assign-manual-order-to-pharmacy', verifyAdminToken("superadmin"), indexController.adminOrderManagementController.manuallyAssignOrderToPhramacy);
-router.get('/get-all-nearby-partner-to-pharmacy', verifyAdminToken("superadmin"), indexController.adminOrderManagementController.getNearyByDeliveryToPharmacy);
+router.get('/get-all-nearby-pharmacy-to-customer',validateQuery(getNearbyDeliveryToPharmacy), verifyAdminToken("superadmin"), indexController.adminOrderManagementController.getNearByPharmacyToCustomer);
+router.post('/assign-manual-order-to-pharmacy',validate(manuallyAssignOrderToPharmacy),verifyAdminToken("superadmin"), indexController.adminOrderManagementController.manuallyAssignOrderToPhramacy);
+router.get('/get-all-nearby-partner-to-pharmacy',validateQuery(getNearbyDeliveryToPharmacy) ,verifyAdminToken("superadmin"), indexController.adminOrderManagementController.getNearyByDeliveryToPharmacy);
 
 
 /** Send Global Notification */

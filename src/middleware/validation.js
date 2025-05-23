@@ -2543,6 +2543,62 @@ const removeAndGetInfoTest = Joi.object({
     }),
 });
 
+// notification validation
+const updateNotificationStatus = Joi.object({
+  notificationId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "any.required": "Notification ID is required",
+      "string.pattern.base": "Invalid Notification ID format",
+    }),
+});
+
+// manull assign order
+
+const manuallyAssignOrderToPharmacy = Joi.object({
+  pharmacyId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "any.required": "Pharmacy ID is required",
+      "string.pattern.base": "Invalid Pharmacy ID format",
+    }),
+  orderId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "any.required": "Order ID is required",
+      "string.pattern.base": "Invalid Order ID format",
+    }),
+});
+
+const getNearbyDeliveryToPharmacy = Joi.object({
+  orderId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "any.required": "Order ID is required",
+      "string.pattern.base": "Invalid Order ID format",
+    }),
+});
+const manuallyAssignOrderToDeliveryPartner = Joi.object({
+  deliveryPartnerId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "any.required": "Delivery Partner ID is required",
+      "string.pattern.base": "Invalid Delivery Partner ID format",
+    }),
+  orderId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "any.required": "Order ID is required",
+      "string.pattern.base": "Invalid Order ID format",
+    }),
+});
+
 const validate = (schema) => {
   return (req, res, next) => {
     const { error } = schema.validate(req.body);
@@ -2703,5 +2759,9 @@ module.exports = {
   TestListApiValidation,
   addTestToPathology,
   updateTest,
-  removeAndGetInfoTest
+  removeAndGetInfoTest,
+  updateNotificationStatus,
+  manuallyAssignOrderToPharmacy,
+  getNearbyDeliveryToPharmacy,
+  manuallyAssignOrderToDeliveryPartner
 };
