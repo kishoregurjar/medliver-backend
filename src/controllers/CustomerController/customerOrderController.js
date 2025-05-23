@@ -283,3 +283,17 @@ module.exports.getAllPrescriptions = asyncErrorHandler(async (req, res, next) =>
     }
     return successRes(res, 200, true, "Prescriptions fetched successfully", { prescriptions });
 })
+
+
+module.exports.getPrescriptionDetailsById = asyncErrorHandler(async (req, res, next) => {
+    const userId = req.user._id;
+    const prescriptionId = req.query.prescriptionId;
+    if (!prescriptionId) {
+        return next(new CustomError("Prescription ID is required", 400));
+    }
+    const prescription = await pescriptionSchema.findOne({ _id: prescriptionId, user_id: userId });
+    if (!prescription) {
+        return next(new CustomError("Prescription not found", 404));
+    }
+    return successRes(res, 200, true, "Prescription fetched successfully", { prescription });
+})
