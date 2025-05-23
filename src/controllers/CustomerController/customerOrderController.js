@@ -276,12 +276,19 @@ module.exports.searchOrder = asyncErrorHandler(async (req, res, next) => {
 
 
 module.exports.getAllPrescriptions = asyncErrorHandler(async (req, res, next) => {
-    const userId = req.user._id;
-    const prescriptions = await pescriptionSchema.find({ user_id: userId });
+    const {userId} = req.user._id;
+    let {page = 1} = req.query;
+    let limit = 10;
+    page = parseInt(page) || 1;
+    let skip = (page - 1) * limit;
+    const [prescriptions, totalPrescriptions] = await Promise.all([
+        pescriptionSchema.find({ user_id: userId }).skip(skip).limit(limit),
+        pescriptionSchema.countDocuments({ user_id: userId })
+    ]);
     if (!prescriptions || prescriptions.length === 0) {
         return next(new CustomError("No prescriptions found", 404));
     }
-    return successRes(res, 200, true, "Prescriptions fetched successfully", { prescriptions });
+    return successRes(res, 200, true, "Prescriptions fetched successfully", { prescriptions , totalPrescriptions, currentPage: page, totalPages: Math.ceil(totalPrescriptions / limit) });
 })
 
 
