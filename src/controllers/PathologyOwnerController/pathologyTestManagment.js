@@ -157,3 +157,34 @@ module.exports.updateTest = asyncErrorHandler(async (req, res, next) => {
   return successRes(res, 200, true, "Test updated successfully", pathology.availableTests[testIndex]);
 });
 
+
+module.exports.removeTestFromStock = asyncErrorHandler(async (req, res, next) => {
+  const admin = req.admin;
+  const { testId } = req.query;
+
+  if (!testId) {
+    return next(new CustomError("testId is required", 400));
+  }
+
+  const pathology = await PathologyCenter.findOne({ adminId: admin._id });
+  if (!pathology) {
+    return next(new CustomError("Pathology not found", 404));
+  }
+
+   const testIndex = pathology.availableTests.findIndex((t)=>{
+   return t.testId.toString() === testId;
+  })
+  console.log("test id ",testIndex)
+
+  if (testIndex === -1) {
+    return next(new CustomError("Test not found in pathology center", 404));
+  }
+   const testRemove = pathology.availableTests[testIndex];
+
+   pathology.availableTests.splice(testIndex,1);
+   await pathology.save();
+
+  return successRes(res, 200, true, "Test remove successfully", testRemove);
+});
+
+module.exports.getSingleTestInfo
