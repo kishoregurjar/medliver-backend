@@ -534,7 +534,7 @@ module.exports.searchPharmacyOrder = asyncErrorHandler(async (req, res, next) =>
   const regex = new RegExp(value.trim(), "i");
 
   const searchQuery = {
-    orderType: "pharmacy", 
+    orderType: "pharmacy",
     $or: [
       { orderStatus: regex },
       { paymentStatus: regex },
@@ -544,7 +544,7 @@ module.exports.searchPharmacyOrder = asyncErrorHandler(async (req, res, next) =>
   };
 
   const [totalOrders, allOrders] = await Promise.all([
-      ordersModel.countDocuments(searchQuery),
+    ordersModel.countDocuments(searchQuery),
     ordersModel.find(searchQuery)
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -561,4 +561,107 @@ module.exports.searchPharmacyOrder = asyncErrorHandler(async (req, res, next) =>
     totalPages: Math.ceil(totalOrders / limit),
     totalOrders,
   });
+});
+
+module.exports.dispatchOrder = asyncErrorHandler(async (req, res, next) => {
+  const { orderId, otp } = req.body;
+
+  const order = await ordersModel.findById(orderId);
+  if (!order) return next(new CustomError("Order not found", 404));
+
+  if (order.deliveryPartnerOTP !== otp) return next(new CustomError("Invalid OTP", 400));
+
+  order.orderStatus = "out_for_delivery";
+
+  await order.save();
+
+  let newNotification = new notificationModel({
+    title: "Order Assigned",
+    message: "A pharmacy has handed over the order. Please proceed to deliver it.",
+    recipientType: "delivery_partner",
+    notificationType: "delivery_partner_received_order",
+    NotificationTypeId: order._id,
+    recipientId: order.deliveryPartnerId
+  });
+
+  await newNotification.save();
+
+  await sendExpoNotification(
+    [order.deliveryPartnerDeviceToken],
+    "New Order Assigned",
+    "A new order has been dispatched to you by the pharmacy.",
+    newNotification
+  );
+
+
+  return successRes(res, 200, true, "Order dispatched successfully", order);
+});
+
+// module.exports.getAllDetailsOfOrders = asyncErrorHandler(async (req, res, next) => {
+//   let {page,limit} = req.query 
+//   const sort = req?.query?.sort === "desc" ? -1 : 1;
+//     console.log("page and limit",page,limit,sort)
+
+//    page = parseInt(page) || 1;
+//    limit = parseInt(limit)||20;
+//   const skip = (page - 1) * limit;
+
+//   let filter = {
+//     orderType: { $in: ["pharmacy", "mixed"] },
+//   };
+
+//   const [orders, totalCount] = await Promise.all([
+//     ordersModel.find(filter)
+//       .populate("customerId", "name phone email")
+//       .populate("assignedPharmacyId", "pharmacyName phone address")
+//       .populate("deliveryPartnerId", "name phone location")
+//       .populate("deliveryAddressId", "street city state pincode coordinates")
+//       .populate("items.medicineId", "medicineName category")
+//       .populate("pharmacyQueue", "pharmacyName")
+//       .populate("deliveryPartnerQueue", "name")
+//       .populate("pharmacyAttempts.pharmacyId", "pharmacyName")
+//       .populate("deliveryPartnerAttempts.deliveryPartnerId", "name")
+//       .sort({ createdAt: sort })
+//       .skip(skip)
+//       .limit(limit),
+//     ordersModel.countDocuments(filter),
+//   ]);
+
+//   return successRes(res, 200, true, "orders fetched successfully", {
+//     currentPage: page,
+//     totalPages: Math.ceil(totalCount / limit),
+//     totalOrders: totalCount,
+//     data: orders,
+//   });
+// });
+
+
+module.exports.getAllDetailsOfOrdersById = asyncErrorHandler(async (req, res, next) => {
+  const adminId = req.admin._id;
+  const orderId = req.query.orderId;
+
+  const pharmacy = await pharmacyModel.findOne({ adminId });
+  if (!pharmacy) return next(new CustomError("Pharmacy not found", 404));
+
+  const order = await ordersModel.findOne({
+    _id: orderId,
+    orderType: { $in: ["pharmacy", "mixed"] },
+    $or: [
+      { assignedPharmacyId: pharmacy._id },
+      { pharmacyAttempts: { $elemMatch: { pharmacyId: pharmacy._id, status: { $in: ["pending", "accepted"] } } } }
+    ]
+  })
+  .populate("customerId", "name phone email")
+  .populate("assignedPharmacyId", "pharmacyName phone address")
+  .populate("deliveryPartnerId", "phone location fullname email")  // only name here
+  .populate("deliveryAddressId", "street city state pincode coordinates")
+  .populate("items.medicineId", "medicineName category")
+  .populate("pharmacyQueue", "pharmacyName")
+  .populate("deliveryPartnerQueue", "name")
+  .populate("pharmacyAttempts.pharmacyId", "pharmacyName")
+  .populate("deliveryPartnerAttempts.deliveryPartnerId", "name");
+
+  if (!order) return next(new CustomError("Order not found or not assigned to this pharmacy", 404));
+
+  return successRes(res, 200, true, "Order details fetched successfully", order);
 });

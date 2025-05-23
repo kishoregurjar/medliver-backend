@@ -38,8 +38,7 @@ module.exports.autoCompleteAddress = asyncErrorHandler(async (req, res, next) =>
 
   return successRes(res, 200, true, "Address suggestions fetched successfully", {
     suggestions,
-    address,
-    randomImage
+    address
   });
 });
 

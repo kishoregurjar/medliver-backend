@@ -13,10 +13,16 @@ router.get('/get-notification-by-recipientId',verifyAdminToken("pathology"),inde
 router.put('/update-notification-status',verifyAdminToken("pathology"),indexController.commonController.updateNotificationStatus);
 
 // test routes
-router.get('/search-test-pathology',verifyAdminToken('pathology'),indexController.pathologyController.searchTest);
-router.get('/test-list',validateQuery(TestListApiValidation),verifyAdminToken('pathology'),indexController.pathologyController.testList);
-router.post('/add-test-to-Stock',validate(addTestToPathology),verifyAdminToken('pathology'),indexController.pathologyController.addTestToStock)
-router.get('/available-test-for-pathology',verifyAdminToken('pathology'),indexController.pathologyController.getAvailableTestsForPathology)
-router.put('/update-test',verifyAdminToken('pathology'),indexController.pathologyController.updateTest);
+router.get('/search-test',verifyAdminToken('pathology'),indexController.pathologyTestController.searchTest);
+router.get('/test-list',validateQuery(TestListApiValidation),verifyAdminToken('pathology'),indexController.pathologyTestController.testList);
+router.post('/add-test-to-Stock',validate(addTestToPathology),verifyAdminToken('pathology'),indexController.pathologyTestController.addTestToStock)
+router.get('/available-test-for-pathology',verifyAdminToken('pathology'),indexController.pathologyTestController.getAvailableTestsForPathology)
+router.put('/update-test',verifyAdminToken('pathology'),indexController.pathologyTestController.updateTest);
+router.delete('/remove-test-from-stock',verifyAdminToken('pathology'),indexController.pathologyTestController.removeTestFromStock);
+router.get('/get-single-test-detail',verifyAdminToken('pathology'),indexController.pathologyTestController.getSingleTestInfo);
+router.get('/search-test-in-pathology',verifyAdminToken('pathology'),indexController.pathologyTestController.searchTestInMyStock);
+
+// pathology COntroller Route
+router.get('/get-my-pathology-center',verifyAdminToken('pathology'),indexController.pathologyController.getMyPathologyCenter)
 
 module.exports = router;

@@ -20,12 +20,13 @@ router.get('/get-all-assigned-orders', verifyAdminToken("pharmacy"), indexContro
 router.put('/accept-reject-order', verifyAdminToken("pharmacy"), indexController.pharmacyOrderController.acceptOrRejectOrder);
 // router.get('/get-order-by-id', validateQuery(getOrderByIdValidation), verifyAdminToken("pharmacy"), indexController.pharmacyOrderController.getOrderById);
 // router.put('/cancel-order', validateQuery(getOrderByIdValidation), verifyAdminToken("pharmacy"), indexController.pharmacyOrderController.cancleOrder);
-router.get('/search-pharmacy-order',verifyAdminToken('pharmacy'),indexController.pharmacyOrderController.searchPharmacyOrder);
+router.get('/search-pharmacy-order', verifyAdminToken('pharmacy'), indexController.pharmacyOrderController.searchPharmacyOrder);
+router.get('/get-all-orders-details-by-id',verifyAdminToken("pharmacy"),indexController.pharmacyOrderController.getAllDetailsOfOrdersById)
 
 // get notification routes
-router.get('/get-notification-by-recipientId',verifyAdminToken("pharmacy"),indexController.commonController.getNotifications);
-router.put('/update-notification-status',verifyAdminToken("pharmacy"),indexController.commonController.updateNotificationStatus);
-router.get('/order-accepted-by-pharmacy',verifyAdminToken("pharmacy"),indexController.pharmacyOrderController.getAcceptedOrdersByPharmacy)
+router.get('/get-notification-by-recipientId', verifyAdminToken("pharmacy"), indexController.commonController.getNotifications);
+router.put('/update-notification-status', verifyAdminToken("pharmacy"), indexController.commonController.updateNotificationStatus);
+router.get('/order-accepted-by-pharmacy', verifyAdminToken("pharmacy"), indexController.pharmacyOrderController.getAcceptedOrdersByPharmacy)
 
 
 module.exports = router;
