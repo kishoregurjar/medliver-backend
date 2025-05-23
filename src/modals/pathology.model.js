@@ -52,8 +52,8 @@ const pathologyCenterSchema = new mongoose.Schema(
     testId: { type: mongoose.Schema.Types.ObjectId, ref: "Test" },
     price: { type: Number },
     deliveryTime: {
-      type: Date,
-      default: Date.now,
+      type: String,
+      default: "",
     },
     availabilityAtHome: {
       type: Boolean,

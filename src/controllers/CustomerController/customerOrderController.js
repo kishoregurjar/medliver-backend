@@ -280,7 +280,7 @@ module.exports.uploadPrescription = asyncErrorHandler(
       res,
       200,
       true,
-      "Prescriptions uploaded successfully",
+      "Prescriptions uploaded successfully our medical team will review it and contact you shortly",
       prescription
     );
   }

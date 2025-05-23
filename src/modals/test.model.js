@@ -23,7 +23,7 @@ const testSchema = new mongoose.Schema({
     preparation: {
         type: String // e.g. 'Fasting for 8 hours'
     },
-    delivery_time: {
+    deliveryTime: {
         type: String // e.g. '24 hours', 'Same day'
     },
     available: {
