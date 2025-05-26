@@ -205,28 +205,87 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
   });
 });
 
+// module.exports.getAllOrders = asyncErrorHandler(async (req, res, next) => {
+//   const userId = req.user._id;
+//   let { page = 1 , status } = req.query;
+//   let limit = 10;
+//   let skip = (page - 1) * limit;
+
+
+//   let [orders, totalOrders] = await Promise.all([
+//       await orderSchema
+//       .find({ customerId: userId })
+//       .populate("items.medicineId")
+//       .populate("deliveryAddressId")
+//       .sort({ createdAt: -1 }),
+//     await orderSchema.countDocuments({ customerId: userId }),
+//   ]);
+
+//   if (!orders || orders.length === 0) {
+//     return next(new CustomError("No orders found", 404));
+//   }
+//   if (orders.length > 0) {
+//     orders.forEach((order) => {
+//       order.items.forEach((item) => {
+//         if (item.medicineId && typeof item.medicineId === "object") {
+//           item.item_id = item.medicineId._id;
+//         }
+//       });
+//     });
+//   }
+
+//   return successRes(res, 200, true, "Orders fetched successfully", { orders , totalOrders, currentPage: page, totalPages: Math.ceil(totalOrders / limit) });
+// });
+
+
 module.exports.getAllOrders = asyncErrorHandler(async (req, res, next) => {
   const userId = req.user._id;
-  const orders = await orderSchema
-    .find({ customerId: userId })
-    .populate("items.medicineId")
-    .populate("deliveryAddressId")
-    .sort({ createdAt: -1 });
-  if (!orders || orders.length === 0) {
-    return next(new CustomError("No orders found", 404));
-  }
-  if (orders.length > 0) {
-    orders.forEach((order) => {
-      order.items.forEach((item) => {
-        if (item.medicineId && typeof item.medicineId === "object") {
-          item.item_id = item.medicineId._id;
-        }
-      });
-    });
+  let { page = 1, status } = req.query;
+  let limit = 10;
+  let skip = (page - 1) * limit;
+
+  
+  let query = { customerId: userId };
+  
+  if (status === "delivered") {
+    query.orderStatus = "delivered";
+  } else if (status === "cancelled") {
+    query.orderStatus = "cancelled";
+  } else if (status === "pending") {
+    query.orderStatus = { $nin: ["delivered", "cancelled"] };
   }
 
-  return successRes(res, 200, true, "Orders fetched successfully", { orders });
+  let [orders, totalOrders] = await Promise.all([
+    orderSchema
+      .find(query)
+      .populate("items.medicineId")
+      .populate("deliveryAddressId")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit),
+    orderSchema.countDocuments(query),
+  ]);
+
+  if (!orders || orders.length === 0) {
+    return successRes(res, 200, false, "No orders found", []);
+  }
+
+  orders.forEach((order) => {
+    order.items.forEach((item) => {
+      if (item.medicineId && typeof item.medicineId === "object") {
+        item.item_id = item.medicineId._id;
+      }
+    });
+  });
+
+  return successRes(res, 200, true, "Orders fetched successfully", {
+    orders,
+    totalOrders,
+    currentPage: Number(page),
+    totalPages: Math.ceil(totalOrders / limit),
+  });
 });
+
 
 module.exports.getOrderById = asyncErrorHandler(async (req, res, next) => {
   const userId = req.user._id;
