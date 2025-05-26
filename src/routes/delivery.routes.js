@@ -40,6 +40,11 @@ router.get('/get-notification-by-recipientId', verifyDeliveryPartnerToken(), ind
 router.put('/update-notification-status', verifyDeliveryPartnerToken(), indexController.commonController.updateNotificationStatus);
 router.get('/check-delivery-partner-currenct-status', verifyDeliveryPartnerToken(), indexController.deliveryPartnerController.getDeliveryPartnerCurrentStatus);
 
-/**  */
+// privacy and terms routes
+
+router.get("/get-privacy-policy",  indexController.commonPPAndTCContorller.getPrivacyPolicy);
+router.get("/get-terms-and-conditions", indexController.commonPPAndTCContorller.getTermsAndConditions);
+
+
 
 module.exports = router;

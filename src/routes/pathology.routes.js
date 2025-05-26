@@ -26,4 +26,8 @@ router.put('/change-test-status',validate(removeAndGetInfoTest),verifyAdminToken
 // pathology COntroller Route
 router.get('/get-my-pathology-center',verifyAdminToken('pathology'),indexController.pathologyController.getMyPathologyCenter)
 
+router.get("/get-privacy-policy",  indexController.commonPPAndTCContorller.getPrivacyPolicy);
+router.get("/get-terms-and-conditions", indexController.commonPPAndTCContorller.getTermsAndConditions);
+
+
 module.exports = router;
