@@ -90,3 +90,9 @@ router.post("/save-notification-id", indexController.commonNotificationControlle
 
 router.post('/get-automated-answer', indexController.chatBoatController.getAnswer);
 router.get('/chat-history', indexController.chatBoatController.getChatBoatHistory);
+
+
+
+//privacy and terms routes
+router.get("/get-privacy-policy",  indexController.commonPPAndTCContorller.getPrivacyPolicy);
+router.get("/get-terms-and-conditions", indexController.commonPPAndTCContorller.getTermsAndConditions);

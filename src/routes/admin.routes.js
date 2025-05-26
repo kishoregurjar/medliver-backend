@@ -764,4 +764,13 @@ router.post(
 );
 
 
+// privacy and terms routes
+router.get("/get-privacy-policy",  indexController.commonPPAndTCContorller.getPrivacyPolicy);
+router.get("/get-terms-and-conditions", indexController.commonPPAndTCContorller.getTermsAndConditions);
+
+router.post("/add-policy", verifyAdminToken("superadmin"), indexController.commonPPAndTCContorller.createPolicy);
+router.put("/update-policy", verifyAdminToken("superadmin"), indexController.commonPPAndTCContorller.createOrUpdatePolicy);
+router.get("/get-all-policies", verifyAdminToken("superadmin"), indexController.commonPPAndTCContorller.getAllPolicies);
+router.get("/get-policy-by-id", verifyAdminToken("superadmin"), indexController.commonPPAndTCContorller.getPolicyById);
+
 module.exports = router;

@@ -29,4 +29,9 @@ router.put('/update-notification-status', verifyAdminToken("pharmacy"), indexCon
 router.get('/order-accepted-by-pharmacy', verifyAdminToken("pharmacy"), indexController.pharmacyOrderController.getAcceptedOrdersByPharmacy)
 
 
+//privacy and terms routes
+router.get("/get-privacy-policy",  indexController.commonPPAndTCContorller.getPrivacyPolicy);
+router.get("/get-terms-and-conditions", indexController.commonPPAndTCContorller.getTermsAndConditions);
+
+
 module.exports = router;

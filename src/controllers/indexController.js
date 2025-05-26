@@ -35,6 +35,7 @@ const pathologyTestController = require('./PathologyOwnerController/pathologyTes
 const pathologyController = require('./PathologyOwnerController/pathologyController');
 const commonNotificationController = require('./CommonController/commonNotificationController');
 const adminNotificationController = require('./AdminController/adminNotificationController');
+const commonPPAndTCContorller = require('./CommonController/commonPPAndTCContorller');
 
 module.exports = {
     adminAuthController,
@@ -74,4 +75,5 @@ module.exports = {
     pathologyController,
     commonNotificationController,
     adminNotificationController,
+    commonPPAndTCContorller
 }   
