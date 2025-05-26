@@ -5,7 +5,7 @@ const { successRes } = require("../../services/response")
 
 
 // Get All Leads
-module.exports.getAllUser = asyncErrorHandler(async (req, res, next) => {
+module.exports.getAllDoctoreLead = asyncErrorHandler(async (req, res, next) => {
   let { page, limit, sortOrder } = req.query;
 
   page = parseInt(page) || 1;
@@ -26,7 +26,7 @@ module.exports.getAllUser = asyncErrorHandler(async (req, res, next) => {
     return successRes(res, 200, false, "No User Found", []);
   }
 
-  return successRes(res, 200, true, "Customers fetched successfully", {
+  return successRes(res, 200, true, "Doctore Lead fetched successfully", {
     user,
     currentPage: page,
     totalPages: Math.ceil(total / limit),

@@ -916,29 +916,51 @@ const searchMedicineValidation = Joi.object({
 
 // doctore Lead Validation
 
-const createDoctorLeadValidation = Joi.object({
-  name: Joi.string().trim().required().messages({
-    "any.required": "Name is required",
-    "string.empty": "Name cannot be empty",
-  }),
-  email: Joi.string().email().required().messages({
-    "any.required": "Email is required",
-    "string.email": "Please provide a valid email address",
-    "string.empty": "Email cannot be empty",
-  }),
-  phone: Joi.string()
-    .pattern(/^[6-9]\d{9}$/)
+const createDoctoreLeadValidation = Joi.object({
+  name: Joi.string()
+    .trim()
+    .required()
     .messages({
-      "string.pattern.base":
-        "Phone number must be a valid 10-digit Indian number",
+      "string.base": "Name must be a string",
+      "string.empty": "Name cannot be empty",
+      "any.required": "Name is required",
     }),
-  address: Joi.string().trim().messages({
-    "string.empty": "Address cannot be empty",
-  }),
-  disease: Joi.string().trim().messages({
-    "string.empty": "Disease cannot be empty",
-  }),
+
+  email: Joi.string()
+    .email()
+    .required()
+    .messages({
+      "string.base": "Email must be a string",
+      "string.email": "Email must be a valid email address",
+      "string.empty": "Email cannot be empty",
+      "any.required": "Email is required",
+    }),
+
+  phone: Joi.string()
+    .pattern(/^[0-9]{10}$/)
+    .required()
+    .messages({
+      "string.base": "Phone must be a string",
+      "string.pattern.base": "Phone must be a valid 10-digit number",
+    }),
+
+  address: Joi.string()
+    .trim()
+    .optional()
+    .messages({
+      "string.base": "Address must be a string",
+    }),
+
+  disease: Joi.string()
+    .trim()
+    .optional()
+    .messages({
+      "string.base": "Disease must be a string",
+    }),
 });
+
+module.exports = { createDoctoreLeadValidation };
+
 
 const getAllDoctoreLeadValidation = Joi.object({
   page: Joi.number().min(1).optional().messages({
@@ -2653,6 +2675,92 @@ const sendGlobalNotification = Joi.object({
   data: Joi.object().optional(), 
 });
 
+const getNotificatioByIdValidation  = Joi.object({
+    notificationId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "string.empty": "Notification id cannot be empty",
+      "string.pattern.base": "Invalid notification ID format",
+    }),
+});
+//policy mangament validation
+const getPrivacyPolicyAndTACValidation = Joi.object({
+  userType: Joi.string()
+    .valid('customer', 'pharmacy', 'delivery', 'pathology')
+    .required()
+    .messages({
+      "any.required": "User type is required",
+      "any.only": "User type must be one of 'customer', 'pharmacy', 'delivery', or 'pathology'",
+      "string.empty": "User type cannot be empty",
+    }),
+});
+
+const createPolicyValidation = Joi.object({
+  type: Joi.string().valid("privacy", "terms").required().messages({
+    "any.required": "Policy type is required",
+    "any.only": "Type must be either 'privacy' or 'terms'",
+    "string.empty": "Policy type cannot be empty",
+  }),
+  content: Joi.string().trim().required().messages({
+    "any.required": "Content is required",
+    "string.empty": "Content cannot be empty",
+  }),
+  userType: Joi.string()
+    .lowercase()
+    .valid("customer", "pharmacy", "delivery", "pathology")
+    .required()
+    .messages({
+      "any.required": "User type is required",
+      "any.only": "User type must be one of 'customer', 'pharmacy', 'delivery', or 'pathology'",
+      "string.empty": "User type cannot be empty",
+    }),
+});
+
+const getPolicyByIdValidation  = Joi.object({
+    policyId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "string.empty": "Policy id cannot be empty",
+      "string.pattern.base": "Invalid policy ID format",
+    }),
+});
+
+const getMedicinesByManufacturerValidation = Joi.object({
+    medicineId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "string.empty": "medicineId cannot be empty",
+      "string.pattern.base": "Invalid medicine ID format",
+    }),
+
+  page: Joi.number()
+    .integer()
+    .min(1)
+    .optional()
+    .messages({
+      "number.base": "Page must be a number",
+      "number.integer": "Page must be an integer",
+      "number.min": "Page must be at least 1",
+    }),
+  limit: Joi.number()
+    .integer()
+    .min(1)
+    .optional()
+    .messages({
+      "number.base": "Limit must be a number",
+      "number.integer": "Limit must be an integer",
+      "number.min": "Limit must be at least 1",
+    }),
+});
+
+module.exports = { getMedicinesByManufacturerValidation };
+
+
+
+
 const validate = (schema) => {
   return (req, res, next) => {
     const { error } = schema.validate(req.body);
@@ -2728,7 +2836,6 @@ module.exports = {
   deleteMedicineValidation,
   searchMedicineValidation,
   approveRejectDeliveryPartnerValidation,
-  createDoctorLeadValidation,
   getAllDoctoreLeadValidation,
   getAnddeleteDoctoreLeadByIdValidation,
   updateDoctorLeadValidation,
@@ -2821,5 +2928,11 @@ module.exports = {
   sendGlobalNotification,
   getBestSellingProductById,
   searchBestSellingProducts,
-  searchBestFeatureProducts
+  searchBestFeatureProducts,
+  getPrivacyPolicyAndTACValidation,
+  createPolicyValidation,
+  getPolicyByIdValidation,
+  getNotificatioByIdValidation,
+  createDoctoreLeadValidation,
+  getMedicinesByManufacturerValidation
 };

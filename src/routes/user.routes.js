@@ -2,7 +2,7 @@ const express = require("express");
 const indexController = require("../controllers/indexController");
 const { verifyUserToken } = require("../utils/jsonWebToken");
 const { uploadUserProfilePic, uploadPrescription } = require("../services/multer");
-const { validate, validateQuery, getAllSpecialOfferValidation, getAllFeatureProductValidation, getAllSellingProductValidation, createDoctorLeadValidation, registerCustomerSchema, CustomerverifyOtpSchema, loginCustomerSchema, forgetPasswordCustomerValidation, resetPasswordCustomerValidation, signUpSignInWithGoogleValidation, addAddressValidation, editAddressSchema, getOrDeleteCustomerAddress, addToCartSchema, changeQuantitySchema, removeItemFromCartSchema, applyInsuranceSchema, emergencyVehicleRequestSchema, updateUserProfileValidation, createOrderValidation, getOrderByIdValidation, createRazorpayOrderValidation, verifyRazorpayPaymentValidation, autoCompleteAddressValidation, getDistanceBetweenCoordsValidation, getRouteBetweenCoordsValidation, searchUMedicineValidation, logMedicineClickValidation ,searchOrderValidation} = require("../middleware/validation")
+const { validate, validateQuery, getAllSpecialOfferValidation, getAllFeatureProductValidation, getAllSellingProductValidation, createDoctorLeadValidation, registerCustomerSchema, CustomerverifyOtpSchema, loginCustomerSchema, forgetPasswordCustomerValidation, resetPasswordCustomerValidation, signUpSignInWithGoogleValidation, addAddressValidation, editAddressSchema, getOrDeleteCustomerAddress, addToCartSchema, changeQuantitySchema, removeItemFromCartSchema, applyInsuranceSchema, emergencyVehicleRequestSchema, updateUserProfileValidation, createOrderValidation, getOrderByIdValidation, createRazorpayOrderValidation, verifyRazorpayPaymentValidation, autoCompleteAddressValidation, getDistanceBetweenCoordsValidation, getRouteBetweenCoordsValidation, searchUMedicineValidation, logMedicineClickValidation ,searchOrderValidation,createDoctoreLeadValidation,getMedicinesByManufacturerValidation} = require("../middleware/validation")
 
 const router = express.Router();
 
@@ -77,10 +77,10 @@ router.get("/get-all-medicines", indexController.medicineController.getAllMedici
 router.get("/get-medicine-by-id", indexController.medicineController.getMedicineById);
 router.post('/log-medicine-click', validate(logMedicineClickValidation), indexController.customerMedicineController.logMedicineClick);
 router.get('/get-top-picks', indexController.customerMedicineController.getUserTopPicksWithSimilar)
-router.get('/medicines-by-manufacturer', indexController.customerMedicineController.getMedicinesByManufacturer)
+router.get('/medicines-by-manufacturer', validateQuery(getMedicinesByManufacturerValidation),indexController.customerMedicineController.getMedicinesByManufacturer)
 
 /**DoctoreLead Routes */
-router.post("/create-doctoreLead", indexController.customerMissLiniesController.createDoctoreLead);
+router.post("/create-doctoreLead",validate(createDoctoreLeadValidation), indexController.customerMissLiniesController.createDoctoreLead);
 module.exports = router;
 
 // get notification routes
