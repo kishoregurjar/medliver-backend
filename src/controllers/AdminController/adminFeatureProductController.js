@@ -145,4 +145,40 @@ module.exports.updateFeaturedProductStatus = asyncErrorHandler(
     );
   }
 );
- 
+
+ module.exports.searchFeaturedProducts = asyncErrorHandler(async (req, res, next) => {
+  let { query, page, limit } = req.query;
+
+  if (!query) {
+    return next(new CustomError("Search value is required", 400));
+  }
+
+  const regex = new RegExp(query.trim(), "i");
+  page = parseInt(page) || 1;
+  limit = parseInt(limit) || 10;
+  const skip = (page - 1) * limit;
+
+  const featuredProducts = await FeaturedProduct.find()
+    .populate("product")
+    .sort({ createdAt: -1 });
+
+  const filteredProducts = featuredProducts.filter((item) =>
+    regex.test(item.product?.name || "") ||
+    regex.test(item.product?.manufacturer || "") ||
+    regex.test(item.isActive?.toString())
+  );
+
+  const totalResults = filteredProducts.length;
+  const paginatedResults = filteredProducts.slice(skip, skip + limit);
+
+  if (paginatedResults.length === 0) {
+    return successRes(res, 200, false, "No Featured Products Found", []);
+  }
+
+  return successRes(res, 200, true, "Featured Products fetched successfully", {
+    featuredProducts: paginatedResults,
+    totalResults,
+    currentPage: page,
+    totalPages: Math.ceil(totalResults / limit),
+  });
+});

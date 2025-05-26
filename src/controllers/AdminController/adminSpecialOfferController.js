@@ -190,7 +190,6 @@ module.exports.updateSpecialOffer = asyncErrorHandler(async (req, res, next) => 
     return successRes(res, 200, true, "Special offer updated successfully", specialOffer);
 });
 
-
 module.exports.activeDeactiveSpecialOffer = asyncErrorHandler(async (req, res, next) => {
     const { specialOfferId, isActive } = req.body;
     if (!specialOfferId || isActive === undefined) {

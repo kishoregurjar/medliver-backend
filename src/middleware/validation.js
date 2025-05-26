@@ -687,6 +687,31 @@ const UpdateAndDeleteBestSelling = Joi.object({
       "string.pattern.base": "Invalid Best Selling Product ID format",
     }),
 });
+const getBestSellingProductById = Joi.object({
+    bestSellingProductId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "string.empty": "Best Selling Product ID cannot be empty",
+      "string.pattern.base": "Invalid Best Selling Product ID format",
+    }),
+});
+
+const searchBestSellingProducts = Joi.object({
+  query: Joi.string().trim().required().messages({
+    "any.required": "Search value is required",
+    "string.empty": "Search value cannot be empty",
+  }),
+   page: Joi.number().min(1).optional().messages({
+    "number.base": "Page must be a number",
+    "number.min": "Page must be at least 1",
+  }),
+  limit: Joi.number().min(1).optional().messages({
+    "number.base": "Limit must be a number",
+    "number.min": "Limit must be at least 1",
+  }),
+});
+
 
 // Doctore Profile validation
 const createDoctorProfileValidation = Joi.object({
@@ -753,7 +778,7 @@ const createDoctorProfileValidation = Joi.object({
   description: Joi.string().trim().required().messages({
     "string.empty": "Description is required",
     "any.required": "Description is required",
-  }),
+  })
 });
 
 const getDoctoreByIdAndChangeStatusValidation = Joi.object({
@@ -1040,6 +1065,21 @@ const getAndDeleteFeatureProductIdValidation = Joi.object({
       "string.empty": "Product ID cannot be empty",
       "string.pattern.base": "Invalid Product ID format",
     }),
+});
+
+const searchBestFeatureProducts = Joi.object({
+  query: Joi.string().trim().required().messages({
+    "any.required": "Search value is required",
+    "string.empty": "Search value cannot be empty",
+  }),
+   page: Joi.number().min(1).optional().messages({
+    "number.base": "Page must be a number",
+    "number.min": "Page must be at least 1",
+  }),
+  limit: Joi.number().min(1).optional().messages({
+    "number.base": "Limit must be a number",
+    "number.min": "Limit must be at least 1",
+  }),
 });
 
 // Validate pagination and sorting in getAllFeaturedProducts
@@ -2599,6 +2639,20 @@ const manuallyAssignOrderToDeliveryPartner = Joi.object({
     }),
 });
 
+// global notification validation
+
+const sendGlobalNotification = Joi.object({
+  title: Joi.string().trim().required().messages({
+    "any.required": "Title is required",
+    "string.empty": "Title cannot be empty",
+  }),
+  body: Joi.string().trim().required().messages({
+    "any.required": "Body is required",
+    "string.empty": "Body cannot be empty",
+  }),
+  data: Joi.object().optional(), 
+});
+
 const validate = (schema) => {
   return (req, res, next) => {
     const { error } = schema.validate(req.body);
@@ -2763,5 +2817,9 @@ module.exports = {
   updateNotificationStatus,
   manuallyAssignOrderToPharmacy,
   getNearbyDeliveryToPharmacy,
-  manuallyAssignOrderToDeliveryPartner
+  manuallyAssignOrderToDeliveryPartner,
+  sendGlobalNotification,
+  getBestSellingProductById,
+  searchBestSellingProducts,
+  searchBestFeatureProducts
 };

@@ -8,6 +8,7 @@ const {
     changeStatusPharmacyValidation,
     getAndDeletePharmacyById,
     getAllPharmacy,
+    searchBestFeatureProducts,
     updatePharmacy,
     createPathologyCenter,
     getAndDeletePathologyCenterById,
@@ -82,7 +83,10 @@ const {
     updateNotificationStatus,
     manuallyAssignOrderToPharmacy,
     getNearbyDeliveryToPharmacy,
-    manuallyAssignOrderToDeliveryPartner
+    manuallyAssignOrderToDeliveryPartner,
+    sendGlobalNotification,
+    getBestSellingProductById,
+    searchBestSellingProducts
 } = require("../middleware/validation");
 const router = express.Router();
 const {
@@ -427,6 +431,9 @@ router.delete(
     verifyAdminToken("superadmin"),
     indexController.adminBestSellingController.deleteBestSellingProduct
 );
+router.get('/get-best-selling-product-by-id',validateQuery( getBestSellingProductById),verifyAdminToken("superadmin"),indexController.adminBestSellingController.getBestSellingProductById);
+
+router.get('/search-best-selling-product',validateQuery(searchBestSellingProducts),verifyAdminToken("superadmin"),indexController.adminBestSellingController.searchBestSellingProducts);
 
 //** Feature Product Routes */
 router.post(
@@ -459,6 +466,8 @@ router.put(
     verifyAdminToken("superadmin"),
     indexController.adminFeatureProductController.updateFeaturedProductStatus
 );
+
+router.get('/search-feature-product',validateQuery(searchBestFeatureProducts),verifyAdminToken("superadmin"),indexController.adminFeatureProductController.searchFeaturedProducts);
 
 //Test Routes
 router.post(
@@ -749,7 +758,7 @@ router.get('/get-all-nearby-partner-to-pharmacy',validateQuery(getNearbyDelivery
 /** Send Global Notification */
 
 router.post(
-    "/send-global-notification",
+    "/send-global-notification",validate(sendGlobalNotification),
     verifyAdminToken("superadmin"),
     indexController.adminNotificationController.sendGlobalNotification
 );

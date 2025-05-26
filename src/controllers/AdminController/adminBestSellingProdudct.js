@@ -110,3 +110,58 @@ module.exports.deleteBestSellingProduct = asyncErrorHandler(async (req, res, nex
     await findProduct.deleteOne();
     return successRes(res, 200, true, "Product deleted successfully", findProduct)
 })
+
+module.exports.getBestSellingProductById = asyncErrorHandler(async (req, res, next) => {
+  const { bestSellingProductId } = req.query;
+
+  if (!bestSellingProductId) {
+    return next(new CustomError("Best Selling Product ID is required", 400));
+  }
+
+  const bestSeller = await BestSellerModel.findById(bestSellingProductId).populate("product");
+
+  if (!bestSeller) {
+    return next(new CustomError("Best Selling Product not found", 404));
+  }
+
+  return successRes(res, 200, true, "Best Selling Product fetched successfully", bestSeller);
+});
+
+
+module.exports.searchBestSellingProducts = asyncErrorHandler(async (req, res, next) => {
+  let { query, page, limit } = req.query;
+
+  if (!query) {
+    return next(new CustomError("Search value is required", 400));
+  }
+
+  page = parseInt(page) || 1;
+  limit = parseInt(limit) || 10;
+  const skip = (page - 1) * limit;
+
+  const regex = new RegExp(query.trim(), "i");
+
+  const allBestSellers = await BestSellerModel.find({ isActive: true })
+    .populate("product")
+    .sort({ createdAt: -1 });
+
+  const filtered = allBestSellers.filter((item) =>
+    regex.test(item.product?.name || "") ||
+    regex.test(item.product?.manufacturer || "") ||
+    regex.test(item.isActive?.toString())
+  );
+
+  const totalResults = filtered.length;
+  const paginated = filtered.slice(skip, skip + limit);
+
+  if (paginated.length === 0) {
+    return successRes(res, 200, false, "No Best Selling Products Found", []);
+  }
+
+  return successRes(res, 200, true, "Best Selling Products fetched successfully", {
+    products: paginated,
+    currentPage: page,
+    totalPages: Math.ceil(totalResults / limit),
+    totalResults
+  });
+});
