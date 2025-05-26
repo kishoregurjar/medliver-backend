@@ -110,7 +110,7 @@ module.exports.getAllSpecialOffers = asyncErrorHandler(
       specialOfferModel.countDocuments(),
       specialOfferModel
         .find()
-        .populate("product", "name image price")
+        .populate("product")
         .limit(limit)
         .skip(skip),
     ]);
