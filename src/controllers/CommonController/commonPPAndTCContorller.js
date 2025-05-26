@@ -8,7 +8,6 @@ module.exports.getPrivacyPolicy = asyncErrorHandler(async (req, res, next) => {
   
   let {userType} = req.query;
 
-
   if (!userType) {
     return next(new CustomError("User type is required", 400));
   }

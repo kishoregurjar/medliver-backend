@@ -207,7 +207,7 @@ module.exports.updateTest = asyncErrorHandler(async (req, res, next) => {
 
 module.exports.removeTestFromStock = asyncErrorHandler(async (req, res, next) => {
   const admin = req.admin;
-  const { testId } = req.query;
+  const { testId } = req.query;``
 
   if (!testId) {
     return next(new CustomError("testId is required", 400));

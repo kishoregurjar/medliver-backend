@@ -8,6 +8,7 @@ const {
     changeStatusPharmacyValidation,
     getAndDeletePharmacyById,
     getAllPharmacy,
+    searchBestFeatureProducts,
     updatePharmacy,
     createPathologyCenter,
     getAndDeletePathologyCenterById,
@@ -82,7 +83,14 @@ const {
     updateNotificationStatus,
     manuallyAssignOrderToPharmacy,
     getNearbyDeliveryToPharmacy,
-    manuallyAssignOrderToDeliveryPartner
+    manuallyAssignOrderToDeliveryPartner,
+    sendGlobalNotification,
+    getBestSellingProductById,
+    searchBestSellingProducts,
+    getPrivacyPolicyAndTACValidation,
+    createPolicyValidation,
+    getPolicyByIdValidation,
+    getNotificatioByIdValidation
 } = require("../middleware/validation");
 const router = express.Router();
 const {
@@ -427,6 +435,9 @@ router.delete(
     verifyAdminToken("superadmin"),
     indexController.adminBestSellingController.deleteBestSellingProduct
 );
+router.get('/get-best-selling-product-by-id',validateQuery( getBestSellingProductById),verifyAdminToken("superadmin"),indexController.adminBestSellingController.getBestSellingProductById);
+
+router.get('/search-best-selling-product',validateQuery(searchBestSellingProducts),verifyAdminToken("superadmin"),indexController.adminBestSellingController.searchBestSellingProducts);
 
 //** Feature Product Routes */
 router.post(
@@ -459,6 +470,8 @@ router.put(
     verifyAdminToken("superadmin"),
     indexController.adminFeatureProductController.updateFeaturedProductStatus
 );
+
+router.get('/search-feature-product',validateQuery(searchBestFeatureProducts),verifyAdminToken("superadmin"),indexController.adminFeatureProductController.searchFeaturedProducts);
 
 //Test Routes
 router.post(
@@ -705,7 +718,7 @@ router.delete(
 router.get(
     "/get-all-doctoreLead", validateQuery(getAllDoctoreLeadValidation),
     verifyAdminToken("superadmin"),
-    indexController.adminDoctoreLeadController.getAllUser
+    indexController.adminDoctoreLeadController.getAllDoctoreLead
 );
 router.get(
     "/get-doctoreLead-by-id", validateQuery(getAnddeleteDoctoreLeadByIdValidation),
@@ -737,7 +750,7 @@ router.put('/update-notification-status', verifyAdminToken(),validate(updateNoti
 
 // get notification routes for pathology
 router.get('/get-notification-by-recipientId', verifyAdminToken(), indexController.commonController.getNotifications);
-router.put('/update-notification-status', verifyAdminToken(), indexController.commonController.updateNotificationStatus);
+router.put('/update-notification-status', validate(getNotificatioByIdValidation),verifyAdminToken(), indexController.commonController.updateNotificationStatus);
 
 /** Manual Order Assignment */
 router.get('/get-all-manual-assignment', verifyAdminToken("superadmin"), indexController.adminOrderManagementController.getAllManualOrderAssignment);
@@ -749,19 +762,20 @@ router.get('/get-all-nearby-partner-to-pharmacy',validateQuery(getNearbyDelivery
 /** Send Global Notification */
 
 router.post(
-    "/send-global-notification",
+    "/send-global-notification",validate(sendGlobalNotification),
     verifyAdminToken("superadmin"),
     indexController.adminNotificationController.sendGlobalNotification
 );
 
 
 // privacy and terms routes
-router.get("/get-privacy-policy",  indexController.commonPPAndTCContorller.getPrivacyPolicy);
-router.get("/get-terms-and-conditions", indexController.commonPPAndTCContorller.getTermsAndConditions);
+router.get("/get-privacy-policy",
+indexController.commonPPAndTCContorller.getPrivacyPolicy);
+router.get("/get-terms-and-conditions", indexController.commonPPAndTCContorller.getTermsAndConditions);//validateQuery(getPrivacyPolicyAndTACValidation) ,
 
-router.post("/add-policy", verifyAdminToken("superadmin"), indexController.commonPPAndTCContorller.createPolicy);
+router.post("/add-policy", validate(createPolicyValidation),verifyAdminToken("superadmin"), indexController.commonPPAndTCContorller.createPolicy);
 router.put("/update-policy", verifyAdminToken("superadmin"), indexController.commonPPAndTCContorller.createOrUpdatePolicy);
 router.get("/get-all-policies", verifyAdminToken("superadmin"), indexController.commonPPAndTCContorller.getAllPolicies);
-router.get("/get-policy-by-id", verifyAdminToken("superadmin"), indexController.commonPPAndTCContorller.getPolicyById);
+router.get("/get-policy-by-id",validateQuery(getPolicyByIdValidation) ,verifyAdminToken("superadmin"), indexController.commonPPAndTCContorller.getPolicyById);
 
 module.exports = router;
