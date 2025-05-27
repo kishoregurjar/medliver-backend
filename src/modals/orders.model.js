@@ -78,7 +78,7 @@ const orderSchema = new mongoose.Schema({
   },
   paymentMethod: {
     type: String,
-    enum: ["UPI", "card", "cash", "wallet", "COD"],
+    enum: ["UPI", "CARD", "WALLET", "COD"],
   },
   totalAmount: {
     type: Number,
