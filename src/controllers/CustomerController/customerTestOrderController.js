@@ -138,7 +138,7 @@ module.exports.popularTest = asyncErrorHandler(async (req, res, next) => {
 
   const [totalTests, allTests] = await Promise.all([
     TestModel.countDocuments(filter),
-    TestModel.aggregate([{ $sample: { size: 5 } }])  //for randome 5 tests
+    TestModel.aggregate([{ $sample: { size: limit } }])  //for randome 5 tests
   ]);
 
   if (allTests.length === 0) {

@@ -2,7 +2,7 @@ const express = require("express");
 const indexController = require("../controllers/indexController");
 const { verifyUserToken } = require("../utils/jsonWebToken");
 const { uploadUserProfilePic, uploadPrescription } = require("../services/multer");
-const { validate, validateQuery, getAllSpecialOfferValidation, getAllFeatureProductValidation, getAllSellingProductValidation, createDoctorLeadValidation, registerCustomerSchema, CustomerverifyOtpSchema, loginCustomerSchema, forgetPasswordCustomerValidation, resetPasswordCustomerValidation, signUpSignInWithGoogleValidation, addAddressValidation, editAddressSchema, getOrDeleteCustomerAddress, addToCartSchema, changeQuantitySchema, removeItemFromCartSchema,emergencyVehicleRequestSchema, updateUserProfileValidation, createOrderValidation, getOrderByIdValidation, createRazorpayOrderValidation, verifyRazorpayPaymentValidation, autoCompleteAddressValidation, getDistanceBetweenCoordsValidation, getRouteBetweenCoordsValidation, searchUMedicineValidation, logMedicineClickValidation ,searchOrderValidation,createDoctoreLeadValidation,applyInsuranceValidation,getMedicinesByManufacturerValidation,getAllOrdersValidation,getprescriptionByIdValidation,changeUserPasswordValidation} = require("../middleware/validation")
+const { validate, validateQuery, getAllSpecialOfferValidation, getAllFeatureProductValidation, getAllSellingProductValidation, createDoctorLeadValidation, registerCustomerSchema, CustomerverifyOtpSchema, loginCustomerSchema, forgetPasswordCustomerValidation, resetPasswordCustomerValidation, signUpSignInWithGoogleValidation, addAddressValidation, editAddressSchema, getOrDeleteCustomerAddress, addToCartSchema, changeQuantitySchema, removeItemFromCartSchema,emergencyVehicleRequestSchema, updateUserProfileValidation, createOrderValidation, getOrderByIdValidation, createRazorpayOrderValidation, verifyRazorpayPaymentValidation, autoCompleteAddressValidation, getDistanceBetweenCoordsValidation, getRouteBetweenCoordsValidation, searchUMedicineValidation, logMedicineClickValidation ,searchOrderValidation,createDoctoreLeadValidation,applyInsuranceValidation,getMedicinesByManufacturerValidation,getAllOrdersValidation,getprescriptionByIdValidation,changeUserPasswordValidation,getTestsByCategoryId,getTestsDetailsById,populatTestApiValidation,searchTest} = require("../middleware/validation")
 
 const router = express.Router();
 
@@ -96,8 +96,8 @@ router.get("/get-privacy-policy",  indexController.commonPPAndTCContorller.getPr
 router.get("/get-terms-and-conditions", indexController.commonPPAndTCContorller.getTermsAndConditions);
 
 // customer test orderController
-router.get('/get-popular-test',verifyUserToken(),indexController.customerTestOrderController.popularTest);
+router.get('/get-popular-test',validateQuery(populatTestApiValidation),verifyUserToken(),indexController.customerTestOrderController.popularTest);
 // router.get('/get-tests-by-category',verifyUserToken(),indexController.customerTestOrderController.getTestsByCategory);
-router.get('/get-tests-by-category',verifyUserToken(),indexController.customerTestOrderController.getTestsByCategoryId);
-router.get('/search-test',verifyUserToken(),indexController.adminTestController.searchTest)
-router.get('/get-test-details',verifyUserToken(),indexController.customerTestOrderController.getTestDetails)
+router.get('/get-tests-by-category',validateQuery(getTestsByCategoryId),verifyUserToken(),indexController.customerTestOrderController.getTestsByCategoryId);
+router.get('/search-test',validateQuery(searchTest),verifyUserToken(),indexController.adminTestController.searchTest)
+router.get('/get-test-details',validateQuery(getTestsDetailsById),verifyUserToken(),indexController.customerTestOrderController.getTestDetails)
