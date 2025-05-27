@@ -1,3 +1,4 @@
+const { v4: uuidv4 } = require('uuid');
 module.exports.getDistance = async (coord1, coord2) => {
   const toRad = (value) => (value * Math.PI) / 180;
   const R = 6371; // Earth's radius in km
@@ -12,6 +13,12 @@ module.exports.getDistance = async (coord1, coord2) => {
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c; // returns distance in km
 };
+
+
+module.exports.generateOrderNumber = () => {
+  return `MED${uuidv4().replace(/-/g, '').slice(0, 12).toUpperCase()}`;
+}
+
 
 module.exports.deliveryOrderStatus = [
   "pending",

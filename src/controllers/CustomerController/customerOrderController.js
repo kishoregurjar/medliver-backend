@@ -9,7 +9,7 @@ const customerAddressModel = require("../../modals/customerAddress.model");
 const { sendExpoNotification } = require("../../utils/expoNotification");
 const pharmacySchema = require("../../modals/pharmacy.model");
 const notificationModel = require("../../modals/notification.model");
-const { getDistance } = require("../../utils/helper");
+const { getDistance, generateOrderNumber } = require("../../utils/helper");
 const adminSchema = require("../../modals/admin.Schema");
 const getRouteBetweenCoords = require("../../utils/distance.helper");
 
@@ -71,10 +71,10 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
     hasMedicine && hasTest
       ? "mixed"
       : hasMedicine
-      ? "pharmacy"
-      : hasTest
-      ? "pathology"
-      : null;
+        ? "pharmacy"
+        : hasTest
+          ? "pathology"
+          : null;
 
   if (!orderType) return next(new CustomError("Invalid items in cart", 400));
 
@@ -108,15 +108,16 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
 
   const pharmacyAttempts = assignedPharmacy
     ? [
-        {
-          pharmacyId: assignedPharmacy._id,
-          status: "pending",
-          attemptAt: new Date(),
-        },
-      ]
+      {
+        pharmacyId: assignedPharmacy._id,
+        status: "pending",
+        attemptAt: new Date(),
+      },
+    ]
     : [];
 
   const newOrder = new orderSchema({
+    orderNumber: generateOrderNumber(),
     customerId: userId,
     orderType,
     items: orderItems,
@@ -244,9 +245,9 @@ module.exports.getAllOrders = asyncErrorHandler(async (req, res, next) => {
   let limit = 10;
   let skip = (page - 1) * limit;
 
-  
+
   let query = { customerId: userId };
-  
+
   if (status === "delivered") {
     query.orderStatus = "delivered";
   } else if (status === "cancelled") {
