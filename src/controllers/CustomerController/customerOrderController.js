@@ -143,7 +143,7 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
     },
   });
 
-  // await newOrder.save();
+  await newOrder.save();
 
   // Update cart
   const updatedItems = cart.items.filter(
@@ -154,7 +154,7 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
     (acc, item) => acc + item.price * item.quantity,
     0
   );
-  // await cart.save();
+  await cart.save();
 
   // Notify pharmacy or admin
   let notification;
