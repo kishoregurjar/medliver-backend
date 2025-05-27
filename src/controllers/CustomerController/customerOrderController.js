@@ -44,9 +44,10 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
   const orderItems = [];
 
   for (const item of itemsToOrder) {
+    console.log(item, "item")
     totalPrice += item.price * item.quantity;
 
-    if (item.item_type === "medicine") {
+    if (item.item_type === "Medicine") {
       const medicine = await medicineModel.findById(item.item_id);
       if (medicine?.isPrescriptionRequired) prescriptionRequired = true;
       orderItems.push({
@@ -55,6 +56,7 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
         price: item.price,
         medicineName: item.name,
       });
+
     } else if (item.item_type === "test") {
       if (item.details?.available_at_home) isTestHomeCollection = true;
       orderItems.push({
@@ -64,7 +66,7 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
       });
     }
   }
-
+  console.log(orderItems, "orderType");
   const hasMedicine = itemsToOrder.some((i) => i.item_type === "Medicine");
   const hasTest = itemsToOrder.some((i) => i.item_type === "test");
   const orderType =
@@ -141,7 +143,7 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
     },
   });
 
-  await newOrder.save();
+  // await newOrder.save();
 
   // Update cart
   const updatedItems = cart.items.filter(
@@ -152,7 +154,7 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
     (acc, item) => acc + item.price * item.quantity,
     0
   );
-  await cart.save();
+  // await cart.save();
 
   // Notify pharmacy or admin
   let notification;
