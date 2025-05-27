@@ -2899,6 +2899,50 @@ const acceptRejectOrderValidation = Joi.object({
 //       "string.pattern.base": "Invalid Order ID format",
 //     }),
 // })
+const getTestsByCategoryId = Joi.object({
+  categoryId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "any.required": "Category id is required",
+      "string.pattern.base": "Invalid category ID format",
+    }),
+})
+
+const getTestsDetailsById = Joi.object({
+  testId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "any.required": "test id is required",
+      "string.pattern.base": "Invalid Test ID format",
+    }),
+})
+const populatTestApiValidation = Joi.object({
+  page: Joi.number().min(1).optional().messages({
+    "number.base": "Page must be a number",
+    "number.min": "Page must be at least 1",
+  }),
+  limit: Joi.number().min(1).optional().messages({
+    "number.base": "Limit must be a number",
+    "number.min": "Limit must be at least 1",
+  }),
+});
+const searchTest = Joi.object({
+  value: Joi.string().trim().required().messages({
+    "any.required": "Search value is required",
+    "string.empty": "Search value cannot be empty",
+  }),
+   page: Joi.number().min(1).optional().messages({
+    "number.base": "Page must be a number",
+    "number.min": "Page must be at least 1",
+  }),
+  limit: Joi.number().min(1).optional().messages({
+    "number.base": "Limit must be a number",
+    "number.min": "Limit must be at least 1",
+  }),
+});
+
 
 const validate = (schema) => {
   return (req, res, next) => {
@@ -3080,5 +3124,9 @@ module.exports = {
   getRequestedOrderValidation,
   getDeliveryOrderByIdValidation,
   acceptRejectOrderValidation,
+  getTestsByCategoryId,
+  getTestsDetailsById,
+  populatTestApiValidation,
+  searchTest
   // updateDeliveryStatusValidation
 };
