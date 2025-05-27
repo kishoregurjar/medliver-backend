@@ -22,7 +22,7 @@ router.delete('/remove-test-from-stock',validateQuery(removeAndGetInfoTest),veri
 router.get('/get-single-test-detail',validateQuery(removeAndGetInfoTest),verifyAdminToken('pathology'),indexController.pathologyTestController.getSingleTestInfo);
 router.get('/search-test-in-pathology',verifyAdminToken('pathology'),indexController.pathologyTestController.searchTestInMyStock);
 router.put('/change-test-status',validate(removeAndGetInfoTest),verifyAdminToken('pathology'),indexController.pathologyTestController.changeTestStatus);
-
+router.get('/get-dashboard-Status',verifyAdminToken('pathology'),indexController.pathologyTestController.getDashboardStatus);
 // pathology COntroller Route
 router.get('/get-my-pathology-center',verifyAdminToken('pathology'),indexController.pathologyController.getMyPathologyCenter)
 

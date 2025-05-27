@@ -321,3 +321,20 @@ module.exports.changeTestStatus = asyncErrorHandler(async (req, res, next) => {
   })
 });
 
+module.exports.getDashboardStatus = asyncErrorHandler(async (req, res, next) => {
+  const admin = req.admin;
+
+  const pathology = await PathologyCenter.findOne({ adminId: admin._id });
+
+  if (!pathology) return next(new CustomError("Pathology not found", 404));
+
+  const total = pathology.availableTests.length;
+  // const available = pathology.availableTests.filter(t => t.available).length;
+  const available = pathology.availableTests.filter((test)=>{
+    return test.available
+  }).length
+ 
+   const unavailable = total - available;
+
+  return successRes(res, 200, true, "Stats fetched", { total, available, unavailable });
+});
