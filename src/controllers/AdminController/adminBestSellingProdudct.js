@@ -29,7 +29,7 @@ module.exports.createBestSellingProduct = asyncErrorHandler(async (req, res, nex
 })
 
 module.exports.getAllBestSellingProduct = asyncErrorHandler(async (req, res, next) => {
-    let { page = 1, limit = 10 } = req.query;
+    let { isActive,page = 1, limit = 10 } = req.query;
 
     page = parseInt(page);
     limit = parseInt(limit);
@@ -37,7 +37,7 @@ module.exports.getAllBestSellingProduct = asyncErrorHandler(async (req, res, nex
     const skip = (page - 1) * limit;
 
     const adminProducts = await BestSellerModel.find({
-        isActive: true,
+        isActive,
         isCreatedByAdmin: true
     })
         .populate('product')
@@ -65,7 +65,7 @@ module.exports.getAllBestSellingProduct = asyncErrorHandler(async (req, res, nex
     const combinedResults = [...adminProducts, ...nonAdminProducts];
 
     const total = await BestSellerModel.countDocuments({
-        isActive: true
+        isActive
     });
 
     return successRes(res, 200, true, "Best selling products fetched successfully", {

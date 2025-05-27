@@ -34,7 +34,11 @@ const testSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-   
-},{ timestamps: true });
+    // isPopular: {
+    //     type: Boolean,
+    //     default: false
+    // },
+
+}, { timestamps: true });
 
 module.exports = mongoose.model('Test', testSchema);
