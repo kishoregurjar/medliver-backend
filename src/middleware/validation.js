@@ -503,6 +503,9 @@ const getAllSellingProductValidation = Joi.object({
   sortOrder: Joi.string().valid("asc", "desc").optional().messages({
     "string.valid": "Sort order must be either 'asc' or 'desc'",
   }),
+    isActive: Joi.string().valid("true", "false").optional().messages({
+    "any.only": "is active must be either 'true' or 'false'",
+  }),
 });
 
 //common you can use for getAll api's
@@ -1132,56 +1135,76 @@ const updateFeaturedProductStatusValidation = Joi.object({
 
 //insurance validation
 
-const applyInsuranceSchema = Joi.object({
-  full_name: Joi.string().required().messages({
+
+const applyInsuranceValidation = Joi.object({
+  full_name: Joi.string().trim().required().messages({
+    "string.empty": "Full name cannot be empty",
     "any.required": "Full name is required",
   }),
-  phone_number: Joi.string().length(10).pattern(/^\d+$/).required().messages({
+
+  phone_number: Joi.string().pattern(/^[0-9]{10}$/).required().messages({
+    "string.pattern.base": "Phone number must be a 10-digit number",
     "any.required": "Phone number is required",
-    "string.length": "Phone number must be exactly 10 digits",
-    "string.pattern.base": "Phone number must contain only digits",
   }),
-  email: Joi.string().email().allow(null, "").messages({
+
+  email: Joi.string().email().optional().messages({
     "string.email": "Email must be a valid email address",
   }),
+
   lead_type: Joi.string().valid("health", "life").required().messages({
-    "any.required": "Lead type is required",
     "any.only": "Lead type must be either 'health' or 'life'",
+    "any.required": "Lead type is required",
   }),
-  age: Joi.number().required().messages({
+
+  age: Joi.number().min(1).required().messages({
+    "number.base": "Age must be a number",
     "any.required": "Age is required",
   }),
+
   gender: Joi.string().valid("male", "female", "other").required().messages({
+    "any.only": "Gender must be 'male', 'female', or 'other'",
     "any.required": "Gender is required",
-    "any.only": "Gender must be 'male', 'female' or 'other'",
   }),
+
   coverage_for: Joi.string().valid("self", "family").required().messages({
+    "any.only": "Coverage must be either 'self' or 'family'",
     "any.required": "Coverage type is required",
-    "any.only": "Coverage type must be either 'self' or 'family'",
   }),
-  family_member_count: Joi.when("coverage_for", {
-    is: "family",
-    then: Joi.number().required().messages({
+
+  family_member_count: Joi.number()
+    .integer()
+    .min(1)
+    .when("coverage_for", {
+      is: "family",
+      then: Joi.required(),
+      otherwise: Joi.forbidden(),
+    })
+    .messages({
       "any.required": "Family member count is required for family coverage",
+      "any.unknown": "Family member count should not be provided for self coverage",
+      "number.base": "Family member count must be a number",
+      "number.integer": "Family member count must be an integer",
+      "number.min": "Family member count must be at least 1",
     }),
-    otherwise: Joi.forbidden().messages({
-      "any.unknown":
-        "Family member count should not be provided for self coverage",
-    }),
-  }),
-  nominee_name: Joi.string().allow(null, ""),
-  nominee_relation: Joi.string().allow(null, ""),
-  income: Joi.when("lead_type", {
-    is: "life",
-    then: Joi.number().required().messages({
+
+  income: Joi.number()
+    .min(0)
+    .when("lead_type", {
+      is: "life",
+      then: Joi.required(),
+      otherwise: Joi.optional(),
+    })
+    .messages({
       "any.required": "Income is required for life insurance leads",
+      "number.base": "Income must be a number",
     }),
-    otherwise: Joi.forbidden().messages({
-      "any.unknown": "Income should not be provided for health insurance leads",
-    }),
-  }),
-  lead_source: Joi.string().allow(null, ""),
+
+  nominee_name: Joi.string().trim().optional(),
+  nominee_relation: Joi.string().trim().optional(),
+  lead_source: Joi.string().trim().optional(),
 });
+
+
 
 const getAllInsuranceLeadsValidation = Joi.object({
   page: Joi.number().min(1).optional().messages({
@@ -1644,21 +1667,31 @@ const updateUserProfileValidation = Joi.object({
 
 
 const signUpSignInWithGoogleValidation = Joi.object({
-  fullName: Joi.string().min(2).max(50).required().messages({
-    "string.base": "Full name must be a string",
-    "string.empty": "Full name is required",
-    "string.min": "Full name must be at least 2 characters",
-    "string.max": "Full name must not exceed 50 characters",
-  }),
-  email: Joi.string().email().required().messages({
-    "string.email": "Please enter a valid email address",
-    "string.empty": "Email is required",
-  }),
-  profilePicture: Joi.string().uri().required().optional().messages({
-    "string.uri": "Profile picture must be a valid URL",
-    "string.empty": "Profile picture is required",
-  }),
+  email: Joi.string()
+    .email()
+    .required()
+    .messages({
+      "string.email": "Email must be a valid email address",
+      "any.required": "Email is required",
+      "string.empty": "Email cannot be empty",
+    }),
+
+  fullName: Joi.string()
+    .trim()
+    .required()
+    .messages({
+      "string.empty": "Full name cannot be empty",
+      "any.required": "Full name is required",
+    }),
+
+  profilePicture: Joi.string()
+    .uri()
+    .optional()
+    .messages({
+      "string.uri": "Profile picture must be a valid URL",
+    }),
 });
+
 
 // Customer address validation
 const addAddressValidation = Joi.object({
@@ -2756,10 +2789,116 @@ const getMedicinesByManufacturerValidation = Joi.object({
     }),
 });
 
-module.exports = { getMedicinesByManufacturerValidation };
+const getAllOrdersValidation = Joi.object({
+  page: Joi.number()
+    .integer()
+    .min(1)
+    .optional()
+    .messages({
+      "number.base": "Page must be a number",
+      "number.integer": "Page must be an integer",
+      "number.min": "Page must be at least 1",
+    }),
 
+  status: Joi.string()
+    .valid("delivered", "cancelled", "pending")
+    .optional()
+    .messages({
+      "any.only": "Status must be one of: delivered, cancelled, pending",
+    }),
+});
 
+const getprescriptionByIdValidation = Joi.object({
+    prescriptionId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "string.empty": "Priscription id cannot be empty",
+      "string.pattern.base": "Invalid Priscription idformat",
+    }),
+  })
 
+const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,15}$/
+const changeUserPasswordValidation= Joi.object({
+  oldPassword: Joi.string()
+    .required()
+    .messages({
+      "any.required": "Old password is required",
+      "string.empty": "Old password cannot be empty",
+    }),
+  newPassword: Joi.string()
+    .pattern(passwordRegex)
+    .required()
+    .messages({
+      "string.pattern.base":
+        "New password must be 6-12 characters long and include at least one letter, one number, and one special character",
+      "any.required": "New password is required",
+      "string.empty": "New password cannot be empty",
+    }),
+});
+
+// delivery partner order validation
+
+const getRequestedOrderValidation = Joi.object({
+  orderStatus: Joi.string()
+    .valid(
+      "pending",
+      "accepted_by_pharmacy",
+      "assigned_to_delivery_partner",
+      "assigned_to_pharmacy",
+      "accepted_by_delivery_partner",
+      "need_manual_assignment_to_pharmacy",
+      "need_manual_assignment_to_delivery_partner",
+      "accepted_by_delivery_partner_and_reached_pharmacy",
+      "out_for_pickup",
+      "picked_up",
+      "out_for_delivery",
+      "delivered",
+      "cancelled",
+      "reached_pharmacy"
+    )
+    .optional()
+    .messages({
+      "any.only": "Invalid orderStatus value",
+    }),
+});
+
+const getDeliveryOrderByIdValidation = Joi.object({
+  orderId: Joi.string()
+    .regex(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "string.pattern.base": "Invalid order ID format",
+      "any.required": "Order ID is required",
+    }),
+});
+const acceptRejectOrderValidation = Joi.object({
+  orderId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "any.required": "Order ID is required",
+      "string.pattern.base": "Invalid Order ID format",
+    }),
+
+  status: Joi.string()
+    .valid("accepted", "rejected")
+    .required()
+    .messages({
+      "any.only": "Status must be either 'accepted' or 'rejected'",
+      "any.required": "Status is required",
+    }),
+});
+
+// const updateDeliveryStatusValidation = Joi.object({
+//   orderId: Joi.string()
+//     .pattern(/^[0-9a-fA-F]{24}$/)
+//     .required()
+//     .messages({
+//       "any.required": "Order ID is required",
+//       "string.pattern.base": "Invalid Order ID format",
+//     }),
+// })
 
 const validate = (schema) => {
   return (req, res, next) => {
@@ -2874,14 +3013,12 @@ module.exports = {
   forgetPasswordCustomerValidation,
   resetPasswordCustomerValidation,
   updateUserProfileValidation,
-  signUpSignInWithGoogleValidation,
   addAddressValidation,
   editAddressSchema,
   getOrDeleteCustomerAddress,
   addToCartSchema,
   changeQuantitySchema,
   removeItemFromCartSchema,
-  applyInsuranceSchema,
   emergencyVehicleRequestSchema,
   createOrderValidation,
   getOrderByIdValidation,
@@ -2934,5 +3071,14 @@ module.exports = {
   getPolicyByIdValidation,
   getNotificatioByIdValidation,
   createDoctoreLeadValidation,
-  getMedicinesByManufacturerValidation
+  getMedicinesByManufacturerValidation,
+  applyInsuranceValidation,
+  getAllOrdersValidation,
+  getprescriptionByIdValidation,
+  signUpSignInWithGoogleValidation,
+  changeUserPasswordValidation,
+  getRequestedOrderValidation,
+  getDeliveryOrderByIdValidation,
+  acceptRejectOrderValidation,
+  // updateDeliveryStatusValidation
 };
