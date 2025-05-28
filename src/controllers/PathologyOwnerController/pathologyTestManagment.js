@@ -267,27 +267,34 @@ module.exports.searchTestInMyStock = asyncErrorHandler(async (req, res, next) =>
     return next(new CustomError("Search value is required", 400));
   }
 
-  const pathology = await PathologyCenter.findOne({ adminId: admin._id });
+  const pathology = await PathologyCenter.findOne({ adminId: admin._id }).populate("availableTests.testId");
 
   if (!pathology) {
     return next(new CustomError("Pathology center not found", 404));
   }
 
   const testIdsInStock = pathology.availableTests.map((t) => t.testId);
-
   const regex = new RegExp(query.trim(), "i");
 
-  const matchingTests = await TestModel.find({
-    _id: { $in: testIdsInStock },
-    name: regex,
-    available: true
+  // const matchingTests = await TestModel.find({
+  //   _id: { $in: testIdsInStock },
+  //   name: regex,
+  //   available: true
+  // });
+
+
+  const matchingResult = pathology.availableTests.filter((test) => {
+    const testName = test.testId.name;
+    const testPrice = test.price;
+    const  result = testName.match(regex) || testPrice.toString().match(regex);
+    return result;
   });
 
-  if (matchingTests.length === 0) {
+  if (matchingResult.length === 0) {
     return successRes(res, 200, false, "No matching tests found in your stock", []);
   }
 
-  return successRes(res, 200, true, "Matching tests fetched", matchingTests);
+  return successRes(res, 200, true, "Matching tests fetched", matchingResult);
 });
 
 module.exports.changeTestStatus = asyncErrorHandler(async (req, res, next) => {
