@@ -648,6 +648,8 @@ router.post(
     verifyAdminToken("superadmin"),
     indexController.adminDoctoreCategoryController.uploadDoctoresCatgImage
 );
+router.get('/search-doctore-category',verifyAdminToken("superadmin"),
+    indexController.adminDoctoreCategoryController.searchDoctoreCatg);
 
 /** Doctor's Route */
 
@@ -675,6 +677,7 @@ router.put(
     verifyAdminToken("superadmin"),
     indexController.adminDoctorController.changeDoctorStatus
 );
+router.get('/search-doctore-profile',verifyAdminToken("superadmin"),indexController.adminDoctorController.searchDoctor);
 
 /** Payment Routes */
 router.post(

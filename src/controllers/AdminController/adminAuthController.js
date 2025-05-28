@@ -178,21 +178,25 @@ module.exports.changedPassword = asyncErrorHandler(async (req, res, next) => {
 });
 
 module.exports.updateAdminProfile = asyncErrorHandler(async (req, res, next) => {
+  
   const adminId = req.admin._id;
   const findAdmin = await adminSchema.findById(adminId);
   if (!findAdmin) {
     return next(new CustomError("Admin not found", 404));
   }
+  const findRole = findAdmin.role
   if (req.body.email) {
     delete req.body.email;
   }
-  // console.log(req.body,"req.body");
   const updateAdmin = await adminSchema.findByIdAndUpdate(adminId, req.body, {
     new: true,
     runValidators: true,
   });
-  return successRes(res, 200, true, "Admin updated successfully", updateAdmin);
+  
+  return successRes(res, 200, true, `${findRole} updated successfully`, updateAdmin);
+
 });
+
 
 module.exports.uploadAdminAvatar = asyncErrorHandler(async (req, res, next) => {
   if (!req.file) {
