@@ -2636,6 +2636,9 @@ const removeAndGetInfoTest = Joi.object({
       "any.required": "Test ID is required",
       "string.pattern.base": "Invalid Test ID format",
     }),
+    available: Joi.boolean().optional().messages({
+    "boolean.base": "Available must be true or false",
+  }),
 });
 
 // notification validation
