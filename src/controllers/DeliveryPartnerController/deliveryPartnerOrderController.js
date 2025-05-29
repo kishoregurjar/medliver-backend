@@ -292,3 +292,73 @@ module.exports.reachedPharmacy = asyncErrorHandler(async (req, res, next) => {
 
   return successRes(res, 200, true, "Delivery partner reached pharmacy successfully", order);
 });
+
+module.exports.reachedDestination = asyncErrorHandler(async (req, res, next) => {
+  const deliveryPartnerId = req.partner._id;
+  const { orderId } = req.body;
+
+  if (!orderId) {
+    return next(new CustomError("Order ID is required", 400));
+  }
+
+  // Fetch both order and delivery partner details in parallel
+  const [order, deliveryPartner] = await Promise.all([
+    ordersModel.findOne({ _id: orderId, deliveryPartnerId }),
+    DeliveryPartner.findById(deliveryPartnerId),
+  ]);
+
+  if (!order) {
+    return next(new CustomError("Order not found", 404));
+  }
+
+  if (!deliveryPartner) {
+    return next(new CustomError("Delivery partner not found", 404));
+  }
+
+  let customerOtp = generateOTPNumber(4);
+  order.customerOTP = customerOtp;
+  order.orderStatus = "reached_destination";
+  order.status = "reached_destination";
+
+  await order.save();
+
+  return successRes(res, 200, true, "Delivery partner reached destination successfully", order);
+});
+
+module.exports.deliverOrder = asyncErrorHandler(async (req, res, next) => {
+  const deliveryPartnerId = req.partner._id;
+  const { orderId, otp } = req.body;
+
+  if (!orderId) {
+    return next(new CustomError("Order ID is required", 400));
+  }
+
+  // Fetch both order and delivery partner details in parallel
+  const [order, deliveryPartner] = await Promise.all([
+    ordersModel.findOne({ _id: orderId, deliveryPartnerId }),
+    DeliveryPartner.findById(deliveryPartnerId),
+  ]);
+
+  if (!order) {
+    return next(new CustomError("Order not found", 404));
+  }
+
+  if (!deliveryPartner) {
+    return next(new CustomError("Delivery partner not found", 404));
+  }
+
+  if (order.orderStatus !== "reached_destination") {
+    return next(new CustomError("Order is not reached destination", 400));
+  }
+
+  if (order.customerOTP !== otp) {
+    return next(new CustomError("Invalid OTP", 400));
+  }
+
+  order.orderStatus = "delivered";
+  order.status = "delivered";
+
+  await order.save();
+
+  return successRes(res, 200, true, "Order delivered successfully", order);
+})

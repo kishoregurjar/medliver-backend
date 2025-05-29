@@ -67,7 +67,8 @@ const orderSchema = new mongoose.Schema({
       "out_for_delivery",
       "delivered",
       "cancelled",
-      "reached_pharmacy"
+      "reached_pharmacy",
+      "reached_destination"
     ],
     default: "pending",
   },
@@ -156,6 +157,10 @@ const orderSchema = new mongoose.Schema({
     default: []
   },
   deliveryPartnerOTP: {
+    type: String,
+    default: null
+  },
+  customerOTP: {
     type: String,
     default: null
   }
