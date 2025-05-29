@@ -122,7 +122,7 @@ module.exports.searchMedicine = asyncErrorHandler(async (req, res, next) => {
     }
 
     const filter = {
-        name: { $regex: query, $options: 'i' } // Case-insensitive partial match
+        name: { $regex: query.trim(), $options: 'i' } // Case-insensitive partial match
     };
 
     const [medicines, totalCount] = await Promise.all([

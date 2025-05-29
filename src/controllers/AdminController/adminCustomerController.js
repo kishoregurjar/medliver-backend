@@ -95,12 +95,12 @@ module.exports.searchCustomer = asyncErrorHandler(async (req, res, next) => {
   if (!searchQuery) {
     return next(new CustomError("Search query is required", 400));
   }
-
+  let query = searchQuery.trim();
   const filter = {
     $or: [
-      { email: { $regex: searchQuery, $options: "i" } }, // Case-insensitive partial match
-      { fullName: { $regex: searchQuery, $options: "i" } }, // Case-insensitive partial match
-      { phoneNumber: { $regex: searchQuery, $options: "i" } }, // Case-insensitive partial match
+      { email: { $regex: query, $options: "i" } }, // Case-insensitive partial match
+      { fullName: { $regex: query, $options: "i" } }, // Case-insensitive partial match
+      { phoneNumber: { $regex: query, $options: "i" } }, // Case-insensitive partial match
     ],
   };
 
@@ -110,7 +110,7 @@ module.exports.searchCustomer = asyncErrorHandler(async (req, res, next) => {
   ]);
 
   return successRes(res, 200, true, "Customers search results", {
-    query: searchQuery,
+    query: query,
     data: customers,
     totalResults: totalCount,
   });

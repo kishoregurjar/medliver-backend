@@ -298,7 +298,7 @@ module.exports.searchTestInMyStock = asyncErrorHandler(async (req, res, next) =>
 });
 
 module.exports.changeTestStatus = asyncErrorHandler(async (req, res, next) => {
-  const { testId } = req.body;
+  const { testId, available } = req.body;
   const admin = req.admin;
 
   if (!testId) {
@@ -318,14 +318,13 @@ module.exports.changeTestStatus = asyncErrorHandler(async (req, res, next) => {
     return next(new CustomError("Test does not belong to your pathology center", 403));
   }
 
-  pathology.availableTests[index].available = !pathology.availableTests[index].available;
+  pathology.availableTests[index].available = available;
 
   await pathology.save();
 
   return successRes(res, 200, true, "Test availability changed successfully", {
-    
-  available: pathology.availableTests[index].available
-  })
+    available: pathology.availableTests[index].available
+  });
 });
 
 module.exports.getDashboardStatus = asyncErrorHandler(async (req, res, next) => {

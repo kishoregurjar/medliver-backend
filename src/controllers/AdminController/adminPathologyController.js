@@ -323,7 +323,7 @@ module.exports.searchPathology = asyncErrorHandler(async (req, res, next) => {
   limit = parseInt(limit) || 10;
   const skip = (page - 1) * limit;
 
-  const regex = new RegExp(value, 'i');
+  const regex = new RegExp(value.trim(), 'i');
   const searchQuery = {
     $or: [
       { centerName: regex },

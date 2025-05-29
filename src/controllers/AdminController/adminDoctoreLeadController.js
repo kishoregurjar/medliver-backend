@@ -101,6 +101,7 @@ module.exports.searchDoctorLead = asyncErrorHandler(async (req, res, next) => {
     return next(new CustomError("Please Provide Search Query", 400))
   }
 
+  query=query.trim();
   const leads = await DoctorLead.find({
     $or: [
       { name: { $regex: query, $options: "i" } },
