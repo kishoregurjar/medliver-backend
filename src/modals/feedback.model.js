@@ -25,6 +25,11 @@ const feedbackSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
     },
+    status:{
+        type: String,
+        enum: ["pending", "accepted", "rejected"],
+        default: "pending",
+    }
 });
 
 module.exports = mongoose.model("Feedback", feedbackSchema);
