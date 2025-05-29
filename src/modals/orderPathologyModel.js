@@ -8,14 +8,14 @@ const pathologyOrderSchema = new mongoose.Schema({
   },
   pathologyCenterId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "PathologyCenter",
-    required: true,
+    ref: "PathologyCenter"
   },
   selectedTests: [
     {
       testId: { type: mongoose.Schema.Types.ObjectId, ref: "Test" }, 
     }
   ],
+  testType: { type: String, enum: ["single", "package"] },
   totalAmount: { type: Number, required: true },
 
   isHomeCollection: { type: Boolean, default: false },
@@ -33,7 +33,7 @@ const pathologyOrderSchema = new mongoose.Schema({
 
   orderStatus: {
     type: String,
-    enum: ['pending', 'confirmed', 'sample_collected', 'completed', 'cancelled'],
+    enum: ['pending', 'confirmed', 'sample_collected', 'completed', 'cancelled','need_manual_assignment_to_pathology'],
     default: 'pending',
   },
   cancellationReason: { type: String },
@@ -51,9 +51,19 @@ const pathologyOrderSchema = new mongoose.Schema({
   },
   paymentMethod: {
     type: String,
-    enum: ['UPI', 'card', 'cash', 'wallet', 'COD', null],
-    default: null
+    enum: ["UPI", "CARD", "WALLET", "COD"],
   },
+  pathologyAttempts: [
+      {
+        deliveryPartnerId: { type: mongoose.Schema.Types.ObjectId, ref: "PathologyCenter" },
+        status: {
+          type: String,
+          enum: ["pending", "accepted", "rejected"],
+          default: "pending"
+        },
+        attemptedAt: { type: Date, default: Date.now }
+      }
+    ],
   orderDate: {
     type: Date,
     default: Date.now,

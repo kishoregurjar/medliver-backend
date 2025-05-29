@@ -47,6 +47,10 @@ const pathologyCenterSchema = new mongoose.Schema(
       enum: ["available", "unavailable"],
       default: "unavailable",
     },
+    centerCoordinates:{
+      lat: Number,
+      long: Number
+    },
   availableTests: [
   {
     testId: { type: mongoose.Schema.Types.ObjectId, ref: "Test" },

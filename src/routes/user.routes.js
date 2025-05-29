@@ -101,3 +101,8 @@ router.get('/get-popular-test',validateQuery(populatTestApiValidation),verifyUse
 router.get('/get-tests-by-category',validateQuery(getTestsByCategoryId),verifyUserToken(),indexController.customerTestOrderController.getTestsByCategoryId);
 router.get('/search-test',validateQuery(searchTest),verifyUserToken(),indexController.adminTestController.searchTest)
 router.get('/get-test-details',validateQuery(getTestsDetailsById),verifyUserToken(),indexController.customerTestOrderController.getTestDetails)
+
+
+/** test booking managemennt */
+
+router.post("/test-booking",verifyUserToken(), indexController.customerTestOrderController.createPathologyOrder);
