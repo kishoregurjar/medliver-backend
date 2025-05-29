@@ -263,10 +263,12 @@ module.exports.BlockUnblockDeliveryPartner = asyncErrorHandler(
 );
 
 module.exports.searchDeliveryPartner = asyncErrorHandler(async (req, res, next) => {
-  const { query } = req.query;
+  let { query } = req.query;
   if (!query) {
     return next(new CustomError("Search query is required", 400));
   }
+    query = query.trim();
+
   const partners = await DeliveryPartner.find({
     $or: [
       { fullname: { $regex: query, $options: "i" } },

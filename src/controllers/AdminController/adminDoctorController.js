@@ -148,3 +148,30 @@ module.exports.changeDoctorStatus = asyncErrorHandler(async (req, res, next) => 
     await findDoctor.save();
     return successRes(res, 200, true, "Status Updated Successfully")
 })
+
+module.exports.searchDoctor = asyncErrorHandler(async (req, res, next) => {
+  let { query } = req.query;
+
+  if (!query || query.trim() === "") {
+    return next(new CustomError("Search query is required", 400));
+  }
+
+  query = query.trim();
+
+  const doctors = await doctorSchema.find({
+    $or: [
+      { first_name: { $regex: query, $options: "i" } },
+      { last_name: { $regex: query, $options: "i" } },
+      { specialties: { $regex: query, $options: "i" } },
+      { clinic_name: { $regex: query, $options: "i" } },
+    ],
+  });
+
+  return successRes(
+    res,
+    200,
+    doctors.length > 0,
+    "Doctors fetched successfully",
+    doctors
+  );
+});

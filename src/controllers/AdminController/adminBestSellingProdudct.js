@@ -5,28 +5,39 @@ const asyncErrorHandler = require("../../utils/asyncErrorHandler");
 const CustomError = require("../../utils/customError");
 
 module.exports.createBestSellingProduct = asyncErrorHandler(async (req, res, next) => {
-    const { productId } = req.body;
-    if (!productId) {
-        return next(new CustomError("Product Id fields is required", 400));
-    }
-    const findProduct = await MedicineModel.findById(productId);
-    if (!findProduct) {
-        return next(new CustomError("Product not found", 404));
-    }
-    const bestSellingProduct = await BestSellerModel.create({
-        product: productId,
-        isCreatedByAdmin: true
-    });
-    if (!bestSellingProduct) {
-        return next(new CustomError("Unable to create best selling product", 400));
-    }
-    return successRes(
-        res,
-        201,
-        "Best selling product created successfully",
-        bestSellingProduct
-    );
-})
+  const { productId } = req.body;
+
+  if (!productId) {
+    return next(new CustomError("Product Id field is required", 400));
+  }
+
+  const findProduct = await MedicineModel.findById(productId);
+  if (!findProduct) {
+    return next(new CustomError("Product not found", 404));
+  }
+
+  const existingBestSeller = await BestSellerModel.findOne({ product: productId });
+  if (existingBestSeller) {
+    return next(new CustomError("This product is already marked as a best-selling product", 400));
+  }
+
+  const bestSellingProduct = await BestSellerModel.create({
+    product: productId,
+    isCreatedByAdmin: true
+  });
+
+  if (!bestSellingProduct) {
+    return next(new CustomError("Unable to create best selling product", 400));
+  }
+
+  return successRes(
+    res,
+    201,
+    "Best selling product created successfully",
+    bestSellingProduct
+  );
+});
+
 
 module.exports.getAllBestSellingProduct = asyncErrorHandler(async (req, res, next) => {
     let { isActive,page = 1, limit = 10 } = req.query;

@@ -651,7 +651,7 @@ module.exports.getAllDetailsOfOrdersById = asyncErrorHandler(async (req, res, ne
       { pharmacyAttempts: { $elemMatch: { pharmacyId: pharmacy._id, status: { $in: ["pending", "accepted"] } } } }
     ]
   })
-  .populate("customerId", "name phone email")
+  .populate("customerId", "fullName phoneNumber email")
   .populate("assignedPharmacyId", "pharmacyName phone address")
   .populate("deliveryPartnerId", "phone location fullname email")  // only name here
   .populate("deliveryAddressId", "street city state pincode coordinates")

@@ -117,3 +117,25 @@ module.exports.getAllDoctoreCategory = asyncErrorHandler(async (req, res, next) 
     return successRes(res, 200, true, "File Uploaded Successfully", { imageUrl });
   
   });
+
+  module.exports.searchDoctoreCatg = asyncErrorHandler(async (req, res, next) => {
+  let { query } = req.query;
+
+  if (!query || query.trim() === "") {
+    return next(new CustomError("Search query is required", 400));
+  }
+
+  query = query.trim();
+
+  const matchedCategories = await doctoreCatgModel.find({
+    name: { $regex: query, $options: "i" },
+  });
+
+  return successRes(
+    res,
+    200,
+    matchedCategories.length > 0,
+    "Doctor Categories fetched successfully",
+    matchedCategories
+  );
+});

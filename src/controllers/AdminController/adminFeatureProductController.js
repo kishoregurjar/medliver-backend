@@ -36,14 +36,15 @@ module.exports.createFeaturedProduct = asyncErrorHandler(
 
 module.exports.getAllFeaturedProducts = asyncErrorHandler(
   async (req, res, next) => {
-    let { page, limit } = req.query;
+    let { page, limit ,isActive} = req.query;
     page = parseInt(page) || 1;
     limit = parseInt(limit) || 10;
     const skip = (page - 1) * limit;
 
     const [totalFeaturedProducts, featuredProducts] = await Promise.all([
-      FeaturedProduct.countDocuments(),
-      FeaturedProduct.find().populate("product").limit(limit).skip(skip),
+    
+      FeaturedProduct.countDocuments({isActive}),
+      FeaturedProduct.find({isActive}).populate("product").limit(limit).skip(skip),
     ]);
 
     if (!featuredProducts || featuredProducts.length === 0) {

@@ -305,6 +305,9 @@ const getAllFeatures = Joi.object({
     "number.integer": "Limit must be an integer",
     "number.min": "Limit must be at least 1",
   }),
+  isActive: Joi.boolean().optional().messages({
+    "boolean.base": "isActive must be a boolean value",
+  }),
 });
 
 //deliveryPartner
@@ -2636,6 +2639,9 @@ const removeAndGetInfoTest = Joi.object({
       "any.required": "Test ID is required",
       "string.pattern.base": "Invalid Test ID format",
     }),
+    available: Joi.boolean().optional().messages({
+    "boolean.base": "Available must be true or false",
+  }),
 });
 
 // notification validation

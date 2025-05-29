@@ -225,11 +225,11 @@ module.exports.searchPharmacy = asyncErrorHandler(async (req, res, next) => {
     limit = parseInt(limit) || 10;
     const skip = (page - 1) * limit;
 
-    const regex = new RegExp(value, 'i'); // case-insensitive search
+    const regex = new RegExp(value.trim(), 'i'); // case-insensitive search
     const searchQuery = {
         $or: [
             { email: regex },
-            { name: regex },
+            { pharmacyName: regex },
             { ownerName: regex }
         ]
     };
