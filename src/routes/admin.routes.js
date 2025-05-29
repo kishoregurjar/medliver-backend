@@ -638,9 +638,7 @@ router.delete(
 );
 router.put(
     "/update-doctore-category",
-    validate(updateDoctorCategoryValidation),
-    verifyAdminToken("superadmin"),
-    indexController.adminDoctoreCategoryController.updateDoctoresCatg
+    validate(updateDoctorCategoryValidation), indexController.adminDoctoreCategoryController.updateDoctoresCatg
 );
 router.post(
     "/upload-doctore-image",

@@ -36,14 +36,15 @@ module.exports.createFeaturedProduct = asyncErrorHandler(
 
 module.exports.getAllFeaturedProducts = asyncErrorHandler(
   async (req, res, next) => {
-    let { page, limit } = req.query;
+    let { page, limit, isActive } = req.query;
     page = parseInt(page) || 1;
     limit = parseInt(limit) || 10;
     const skip = (page - 1) * limit;
 
     const [totalFeaturedProducts, featuredProducts] = await Promise.all([
-      FeaturedProduct.countDocuments(),
-      FeaturedProduct.find().populate("product").limit(limit).skip(skip),
+
+      FeaturedProduct.countDocuments({ isActive }),
+      FeaturedProduct.find({ isActive }).populate("product").limit(limit).skip(skip),
     ]);
 
     if (!featuredProducts || featuredProducts.length === 0) {
@@ -103,13 +104,13 @@ module.exports.getFeatureProductById = asyncErrorHandler(
       return next(new CustomError("feature product is not found"), 404);
     }
 
-    return successRes(res, 200, true, "Feature producd fetch successfully",fethcData);
+    return successRes(res, 200, true, "Feature producd fetch successfully", fethcData);
   }
 );
 
 module.exports.updateFeaturedProductStatus = asyncErrorHandler(
   async (req, res, next) => {
-    const { productId } = req.query;
+    const { productId } = req.body;
 
     if (!productId) {
       return next(new CustomError("Featured product ID is required", 400));
@@ -138,15 +139,14 @@ module.exports.updateFeaturedProductStatus = asyncErrorHandler(
       res,
       200,
       true,
-      `Featured product has been ${
-        newStatus ? "activated" : "deactivated"
+      `Featured product has been ${newStatus ? "activated" : "deactivated"
       } successfully`,
       updatedProduct
     );
   }
 );
 
- module.exports.searchFeaturedProducts = asyncErrorHandler(async (req, res, next) => {
+module.exports.searchFeaturedProducts = asyncErrorHandler(async (req, res, next) => {
   let { query, page, limit } = req.query;
 
   if (!query) {

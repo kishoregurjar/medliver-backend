@@ -305,6 +305,9 @@ const getAllFeatures = Joi.object({
     "number.integer": "Limit must be an integer",
     "number.min": "Limit must be at least 1",
   }),
+  isActive: Joi.boolean().optional().messages({
+    "boolean.base": "isActive must be a boolean value",
+  }),
 });
 
 //deliveryPartner
