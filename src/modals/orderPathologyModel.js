@@ -55,7 +55,7 @@ const pathologyOrderSchema = new mongoose.Schema({
   },
   pathologyAttempts: [
       {
-        deliveryPartnerId: { type: mongoose.Schema.Types.ObjectId, ref: "PathologyCenter" },
+        pathologyId: { type: mongoose.Schema.Types.ObjectId, ref: "PathologyCenter" },
         status: {
           type: String,
           enum: ["pending", "accepted", "rejected"],

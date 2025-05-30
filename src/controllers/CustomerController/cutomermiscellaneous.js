@@ -117,5 +117,5 @@ module.exports.createDoctoreLead = asyncErrorHandler(async (req, res, next) => {
     address,
     disease,
   });
-  return successRes(res, 201, true, "User created successfully", newUser);
+  return successRes(res, 201, true, "Appointment Booked! A medical expert will reach out to you soon.", newUser);
 });

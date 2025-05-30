@@ -597,45 +597,6 @@ module.exports.dispatchOrder = asyncErrorHandler(async (req, res, next) => {
   return successRes(res, 200, true, "Order dispatched successfully", order);
 });
 
-// module.exports.getAllDetailsOfOrders = asyncErrorHandler(async (req, res, next) => {
-//   let {page,limit} = req.query 
-//   const sort = req?.query?.sort === "desc" ? -1 : 1;
-//     console.log("page and limit",page,limit,sort)
-
-//    page = parseInt(page) || 1;
-//    limit = parseInt(limit)||20;
-//   const skip = (page - 1) * limit;
-
-//   let filter = {
-//     orderType: { $in: ["pharmacy", "mixed"] },
-//   };
-
-//   const [orders, totalCount] = await Promise.all([
-//     ordersModel.find(filter)
-//       .populate("customerId", "name phone email")
-//       .populate("assignedPharmacyId", "pharmacyName phone address")
-//       .populate("deliveryPartnerId", "name phone location")
-//       .populate("deliveryAddressId", "street city state pincode coordinates")
-//       .populate("items.medicineId", "medicineName category")
-//       .populate("pharmacyQueue", "pharmacyName")
-//       .populate("deliveryPartnerQueue", "name")
-//       .populate("pharmacyAttempts.pharmacyId", "pharmacyName")
-//       .populate("deliveryPartnerAttempts.deliveryPartnerId", "name")
-//       .sort({ createdAt: sort })
-//       .skip(skip)
-//       .limit(limit),
-//     ordersModel.countDocuments(filter),
-//   ]);
-
-//   return successRes(res, 200, true, "orders fetched successfully", {
-//     currentPage: page,
-//     totalPages: Math.ceil(totalCount / limit),
-//     totalOrders: totalCount,
-//     data: orders,
-//   });
-// });
-
-
 module.exports.getAllDetailsOfOrdersById = asyncErrorHandler(async (req, res, next) => {
   const adminId = req.admin._id;
   const orderId = req.query.orderId;

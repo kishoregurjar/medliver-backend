@@ -33,6 +33,8 @@ const chatBoatController = require("./CommonController/chatBoatController");
 const adminOrderManagementController = require("./AdminController/adminOrderManagementController");
 const pathologyTestController = require('./PathologyOwnerController/pathologyTestManagment');
 const pathologyController = require('./PathologyOwnerController/pathologyController');
+const pathologyOrderController = require('./PathologyOwnerController/pathologyOrderController');
+
 const commonNotificationController = require('./CommonController/commonNotificationController');
 const adminNotificationController = require('./AdminController/adminNotificationController');
 const commonPPAndTCContorller = require('./CommonController/commonPPAndTCContorller');
@@ -76,5 +78,6 @@ module.exports = {
     commonNotificationController,
     adminNotificationController,
     commonPPAndTCContorller,
-    customerTestOrderController
+    customerTestOrderController,
+    pathologyOrderController
 }   
