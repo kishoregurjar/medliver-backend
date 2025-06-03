@@ -33,7 +33,7 @@ const pathologyOrderSchema = new mongoose.Schema({
 
   orderStatus: {
     type: String,
-    enum: ['pending', 'confirmed', 'sample_collected', 'completed', 'cancelled','need_manual_assignment_to_pathology'],
+    enum: ['pending', 'confirmed', 'sample_collected', 'completed', 'cancelled','need_manual_assignment_to_pathology', 'accepted_by_pathology'],
     default: 'pending',
   },
   cancellationReason: { type: String },
