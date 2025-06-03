@@ -32,8 +32,9 @@ router.get("/get-terms-and-conditions", indexController.commonPPAndTCContorller.
 router.put('/change-path-availability-status', verifyAdminToken('pathology'), indexController.pathologyController.changePathologyAvailabilityStatus);
 
 //pathology order Controller Routes
-router.get('/view-all-assigned-test-booking',verifyAdminToken('pathology'), indexController.pathologyOrderController.viewAllAssignedTestBooking);
-router.get("/view-all-accepted-test-booking",verifyAdminToken('pathology'), indexController.pathologyOrderController.getAllAcceptedTestBooking);
+router.get('/view-all-assigned-test-booking', verifyAdminToken('pathology'), indexController.pathologyOrderController.viewAllAssignedTestBooking);
+router.get("/view-all-accepted-test-booking", verifyAdminToken('pathology'), indexController.pathologyOrderController.getAllAcceptedTestBooking);
+router.put('/accept-reject-order', verifyAdminToken('pathology'), indexController.pathologyOrderController.acceptOrRejectTestOrder);
 
 
 module.exports = router;
