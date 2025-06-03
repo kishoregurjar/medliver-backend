@@ -66,7 +66,7 @@ module.exports.createOrUpdatePolicy = asyncErrorHandler(
     const policy = await policySchema.findOneAndUpdate(
       { type, userType },
       { content, updatedAt: new Date() },
-      { new: true, upsert: true }
+      { new: true }
     );
 
     return successRes(res, 200, "Policy updated successfully", {
