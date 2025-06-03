@@ -47,7 +47,7 @@ module.exports.getTermsAndConditions = asyncErrorHandler(
       );
     }
 
-    return successRes(res, 200, "Terms and conditions fetched successfully", {
+    return successRes(res, 200, true, "Terms and conditions fetched successfully", {
       policy,
     });
   }
@@ -69,7 +69,7 @@ module.exports.createOrUpdatePolicy = asyncErrorHandler(
       { new: true }
     );
 
-    return successRes(res, 200, "Policy updated successfully", {
+    return successRes(res, 200, true, "Policy updated successfully", {
       policy,
     });
   }
