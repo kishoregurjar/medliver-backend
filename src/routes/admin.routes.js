@@ -775,4 +775,8 @@ router.put("/update-policy", verifyAdminToken("superadmin"), indexController.com
 router.get("/get-all-policies", verifyAdminToken("superadmin"), indexController.commonPPAndTCContorller.getAllPolicies);
 router.get("/get-policy-by-id", validateQuery(getPolicyByIdValidation), verifyAdminToken("superadmin"), indexController.commonPPAndTCContorller.getPolicyById);
 
+/** promo banner */
+router.post("/create-promo-banner", verifyAdminToken("superadmin"), indexController.promoBannerController.createPromoBanner);
+router.get("/get-all-promo-banner", verifyAdminToken("superadmin"), indexController.promoBannerController.getAllPromoBanners);
+
 module.exports = router;

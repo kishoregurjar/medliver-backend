@@ -107,3 +107,8 @@ router.get('/get-test-details', validateQuery(getTestsDetailsById), verifyUserTo
 
 router.post("/test-booking", verifyUserToken(), indexController.customerTestOrderController.createPathologyOrder);
 
+
+/** Banners  */
+
+router.get('/get-all-banners', indexController.promoBannerController.getAllPromoBanners);
+
