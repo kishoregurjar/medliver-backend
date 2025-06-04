@@ -39,6 +39,7 @@ const commonNotificationController = require('./CommonController/commonNotificat
 const adminNotificationController = require('./AdminController/adminNotificationController');
 const commonPPAndTCContorller = require('./CommonController/commonPPAndTCContorller');
 const customerTestOrderController = require('./CustomerController/customerTestOrderController')
+const promoBannerController = require('./CommonController/promoBannerController');
 module.exports = {
     adminAuthController,
     pharmacyController,
@@ -79,5 +80,6 @@ module.exports = {
     adminNotificationController,
     commonPPAndTCContorller,
     customerTestOrderController,
-    pathologyOrderController
+    pathologyOrderController,
+    promoBannerController
 }   

@@ -5,7 +5,7 @@ const { successRes } = require("../../services/response");
 const customerAddressModel = require('../../modals/customerAddress.model');
 const pathologySchema = require('../../modals/pathology.model');
 const TestModel = require('../../modals/test.model');
-const TestCategory = require('../../modals/testCategory'); 
+const TestCategory = require('../../modals/testCategory');
 const notificationModel = require('../../modals/notification.model');
 const adminSchema = require('../../modals/admin.Schema');
 const { sendExpoNotification } = require('../../utils/expoNotification');
@@ -47,9 +47,9 @@ module.exports.createPathologyOrder = asyncErrorHandler(async (req, res, next) =
       }
     }
   });
-  
+
   const userCoords = findAddress.location;
-  
+
   const sortedCenters = allCenters
     .map((center) => ({
       center,
@@ -59,7 +59,7 @@ module.exports.createPathologyOrder = asyncErrorHandler(async (req, res, next) =
     .map((entry) => entry.center);
 
   const assignedCenter = sortedCenters[0] || null;
-
+  console.log(findAddress?.location, "findAddress?.location")
   const newOrder = new orderPathologyModel({
     customerId: userId,
     pathologyCenterId: assignedCenter?._id || null,
@@ -67,6 +67,7 @@ module.exports.createPathologyOrder = asyncErrorHandler(async (req, res, next) =
     totalAmount: assignedCenter ? assignedCenter.availableTests.price : 0,
     isHomeCollection: assignedCenter ? assignedCenter.availableTests.availabilityAtHome : false,
     paymentMethod: paymentMethod,
+    addressId: deliveryAddressId,
     deliveryAddress: {
       street: findAddress?.street,
       city: findAddress?.city,
@@ -188,8 +189,8 @@ module.exports.getTestsByCategoryId = asyncErrorHandler(async (req, res, next) =
 
   const category = await TestCategory.findById(categoryId).populate({
     path: "tests",
-    match: { available: true }, 
-    select: "name price description image_url bookedCount", 
+    match: { available: true },
+    select: "name price description image_url bookedCount",
   });
 
   if (!category) {

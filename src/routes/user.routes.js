@@ -2,7 +2,7 @@ const express = require("express");
 const indexController = require("../controllers/indexController");
 const { verifyUserToken } = require("../utils/jsonWebToken");
 const { uploadUserProfilePic, uploadPrescription } = require("../services/multer");
-const { validate, validateQuery, getAllSpecialOfferValidation, getAllFeatureProductValidation, getAllSellingProductValidation, createDoctorLeadValidation, registerCustomerSchema, CustomerverifyOtpSchema, loginCustomerSchema, forgetPasswordCustomerValidation, resetPasswordCustomerValidation, signUpSignInWithGoogleValidation, addAddressValidation, editAddressSchema, getOrDeleteCustomerAddress, addToCartSchema, changeQuantitySchema, removeItemFromCartSchema,emergencyVehicleRequestSchema, updateUserProfileValidation, createOrderValidation, getOrderByIdValidation, createRazorpayOrderValidation, verifyRazorpayPaymentValidation, autoCompleteAddressValidation, getDistanceBetweenCoordsValidation, getRouteBetweenCoordsValidation, searchUMedicineValidation, logMedicineClickValidation ,searchOrderValidation,createDoctoreLeadValidation,applyInsuranceValidation,getMedicinesByManufacturerValidation,getAllOrdersValidation,getprescriptionByIdValidation,changeUserPasswordValidation,getTestsByCategoryId,getTestsDetailsById,populatTestApiValidation,searchTest} = require("../middleware/validation")
+const { validate, validateQuery, getAllSpecialOfferValidation, getAllFeatureProductValidation, getAllSellingProductValidation, createDoctorLeadValidation, registerCustomerSchema, CustomerverifyOtpSchema, loginCustomerSchema, forgetPasswordCustomerValidation, resetPasswordCustomerValidation, signUpSignInWithGoogleValidation, addAddressValidation, editAddressSchema, getOrDeleteCustomerAddress, addToCartSchema, changeQuantitySchema, removeItemFromCartSchema, emergencyVehicleRequestSchema, updateUserProfileValidation, createOrderValidation, getOrderByIdValidation, createRazorpayOrderValidation, verifyRazorpayPaymentValidation, autoCompleteAddressValidation, getDistanceBetweenCoordsValidation, getRouteBetweenCoordsValidation, searchUMedicineValidation, logMedicineClickValidation, searchOrderValidation, createDoctoreLeadValidation, applyInsuranceValidation, getMedicinesByManufacturerValidation, getAllOrdersValidation, getprescriptionByIdValidation, changeUserPasswordValidation, getTestsByCategoryId, getTestsDetailsById, populatTestApiValidation, searchTest } = require("../middleware/validation")
 
 const router = express.Router();
 
@@ -16,7 +16,7 @@ router.post("/forget-password", validate(forgetPasswordCustomerValidation), inde
 router.post("/verify-forget-password-otp", validate(CustomerverifyOtpSchema), indexController.customerController.verifyForgetPasswordOtp);
 router.post("/reset-password", validate(resetPasswordCustomerValidation), indexController.customerController.resetPassword);
 router.get("/get-user-details", verifyUserToken(), indexController.customerController.getUserDetails);
-router.post("/change-password", verifyUserToken(),validate(changeUserPasswordValidation) ,indexController.customerController.changeUserPassword);
+router.post("/change-password", verifyUserToken(), validate(changeUserPasswordValidation), indexController.customerController.changeUserPassword);
 router.patch("/update-user-profile", validate(updateUserProfileValidation), verifyUserToken(), indexController.customerController.updateUserProfile);
 router.post("/update-user-profile-picture", verifyUserToken(), uploadUserProfilePic, indexController.customerController.updateUserProfilePicture);
 router.post("signup-signin-with-google", validate(signUpSignInWithGoogleValidation), indexController.customerController.signUPSignInWithGoogle);
@@ -42,17 +42,17 @@ router.put('/change-cart-product-quantity', validate(changeQuantitySchema), veri
 router.put('/remove-item-from-cart', validate(removeItemFromCartSchema), verifyUserToken(), indexController.customerCartController.removeItemFromCart);
 
 /** Insurance route */
-router.post("/apply-for-insurance",validate(applyInsuranceValidation) ,indexController.customerMissLiniesController.applyInsurance);
+router.post("/apply-for-insurance", validate(applyInsuranceValidation), indexController.customerMissLiniesController.applyInsurance);
 router.post("/request-for-emergency-vehicle", validate(emergencyVehicleRequestSchema), indexController.customerMissLiniesController.requestEmergencyVehicle)
 
 
 
 /** Order Routes */
 router.post("/create-order", validate(createOrderValidation), verifyUserToken(), indexController.customerOrderController.createOrder);
-router.get("/get-all-orders", verifyUserToken(),validateQuery(getAllOrdersValidation),indexController.customerOrderController.getAllOrders);
+router.get("/get-all-orders", verifyUserToken(), validateQuery(getAllOrdersValidation), indexController.customerOrderController.getAllOrders);
 router.get("/get-order-by-id", validateQuery(getOrderByIdValidation), verifyUserToken(), indexController.customerOrderController.getOrderById);
 router.put("/cancel-order", validateQuery(getOrderByIdValidation), verifyUserToken(), indexController.customerOrderController.cancleOrder);
-router.get('/search-order',validateQuery(searchOrderValidation),verifyUserToken(),indexController.customerOrderController.searchOrder);
+router.get('/search-order', validateQuery(searchOrderValidation), verifyUserToken(), indexController.customerOrderController.searchOrder);
 
 /** Payment Routes */
 
@@ -63,7 +63,7 @@ router.post('/verify-payment', validate(verifyRazorpayPaymentValidation), indexC
 
 router.post('/upload-prescription', verifyUserToken(), uploadPrescription, indexController.customerOrderController.uploadPrescription)
 router.get("/get-all-prescriptions", verifyUserToken(), indexController.customerOrderController.getAllPrescriptions);
-router.get("/get-prescription-details-by-id",  validateQuery(getprescriptionByIdValidation),verifyUserToken(), indexController.customerOrderController.getPrescriptionDetailsById);
+router.get("/get-prescription-details-by-id", validateQuery(getprescriptionByIdValidation), verifyUserToken(), indexController.customerOrderController.getPrescriptionDetailsById);
 
 /** Map Integration */
 router.post('/search-autocomplete-address', validate(autoCompleteAddressValidation), indexController.commonController.autoCompleteAddress);
@@ -77,10 +77,10 @@ router.get("/get-all-medicines", indexController.medicineController.getAllMedici
 router.get("/get-medicine-by-id", indexController.medicineController.getMedicineById);
 router.post('/log-medicine-click', validate(logMedicineClickValidation), indexController.customerMedicineController.logMedicineClick);
 router.get('/get-top-picks', indexController.customerMedicineController.getUserTopPicksWithSimilar)
-router.get('/medicines-by-manufacturer', validateQuery(getMedicinesByManufacturerValidation),indexController.customerMedicineController.getMedicinesByManufacturer)
+router.get('/medicines-by-manufacturer', validateQuery(getMedicinesByManufacturerValidation), indexController.customerMedicineController.getMedicinesByManufacturer)
 
 /**DoctoreLead Routes */
-router.post("/create-doctoreLead",validate(createDoctoreLeadValidation), indexController.customerMissLiniesController.createDoctoreLead);
+router.post("/create-doctoreLead", validate(createDoctoreLeadValidation), indexController.customerMissLiniesController.createDoctoreLead);
 module.exports = router;
 
 // get notification routes
@@ -92,17 +92,23 @@ router.post('/get-automated-answer', indexController.chatBoatController.getAnswe
 router.get('/chat-history', indexController.chatBoatController.getChatBoatHistory);
 
 //privacy and terms routes
-router.get("/get-privacy-policy",  indexController.commonPPAndTCContorller.getPrivacyPolicy);
+router.get("/get-privacy-policy", indexController.commonPPAndTCContorller.getPrivacyPolicy);
 router.get("/get-terms-and-conditions", indexController.commonPPAndTCContorller.getTermsAndConditions);
 
 // customer test orderController
-router.get('/get-popular-test',validateQuery(populatTestApiValidation),verifyUserToken(),indexController.customerTestOrderController.popularTest);
+router.get('/get-popular-test', validateQuery(populatTestApiValidation), verifyUserToken(), indexController.customerTestOrderController.popularTest);
 // router.get('/get-tests-by-category',verifyUserToken(),indexController.customerTestOrderController.getTestsByCategory);
-router.get('/get-tests-by-category',validateQuery(getTestsByCategoryId),verifyUserToken(),indexController.customerTestOrderController.getTestsByCategoryId);
-router.get('/search-test',validateQuery(searchTest),verifyUserToken(),indexController.adminTestController.searchTest)
-router.get('/get-test-details',validateQuery(getTestsDetailsById),verifyUserToken(),indexController.customerTestOrderController.getTestDetails)
+router.get('/get-tests-by-category', validateQuery(getTestsByCategoryId), verifyUserToken(), indexController.customerTestOrderController.getTestsByCategoryId);
+router.get('/search-test', validateQuery(searchTest), verifyUserToken(), indexController.adminTestController.searchTest)
+router.get('/get-test-details', validateQuery(getTestsDetailsById), verifyUserToken(), indexController.customerTestOrderController.getTestDetails)
 
 
 /** test booking managemennt */
 
-router.post("/test-booking",verifyUserToken(), indexController.customerTestOrderController.createPathologyOrder);
+router.post("/test-booking", verifyUserToken(), indexController.customerTestOrderController.createPathologyOrder);
+
+
+/** Banners  */
+
+router.get('/get-all-banners', indexController.promoBannerController.getAllPromoBanners);
+
