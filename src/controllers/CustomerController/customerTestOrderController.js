@@ -35,7 +35,6 @@ module.exports.createPathologyOrder = asyncErrorHandler(async (req, res, next) =
     return next(new CustomError("Delivery address not found", 404));
   }
   const convertedTestIds = test_ids.map(id => new mongoose.Types.ObjectId(id));
-
   const allCenters = await pathologySchema.find({
     isActive: true,
     availabilityStatus: "available",
@@ -59,11 +58,11 @@ module.exports.createPathologyOrder = asyncErrorHandler(async (req, res, next) =
     .map((entry) => entry.center);
 
   const assignedCenter = sortedCenters[0] || null;
-  console.log(findAddress?.location, "findAddress?.location")
+
   const newOrder = new orderPathologyModel({
     customerId: userId,
     pathologyCenterId: assignedCenter?._id || null,
-    selectedTests: convertedTestIds,
+    selectedTests: convertedTestIds.map(id => ({ testId: id })),
     totalAmount: assignedCenter ? assignedCenter.availableTests.price : 0,
     isHomeCollection: assignedCenter ? assignedCenter.availableTests.availabilityAtHome : false,
     paymentMethod: paymentMethod,
@@ -237,7 +236,7 @@ module.exports.getOrdersPathology = asyncErrorHandler(async (req, res, next) => 
     .populate("selectedTests", "name price")
     .populate("pathologyCenterId")
     .populate("customerId") // optional, for wrapping
- // assumes addressId is a ref
+  // assumes addressId is a ref
 
   const formattedOrders = orders.map(order => ({
     _id: order._id,
@@ -269,7 +268,7 @@ module.exports.getOrderDetailsPathology = asyncErrorHandler(async (req, res, nex
 
   const order = await orderPathologyModel
     .findOne({ _id: orderId, customerId })
-    .populate("selectedTests._id", "name price") 
+    .populate("selectedTests.testId", "name price")
     .populate("pathologyCenterId", "centerName phoneNumber")
     .populate("customerId", "fullName email phoneNumber");
 
@@ -301,7 +300,7 @@ module.exports.getOrderDetailsPathology = asyncErrorHandler(async (req, res, nex
   return successRes(res, 200, true, "Order details fetched successfully", formattedOrder);
 });
 
-  module.exports.searchOrdersPathology = asyncErrorHandler(async (req, res, next) => {
+module.exports.searchOrdersPathology = asyncErrorHandler(async (req, res, next) => {
   let { value, page, limit } = req.query;
 
   if (!value) {
