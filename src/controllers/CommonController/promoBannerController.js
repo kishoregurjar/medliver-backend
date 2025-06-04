@@ -43,10 +43,19 @@ module.exports.createPromoBanner = asyncErrorHandler(async (req, res, next) => {
 
 module.exports.getAllPromoBanners = asyncErrorHandler(async (req, res, next) => {
     let { isActive, type } = req.query;
-    isActive = isActive ? isActive : true;
-    const banners = await promoBannerSchema.find({ isActive, type }).sort({ priority: -1, createdAt: -1 });
+
+    isActive = isActive !== undefined ? isActive === 'true' : true;
+
+    const typeFilter = type ? [type] : ["medicine", "test"];
+
+    const banners = await promoBannerSchema.find({
+        isActive,
+        type: { $in: typeFilter }
+    }).sort({ priority: -1, createdAt: -1 });
+
     return successRes(res, 200, true, "Banners fetched successfully", banners);
 });
+
 
 module.exports.getPromoBannerById = asyncErrorHandler(async (req, res, next) => {
     const { bannerId } = req.query;
