@@ -149,3 +149,14 @@ module.exports.getPolicyById = asyncErrorHandler(async (req,res , next) =>{
 
 
 
+module.exports.deletePolicyById = asyncErrorHandler(async (req, res, next) => {
+  const { policyId } = req.query;
+  if (!policyId) {
+    return next(new CustomError("Policy ID is required", 400));
+  }
+  const policy = await policySchema.findByIdAndDelete(policyId);
+  if (!policy) {
+    return next(new CustomError("Policy not found", 404));
+  }
+  return successRes(res, 200, true, "Policy deleted successfully", policy);
+});
