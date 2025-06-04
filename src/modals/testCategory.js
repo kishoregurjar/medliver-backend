@@ -15,10 +15,6 @@ const testCategorySchema = new mongoose.Schema({
         type: String,
         default: "" // You can set a default image URL here if you want
     },
-    tests: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Test"
-    }],
     created_at: {
         type: Date,
         default: Date.now

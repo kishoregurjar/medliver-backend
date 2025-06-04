@@ -12,14 +12,15 @@ const pathologyOrderSchema = new mongoose.Schema({
   },
   selectedTests: [
     {
-      testId: { type: mongoose.Schema.Types.ObjectId, ref: "Test" }, 
+      testId: { type: mongoose.Schema.Types.ObjectId, ref: "Test" },
     }
   ],
   testType: { type: String, enum: ["single", "package"] },
-  totalAmount: { type: Number, required: true },
+  totalAmount: { type: Number },
 
   isHomeCollection: { type: Boolean, default: false },
   sampleCollectionDateTime: { type: Date },
+  addressId: { type: mongoose.Schema.Types.ObjectId, ref: "CustomerAddress", default: null },
   homeCollectionAddress: {
     street: String,
     city: String,
@@ -33,7 +34,7 @@ const pathologyOrderSchema = new mongoose.Schema({
 
   orderStatus: {
     type: String,
-    enum: ['pending', 'confirmed', 'sample_collected', 'completed', 'cancelled','need_manual_assignment_to_pathology'],
+    enum: ['pending', 'confirmed', 'sample_collected', 'completed', 'cancelled', 'need_manual_assignment_to_pathology', 'accepted_by_pathology'],
     default: 'pending',
   },
   cancellationReason: { type: String },
@@ -54,16 +55,16 @@ const pathologyOrderSchema = new mongoose.Schema({
     enum: ["UPI", "CARD", "WALLET", "COD"],
   },
   pathologyAttempts: [
-      {
-        pathologyId: { type: mongoose.Schema.Types.ObjectId, ref: "PathologyCenter" },
-        status: {
-          type: String,
-          enum: ["pending", "accepted", "rejected"],
-          default: "pending"
-        },
-        attemptedAt: { type: Date, default: Date.now }
-      }
-    ],
+    {
+      pathologyId: { type: mongoose.Schema.Types.ObjectId, ref: "PathologyCenter" },
+      status: {
+        type: String,
+        enum: ["pending", "accepted", "rejected"],
+        default: "pending"
+      },
+      attemptedAt: { type: Date, default: Date.now }
+    }
+  ],
   orderDate: {
     type: Date,
     default: Date.now,
@@ -71,7 +72,7 @@ const pathologyOrderSchema = new mongoose.Schema({
   deliveryDate: {
     type: Date,
   }
-}, { timestamps: true }); 
+}, { timestamps: true });
 
 
 module.exports = mongoose.model("PathologyOrder", pathologyOrderSchema);

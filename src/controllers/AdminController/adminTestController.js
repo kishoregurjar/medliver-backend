@@ -17,7 +17,8 @@ module.exports.createTest = asyncErrorHandler(async (req, res, next) => {
     sample_required,
     preparation,
     delivery_time,
-    available_at_home
+    available_at_home,
+    categoryId
   } = req.body;
 
   if (!name || !price) {
@@ -39,7 +40,8 @@ module.exports.createTest = asyncErrorHandler(async (req, res, next) => {
     preparation,
     delivery_time,
     test_code,
-    available_at_home
+    available_at_home,
+    categoryId
   });
   return successRes(res, 201, true, "Test created successfully", newTest);
 });
@@ -55,7 +57,7 @@ module.exports.getAllTests = asyncErrorHandler(async (req, res, next) => {
 
   const [total, tests] = await Promise.all([
     Test.countDocuments(),
-    Test.find().sort({ createdAt: sortDir }).skip(skip).limit(limit),
+    Test.find().sort({ createdAt: sortDir }).skip(skip).limit(limit).populate("categoryId"),
   ]);
 
   if (tests.length === 0) {
@@ -77,7 +79,7 @@ module.exports.getTestById = asyncErrorHandler(async (req, res, next) => {
     return next(new CustomError("Test ID is required", 400));
   }
 
-  const test = await Test.findById(testId);
+  const test = await Test.findById(testId).populate("categoryId");
 
   if (!test) {
     return next(new CustomError("Test not found", 404));
@@ -103,7 +105,7 @@ module.exports.deleteTest = asyncErrorHandler(async (req, res, next) => {
 });
 
 module.exports.updateTest = asyncErrorHandler(async (req, res, next) => {
-  const { testId, name, price, sample_required, preparation, delivery_time, description,available_at_home,available} = req.body;
+  const { testId, name, price, sample_required, preparation, delivery_time, description, available_at_home, available } = req.body;
 
   if (!testId) {
     return next(new CustomError("Test ID is required", 400));
@@ -116,12 +118,12 @@ module.exports.updateTest = asyncErrorHandler(async (req, res, next) => {
   if (preparation) updateFields.preparation = preparation;
   if (delivery_time) updateFields.delivery_time = delivery_time;
   if (description) updateFields.description = description;
-  if(available_at_home) updateFields.available_at_home = available_at_home;
-  if(available) updateFields.available = available;
+  if (available_at_home) updateFields.available_at_home = available_at_home;
+  if (available) updateFields.available = available;
 
-    if (Object.keys(updateFields).length === 0) {
-      return next(new CustomError("No fields provided for update", 400));
-    }
+  if (Object.keys(updateFields).length === 0) {
+    return next(new CustomError("No fields provided for update", 400));
+  }
 
   const updatedTest = await Test.findByIdAndUpdate(
     testId,
@@ -137,40 +139,39 @@ module.exports.updateTest = asyncErrorHandler(async (req, res, next) => {
 });
 
 module.exports.searchTest = asyncErrorHandler(async (req, res, next) => {
-    let { value, page, limit } = req.query;
-  
-    if (!value) {
-      return next(new CustomError("Search value is required", 400));
-    }
-  
-    page = parseInt(page) || 1;
-    limit = parseInt(limit) || 10;
-    const skip = (page - 1) * limit;
-  
-    const regex = new RegExp(value.trim(), 'i');
-    const searchQuery = {
-      $or: [
-        { name: regex }, 
-      ]
-    };
-  
-    const [totalTests, allTests] = await Promise.all([
-      Test.countDocuments(searchQuery),
-      Test.find(searchQuery)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-    ]);
-  
-    if (allTests.length === 0) {
-      return successRes(res, 200, false, "No Tests Found", []);
-    }
-  
-    return successRes(res, 200, true, "Tests fetched successfully", {
-      tests: allTests,
-      currentPage: page,
-      totalPages: Math.ceil(totalTests / limit),
-      totalTests
-    });
+  let { value, page, limit } = req.query;
+
+  if (!value) {
+    return next(new CustomError("Search value is required", 400));
+  }
+
+  page = parseInt(page) || 1;
+  limit = parseInt(limit) || 10;
+  const skip = (page - 1) * limit;
+
+  const regex = new RegExp(value.trim(), 'i');
+  const searchQuery = {
+    $or: [
+      { name: regex },
+    ]
+  };
+
+  const [totalTests, allTests] = await Promise.all([
+    Test.countDocuments(searchQuery),
+    Test.find(searchQuery)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+  ]);
+
+  if (allTests.length === 0) {
+    return successRes(res, 200, false, "No Tests Found", []);
+  }
+
+  return successRes(res, 200, true, "Tests fetched successfully", {
+    tests: allTests,
+    currentPage: page,
+    totalPages: Math.ceil(totalTests / limit),
+    totalTests
   });
-  
+});

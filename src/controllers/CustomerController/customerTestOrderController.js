@@ -5,7 +5,7 @@ const { successRes } = require("../../services/response");
 const customerAddressModel = require('../../modals/customerAddress.model');
 const pathologySchema = require('../../modals/pathology.model');
 const TestModel = require('../../modals/test.model');
-const TestCategory = require('../../modals/testCategory'); 
+const TestCategory = require('../../modals/testCategory');
 const notificationModel = require('../../modals/notification.model');
 const adminSchema = require('../../modals/admin.Schema');
 const { sendExpoNotification } = require('../../utils/expoNotification');
@@ -47,9 +47,9 @@ module.exports.createPathologyOrder = asyncErrorHandler(async (req, res, next) =
       }
     }
   });
-  
+
   const userCoords = findAddress.location;
-  
+
   const sortedCenters = allCenters
     .map((center) => ({
       center,
@@ -59,7 +59,7 @@ module.exports.createPathologyOrder = asyncErrorHandler(async (req, res, next) =
     .map((entry) => entry.center);
 
   const assignedCenter = sortedCenters[0] || null;
-
+  console.log(findAddress?.location, "findAddress?.location")
   const newOrder = new orderPathologyModel({
     customerId: userId,
     pathologyCenterId: assignedCenter?._id || null,
@@ -67,6 +67,7 @@ module.exports.createPathologyOrder = asyncErrorHandler(async (req, res, next) =
     totalAmount: assignedCenter ? assignedCenter.availableTests.price : 0,
     isHomeCollection: assignedCenter ? assignedCenter.availableTests.availabilityAtHome : false,
     paymentMethod: paymentMethod,
+    addressId: deliveryAddressId,
     deliveryAddress: {
       street: findAddress?.street,
       city: findAddress?.city,
@@ -138,7 +139,6 @@ module.exports.createPathologyOrder = asyncErrorHandler(async (req, res, next) =
   });
 });
 
-
 module.exports.popularTest = asyncErrorHandler(async (req, res, next) => {
   let { page, limit } = req.query;
 
@@ -164,14 +164,13 @@ module.exports.popularTest = asyncErrorHandler(async (req, res, next) => {
   });
 });
 
-
 module.exports.getTestsByCategoryId = asyncErrorHandler(async (req, res, next) => {
   const { categoryId } = req.query;
 
   const category = await TestCategory.findById(categoryId).populate({
     path: "tests",
-    match: { available: true }, 
-    select: "name price description image_url bookedCount", 
+    match: { available: true },
+    select: "name price description image_url bookedCount",
   });
 
   if (!category) {
@@ -185,7 +184,6 @@ module.exports.getTestsByCategoryId = asyncErrorHandler(async (req, res, next) =
   });
 });
 
-
 module.exports.getTestDetails = asyncErrorHandler(async (req, res, next) => {
   const { testId } = req.query;
 
@@ -197,66 +195,6 @@ module.exports.getTestDetails = asyncErrorHandler(async (req, res, next) => {
 
   return successRes(res, 200, true, "Test details fetched successfully", test);
 });
-
-// module.exports.cancelOrderFromUser = asyncErrorHandler(async (req, res, next) => {
-//   const userId = req.user._id;
-//   const { orderId, reason } = req.body;
-
-//   if (!orderId) {
-//     return next(new CustomError("Order ID is required", 400));
-//   }
-
-//   if (!reason || reason.trim() === "") {
-//     return next(new CustomError("Cancellation reason is required", 400));
-//   }
-
-//   const order = await orderPathologyModel.findOne({
-//     _id: orderId,
-//     customerId: userId,
-//   });
-
-//   if (!order) {
-//     return next(new CustomError("Order not found or unauthorized access", 404));
-//   }
-
-//   if (["completed", "cancelled"].includes(order.orderStatus)) {
-//     return next(new CustomError(`Order is already ${order.orderStatus}`, 400));
-//   }
-
-//   order.orderStatus = "cancelled";
-//   order.cancellationReason = reason;
-//   await order.save();
-
-//   if (order.pathologyCenterId) {
-//     const pathology = await pathologySchema.findById(order.pathologyCenterId);
-
-//     if (pathology && pathology.deviceToken) {
-//       const notification = new notificationModel({
-//         title: "Test Order Cancelled",
-//         message: `A customer has cancelled their pathology test order.`,
-//         recipientId: pathology._id,
-//         recipientType: "pathology",
-//         NotificationTypeId: order._id,
-//         notificationType: "pathology_order_cancelled_by_user",
-//       });
-
-//       await notification.save();
-
-//       await sendExpoNotification(
-//         [pathology.deviceToken],
-//         "Order Cancelled",
-//         "A customer cancelled a pathology test order.",
-//         notification
-//       );
-//     }
-//   }
-
-//   return successRes(res, 200, true, "Order cancelled successfully by user", {
-//     orderId: order._id,
-//     orderStatus: order.orderStatus,
-//     cancellationReason: order.cancellationReason,
-//   });
-// });
 
 module.exports.cancelOrderFromUser = asyncErrorHandler(async (req, res, next) => {
   const userId = req.user._id;
@@ -291,18 +229,6 @@ module.exports.cancelOrderFromUser = asyncErrorHandler(async (req, res, next) =>
   });
 });
 
-
-// module.exports.getOrdersPathology = asyncErrorHandler(async (req, res, next) => {
-//   const customerId = req.user._id;
-
-//   const orders = await orderPathologyModel.find({ customerId })
-//     .sort({ createdAt: -1 })
-//     .populate("selectedTests", "name price")
-//     .populate("pathologyCenterId", "centerName contactInfo");
-
-//   return successRes(res, 200, true, "Customer pathology orders fetched successfully", orders);
-// });
-
 module.exports.getOrdersPathology = asyncErrorHandler(async (req, res, next) => {
   const customerId = req.user._id;
 
@@ -332,24 +258,6 @@ module.exports.getOrdersPathology = asyncErrorHandler(async (req, res, next) => 
 
   return successRes(res, 200, true, "Customer pathology orders fetched successfully", orders);
 });
-
-
-// module.exports.getOrderDetailsPathology = asyncErrorHandler(async (req, res, next) => {
-//   const customerId = req.user._id;
-//   const { orderId } = req.query;
-
-//   const order = await orderPathologyModel.findById(orderId, { customerId })
-//     .populate("selectedTests")
-//     .populate("pathologyCenterId")
-//     .populate("customerId")
-
-
-//   if (!order) {
-//     return next(new CustomError("Order not found", 404));
-//   }
-
-//   return successRes(res, 200, true, "Order details fetched successfully", order);
-// });
 
 module.exports.getOrderDetailsPathology = asyncErrorHandler(async (req, res, next) => {
   const customerId = req.user._id;
@@ -392,8 +300,6 @@ module.exports.getOrderDetailsPathology = asyncErrorHandler(async (req, res, nex
 
   return successRes(res, 200, true, "Order details fetched successfully", formattedOrder);
 });
-
-
 
   module.exports.searchOrdersPathology = asyncErrorHandler(async (req, res, next) => {
   let { value, page, limit } = req.query;

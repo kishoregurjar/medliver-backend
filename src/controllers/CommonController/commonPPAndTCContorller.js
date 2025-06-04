@@ -47,7 +47,7 @@ module.exports.getTermsAndConditions = asyncErrorHandler(
       );
     }
 
-    return successRes(res, 200, "Terms and conditions fetched successfully", {
+    return successRes(res, 200, true, "Terms and conditions fetched successfully", {
       policy,
     });
   }
@@ -55,21 +55,22 @@ module.exports.getTermsAndConditions = asyncErrorHandler(
 
 module.exports.createOrUpdatePolicy = asyncErrorHandler(
   async (req, res, next) => {
-    const { type, content, userType } = req.body;
+    const { type, content, userType , policyId} = req.body;
 
-    if (!type || !content || !userType) {
+
+    if (!policyId || !content ) {
       return next(
         new CustomError("Type, content and userType are required", 400)
       );
     }
 
     const policy = await policySchema.findOneAndUpdate(
-      { type, userType },
+      {  _id: policyId },
       { content, updatedAt: new Date() },
-      { new: true, upsert: true }
+      { new: true }
     );
 
-    return successRes(res, 200, "Policy updated successfully", {
+    return successRes(res, 200, true, "Policy updated successfully", {
       policy,
     });
   }

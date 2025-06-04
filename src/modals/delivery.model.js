@@ -104,8 +104,11 @@ const deliveryPartnerSchema = new mongoose.Schema({
   deviceToken: {
     type: String,
     default: null
+  },
+  lastHeartbeat:{
+    type:Date,
+    default:Date.now()
   }
-
 }, { timestamps: true });
 
 deliveryPartnerSchema.pre('save', function (next) {

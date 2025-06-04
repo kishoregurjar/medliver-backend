@@ -45,6 +45,7 @@ router.get('/check-delivery-partner-currenct-status', verifyDeliveryPartnerToken
 router.get("/get-privacy-policy",  indexController.commonPPAndTCContorller.getPrivacyPolicy);
 router.get("/get-terms-and-conditions", indexController.commonPPAndTCContorller.getTermsAndConditions);
 
-
+// Heartbeat routes
+router.post("/send-heartbeat", verifyDeliveryPartnerToken(), indexController.deliveryPartnerController.saveDeliveryPartnerHeartbeat);
 
 module.exports = router;
