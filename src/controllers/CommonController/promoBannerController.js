@@ -42,18 +42,37 @@ module.exports.createPromoBanner = asyncErrorHandler(async (req, res, next) => {
 });
 
 module.exports.getAllPromoBanners = asyncErrorHandler(async (req, res, next) => {
-    let { isActive, type } = req.query;
+    let { isActive, type, page = 1, limit = 10 } = req.query;
 
-    isActive = isActive !== undefined ? isActive === 'true' : true;
-
+    isActive = isActive ? isActive : true;
     const typeFilter = type ? [type] : ["medicine", "test"];
 
-    const banners = await promoBannerSchema.find({
+    page = parseInt(page);
+    limit = parseInt(limit);
+    const skip = (page - 1) * limit;
+
+    const filter = {
         isActive,
         type: { $in: typeFilter }
-    }).sort({ priority: -1, createdAt: -1 });
+    };
 
-    return successRes(res, 200, true, "Banners fetched successfully", banners);
+    const [totalBanners, banners] = await Promise.all([
+        promoBannerSchema.countDocuments(filter),
+        promoBannerSchema
+            .find(filter)
+            .sort({ priority: -1, createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+    ]);
+
+    const totalPages = Math.ceil(totalBanners / limit);
+
+    return successRes(res, 200, true, "Banners fetched successfully", {
+        totalBanners,
+        currentPage: page,
+        totalPages,
+        banners
+    });
 });
 
 
