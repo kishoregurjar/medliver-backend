@@ -104,10 +104,34 @@ module.exports.createPolicy = asyncErrorHandler(async (req, res, next) => {
 
 module.exports.getAllPolicies = asyncErrorHandler(async (req, res, next) => {
   const policies = await policySchema.find();
+
   if (!policies || policies.length === 0) {
     return next(new CustomError("No policies found", 404));
   }
-  return successRes(res, 200, true, "Policies fetched successfully", policies);
+
+  // Define all possible userTypes
+  const userTypes = ['customer', 'pharmacy', 'delivery', 'pathology'];
+
+  // Initialize the response object
+  const structuredPolicies = {};
+
+  // Initialize each userType with privacy and terms set to null
+  userTypes.forEach((userType) => {
+    structuredPolicies[userType] = {
+      privacy: null,
+      terms: null
+    };
+  });
+
+  // Populate the response object with policies
+  policies.forEach((policy) => {
+    const { userType, type } = policy;
+    if (userTypes.includes(userType)) {
+      structuredPolicies[userType][type] = policy;
+    }
+  });
+
+  return successRes(res, 200, true, "Policies fetched successfully", structuredPolicies);
 });
 
 
@@ -122,3 +146,6 @@ module.exports.getPolicyById = asyncErrorHandler(async (req,res , next) =>{
   }
   return successRes(res, 200, true, "Policy fetched successfully", policy);
 })
+
+
+
