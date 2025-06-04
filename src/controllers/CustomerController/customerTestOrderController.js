@@ -79,7 +79,7 @@ module.exports.createPathologyOrder = asyncErrorHandler(async (req, res, next) =
     },
     pathologyAttempts: [
       {
-        pathologyCenterId: assignedCenter?._id || null,
+        pathologyId: assignedCenter?._id || null,
         status: "pending",
         attemptedAt: new Date(),
       },
@@ -165,24 +165,6 @@ module.exports.popularTest = asyncErrorHandler(async (req, res, next) => {
 });
 
 
-// module.exports.getTestsByCategory = asyncErrorHandler(async (req, res, next) => {
-//   const categories = await TestCategory.find()
-//     .populate({
-//       path: "tests",
-//       match: { available: true }, 
-//       select: "name price description image_url", 
-//     })
-//     .select("name description image_url tests");
-
-//   if (!categories || categories.length === 0) {
-//     return successRes(res, 200, false, "No categories found", []);
-//   }
-
-//   return successRes(res, 200, true, "Tests grouped by category fetched successfully", {
-//     categories,
-//   });
-// });
-
 module.exports.getTestsByCategoryId = asyncErrorHandler(async (req, res, next) => {
   const { categoryId } = req.query;
 
@@ -215,3 +197,246 @@ module.exports.getTestDetails = asyncErrorHandler(async (req, res, next) => {
 
   return successRes(res, 200, true, "Test details fetched successfully", test);
 });
+
+// module.exports.cancelOrderFromUser = asyncErrorHandler(async (req, res, next) => {
+//   const userId = req.user._id;
+//   const { orderId, reason } = req.body;
+
+//   if (!orderId) {
+//     return next(new CustomError("Order ID is required", 400));
+//   }
+
+//   if (!reason || reason.trim() === "") {
+//     return next(new CustomError("Cancellation reason is required", 400));
+//   }
+
+//   const order = await orderPathologyModel.findOne({
+//     _id: orderId,
+//     customerId: userId,
+//   });
+
+//   if (!order) {
+//     return next(new CustomError("Order not found or unauthorized access", 404));
+//   }
+
+//   if (["completed", "cancelled"].includes(order.orderStatus)) {
+//     return next(new CustomError(`Order is already ${order.orderStatus}`, 400));
+//   }
+
+//   order.orderStatus = "cancelled";
+//   order.cancellationReason = reason;
+//   await order.save();
+
+//   if (order.pathologyCenterId) {
+//     const pathology = await pathologySchema.findById(order.pathologyCenterId);
+
+//     if (pathology && pathology.deviceToken) {
+//       const notification = new notificationModel({
+//         title: "Test Order Cancelled",
+//         message: `A customer has cancelled their pathology test order.`,
+//         recipientId: pathology._id,
+//         recipientType: "pathology",
+//         NotificationTypeId: order._id,
+//         notificationType: "pathology_order_cancelled_by_user",
+//       });
+
+//       await notification.save();
+
+//       await sendExpoNotification(
+//         [pathology.deviceToken],
+//         "Order Cancelled",
+//         "A customer cancelled a pathology test order.",
+//         notification
+//       );
+//     }
+//   }
+
+//   return successRes(res, 200, true, "Order cancelled successfully by user", {
+//     orderId: order._id,
+//     orderStatus: order.orderStatus,
+//     cancellationReason: order.cancellationReason,
+//   });
+// });
+
+module.exports.cancelOrderFromUser = asyncErrorHandler(async (req, res, next) => {
+  const userId = req.user._id;
+  const { orderId, reason } = req.body;
+
+  if (!orderId) {
+    return next(new CustomError("Order ID is required", 400));
+  }
+
+  if (!reason) {
+    return next(new CustomError("Cancellation reason is required", 400));
+  }
+
+  const order = await orderPathologyModel.findOne({ _id: orderId, customerId: userId });
+
+  if (!order) {
+    return next(new CustomError("Order not found", 404));
+  }
+
+  if (["completed", "cancelled"].includes(order.orderStatus)) {
+    return next(new CustomError(`Order is already ${order.orderStatus}`, 400));
+  }
+
+  order.orderStatus = "cancelled";
+  order.cancellationReason = reason;
+  await order.save();
+
+  return successRes(res, 200, true, "Order cancelled successfully", {
+    orderId: order._id,
+    orderStatus: order.orderStatus,
+    cancellationReason: order.cancellationReason,
+  });
+});
+
+
+// module.exports.getOrdersPathology = asyncErrorHandler(async (req, res, next) => {
+//   const customerId = req.user._id;
+
+//   const orders = await orderPathologyModel.find({ customerId })
+//     .sort({ createdAt: -1 })
+//     .populate("selectedTests", "name price")
+//     .populate("pathologyCenterId", "centerName contactInfo");
+
+//   return successRes(res, 200, true, "Customer pathology orders fetched successfully", orders);
+// });
+
+module.exports.getOrdersPathology = asyncErrorHandler(async (req, res, next) => {
+  const customerId = req.user._id;
+
+  const orders = await orderPathologyModel.find({ customerId })
+    .sort({ createdAt: -1 })
+    .populate("selectedTests", "name price")
+    .populate("pathologyCenterId")
+    .populate("customerId") // optional, for wrapping
+ // assumes addressId is a ref
+
+  const formattedOrders = orders.map(order => ({
+    _id: order._id,
+    customer: order.customerId, // already populated
+    pathologyCenter: order.pathologyCenterId,
+    selectedTests: order.selectedTests,
+    isHomeCollection: order.isHomeCollection,
+    orderStatus: order.orderStatus,
+    reportStatus: order.reportStatus,
+    paymentStatus: order.paymentStatus,
+    paymentMethod: order.paymentMethod,
+    pathologyAttempts: order.pathologyAttempts,
+    orderDate: order.orderDate,
+    cancellationReason: order.cancellationReason,
+    // createdAt: order.createdAt,
+    // updatedAt: order.updatedAt,
+  }));
+
+  return successRes(res, 200, true, "Customer pathology orders fetched successfully", orders);
+});
+
+
+// module.exports.getOrderDetailsPathology = asyncErrorHandler(async (req, res, next) => {
+//   const customerId = req.user._id;
+//   const { orderId } = req.query;
+
+//   const order = await orderPathologyModel.findById(orderId, { customerId })
+//     .populate("selectedTests")
+//     .populate("pathologyCenterId")
+//     .populate("customerId")
+
+
+//   if (!order) {
+//     return next(new CustomError("Order not found", 404));
+//   }
+
+//   return successRes(res, 200, true, "Order details fetched successfully", order);
+// });
+
+module.exports.getOrderDetailsPathology = asyncErrorHandler(async (req, res, next) => {
+  const customerId = req.user._id;
+  const { orderId } = req.query;
+
+  if (!orderId) {
+    return next(new CustomError("Order ID is required", 400));
+  }
+
+  const order = await orderPathologyModel
+    .findOne({ _id: orderId, customerId })
+    .populate("selectedTests._id", "name price") 
+    .populate("pathologyCenterId", "centerName phoneNumber")
+    .populate("customerId", "fullName email phoneNumber");
+
+  if (!order) {
+    return next(new CustomError("Order not found", 404));
+  }
+
+  const formattedOrder = {
+    _id: order._id,
+    customer: order.customerId,
+    pathologyCenter: order.pathologyCenterId,
+    selectedTests: order.selectedTests.map((item) => ({
+      _id: item.testId?._id,
+      name: item.testId?.name,
+      price: item.testId?.price
+    })),
+    isHomeCollection: order.isHomeCollection,
+    orderStatus: order.orderStatus,
+    reportStatus: order.reportStatus,
+    paymentStatus: order.paymentStatus,
+    paymentMethod: order.paymentMethod,
+    pathologyAttempts: order.pathologyAttempts,
+    orderDate: order.orderDate,
+    cancellationReason: order.cancellationReason,
+    createdAt: order.createdAt,
+    updatedAt: order.updatedAt
+  };
+
+  return successRes(res, 200, true, "Order details fetched successfully", formattedOrder);
+});
+
+
+
+  module.exports.searchOrdersPathology = asyncErrorHandler(async (req, res, next) => {
+  let { value, page, limit } = req.query;
+
+  if (!value) {
+    return next(new CustomError("Search value is required", 400));
+  }
+
+  page = parseInt(page) || 1;
+  limit = parseInt(limit) || 10;
+  const skip = (page - 1) * limit;
+
+  const regex = new RegExp(value.trim(), "i");
+
+  const searchQuery = {
+    $or: [
+      { orderStatus: regex },
+      { paymentStatus: regex },
+      { orderType: regex },      // if you have this field in pathology orders schema
+      { paymentMethod: regex },
+    ],
+  };
+
+  const [totalOrders, orders] = await Promise.all([
+    orderPathologyModel.countDocuments(searchQuery),
+    orderPathologyModel
+      .find(searchQuery)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate("selectedTests.testId", "name")
+      .populate("pathologyCenterId", "centerName"),
+  ]);
+
+  if (orders.length === 0) {
+    return successRes(res, 200, false, "No orders found", []);
+  }
+
+  return successRes(res, 200, true, "Orders fetched successfully", {
+    orders,
+    currentPage: page,
+    totalPages: Math.ceil(totalOrders / limit),
+    totalOrders,
+  });
+});
+

@@ -33,4 +33,5 @@ router.put('/change-path-availability-status', verifyAdminToken('pathology'), in
 
 //pathology order Controller Routes
 router.get('/view-all-assigned-test-booking',verifyAdminToken('pathology'), indexController.pathologyOrderController.viewAllAssignedTestBooking);   
+router.post('/cancel-order-pathology', verifyAdminToken('pathology'), indexController.pathologyOrderController.cancelOrderFromPathology);
 module.exports = router;
