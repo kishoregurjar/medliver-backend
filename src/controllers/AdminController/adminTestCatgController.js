@@ -41,15 +41,15 @@ module.exports.createTestCategory = asyncErrorHandler(async (req, res, next) => 
     return next(new CustomError("Category with this name already exists", 409));
   }
 
-  if (tests && !Array.isArray(tests)) {
-    return next(new CustomError("Tests should be an array of IDs", 400));
-  }
+  // if (tests && !Array.isArray(tests)) {
+  //   return next(new CustomError("Tests should be an array of IDs", 400));
+  // }
 
   const newCategory = await TestCategory.create({
     name: name.trim(),
     description,
     image_url,
-    tests,
+    // tests,
   });
 
   const populatedCategory = await TestCategory.findById(newCategory._id).populate("tests");

@@ -506,7 +506,7 @@ const getAllSellingProductValidation = Joi.object({
   sortOrder: Joi.string().valid("asc", "desc").optional().messages({
     "string.valid": "Sort order must be either 'asc' or 'desc'",
   }),
-    isActive: Joi.string().valid("true", "false").optional().messages({
+  isActive: Joi.string().valid("true", "false").optional().messages({
     "any.only": "is active must be either 'true' or 'false'",
   }),
 });
@@ -587,6 +587,13 @@ const createTestValidation = Joi.object({
   delivery_time: Joi.string().optional(),
   available_at_home: Joi.boolean().optional(),
   available: Joi.boolean().optional(),
+  categoryId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "string.empty": "Category ID is required",
+      "string.pattern.base": "Invalid Category ID format",
+    })
 });
 
 const getTestdeleteAndById = Joi.object({
@@ -694,7 +701,7 @@ const UpdateAndDeleteBestSelling = Joi.object({
     }),
 });
 const getBestSellingProductById = Joi.object({
-    bestSellingProductId: Joi.string()
+  bestSellingProductId: Joi.string()
     .pattern(/^[0-9a-fA-F]{24}$/)
     .required()
     .messages({
@@ -708,7 +715,7 @@ const searchBestSellingProducts = Joi.object({
     "any.required": "Search value is required",
     "string.empty": "Search value cannot be empty",
   }),
-   page: Joi.number().min(1).optional().messages({
+  page: Joi.number().min(1).optional().messages({
     "number.base": "Page must be a number",
     "number.min": "Page must be at least 1",
   }),
@@ -1100,7 +1107,7 @@ const searchBestFeatureProducts = Joi.object({
     "any.required": "Search value is required",
     "string.empty": "Search value cannot be empty",
   }),
-   page: Joi.number().min(1).optional().messages({
+  page: Joi.number().min(1).optional().messages({
     "number.base": "Page must be a number",
     "number.min": "Page must be at least 1",
   }),
@@ -1333,7 +1340,7 @@ const createTestCategory = Joi.object({
     "any.required": "Category name is required",
   }),
   description: Joi.string().allow("").optional(),
-  image_url: Joi.string().uri().allow("").optional(),
+  image_url: Joi.string().allow("").optional(),
   tests: Joi.array().optional().messages({
     "array.base": "Tests should be an array of valid IDs",
   }),
@@ -2595,7 +2602,7 @@ const addTestToPathology = Joi.object({
       "boolean.base": "Availability at home must be true or false",
       "any.required": "Availability at home is required",
     }),
-    available: Joi.boolean()
+  available: Joi.boolean()
     .required()
     .messages({
       "boolean.base": "Available must be true or false",
@@ -2639,7 +2646,7 @@ const removeAndGetInfoTest = Joi.object({
       "any.required": "Test ID is required",
       "string.pattern.base": "Invalid Test ID format",
     }),
-    available: Joi.boolean().optional().messages({
+  available: Joi.boolean().optional().messages({
     "boolean.base": "Available must be true or false",
   }),
 });
@@ -2711,11 +2718,11 @@ const sendGlobalNotification = Joi.object({
     "any.required": "Body is required",
     "string.empty": "Body cannot be empty",
   }),
-  data: Joi.object().optional(), 
+  data: Joi.object().optional(),
 });
 
-const getNotificatioByIdValidation  = Joi.object({
-    notificationId: Joi.string()
+const getNotificatioByIdValidation = Joi.object({
+  notificationId: Joi.string()
     .pattern(/^[0-9a-fA-F]{24}$/)
     .required()
     .messages({
@@ -2756,8 +2763,8 @@ const createPolicyValidation = Joi.object({
     }),
 });
 
-const getPolicyByIdValidation  = Joi.object({
-    policyId: Joi.string()
+const getPolicyByIdValidation = Joi.object({
+  policyId: Joi.string()
     .pattern(/^[0-9a-fA-F]{24}$/)
     .required()
     .messages({
@@ -2767,7 +2774,7 @@ const getPolicyByIdValidation  = Joi.object({
 });
 
 const getMedicinesByManufacturerValidation = Joi.object({
-    medicineId: Joi.string()
+  medicineId: Joi.string()
     .pattern(/^[0-9a-fA-F]{24}$/)
     .required()
     .messages({
@@ -2815,17 +2822,17 @@ const getAllOrdersValidation = Joi.object({
 });
 
 const getprescriptionByIdValidation = Joi.object({
-    prescriptionId: Joi.string()
+  prescriptionId: Joi.string()
     .pattern(/^[0-9a-fA-F]{24}$/)
     .required()
     .messages({
       "string.empty": "Priscription id cannot be empty",
       "string.pattern.base": "Invalid Priscription idformat",
     }),
-  })
+})
 
 const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,15}$/
-const changeUserPasswordValidation= Joi.object({
+const changeUserPasswordValidation = Joi.object({
   oldPassword: Joi.string()
     .required()
     .messages({
@@ -2939,7 +2946,7 @@ const searchTest = Joi.object({
     "any.required": "Search value is required",
     "string.empty": "Search value cannot be empty",
   }),
-   page: Joi.number().min(1).optional().messages({
+  page: Joi.number().min(1).optional().messages({
     "number.base": "Page must be a number",
     "number.min": "Page must be at least 1",
   }),

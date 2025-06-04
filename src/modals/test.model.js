@@ -38,6 +38,10 @@ const testSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    categoryId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'TestCategory'
+    }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Test', testSchema);
