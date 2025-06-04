@@ -296,3 +296,4 @@ module.exports.getDashboardStatus = asyncErrorHandler(async (req, res, next) => 
 
   return successRes(res, 200, true, "Stats fetched", { total, available, unavailable });
 });
+

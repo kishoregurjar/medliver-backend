@@ -105,6 +105,11 @@ router.get('/get-test-details', validateQuery(getTestsDetailsById), verifyUserTo
 
 /** test booking managemennt */
 
+router.post("/test-booking",verifyUserToken(), indexController.customerTestOrderController.createPathologyOrder);
+router.post('/cancel-pathology-booking-from-user',verifyUserToken(), indexController.customerTestOrderController.cancelOrderFromUser);
+router.get('/get-orders-pathology',verifyUserToken(), indexController.customerTestOrderController.getOrdersPathology);
+router.get('/get-order-details-pathology',verifyUserToken(), indexController.customerTestOrderController.getOrderDetailsPathology);
+router.get('/search-orders-pathology',verifyUserToken(), indexController.customerTestOrderController.searchOrdersPathology);
 router.post("/test-booking", verifyUserToken(), indexController.customerTestOrderController.createPathologyOrder);
 
 

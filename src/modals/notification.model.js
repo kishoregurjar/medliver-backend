@@ -35,7 +35,8 @@ const notificationSchema = new mongoose.Schema({
             "manual_delivery_assignment",
             "delivery_partner_reached_pharmacy",
             "delivery_partner_received_order",
-            "manual_pathology_assignment"
+            "manual_pathology_assignment",
+            "pathology_order_cancelled_by_user"
         ],
         default: null
     },
