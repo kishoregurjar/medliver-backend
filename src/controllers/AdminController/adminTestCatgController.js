@@ -5,30 +5,7 @@ const { successRes } = require("../../services/response")
 require('dotenv').config();
 const mongoose = require("mongoose")
 
-// module.exports.createTestCategory = asyncErrorHandler(async (req, res, next) => {
-//   const { name, description, image_url, tests } = req.body;
 
-//   if (!name) {
-//     return next(new CustomError("Category name is required", 400));
-//   }
-
-//   const existing = await TestCategory.findOne({ name: name.trim() });
-//   if (existing) {
-//     return next(new CustomError("Category with this name already exists", 409));
-//   }
-//   if (tests && !Array.isArray(tests)) {
-//     return next(new CustomError("Tests should be an array of IDs", 400));
-//   }
-
-//   const newCategory = await TestCategory.create({
-//     name,
-//     description,
-//     image_url,
-//     tests
-//   });
-
-//   return successRes(res, 201, true, "Test Category created successfully", newCategory);
-// });
 module.exports.createTestCategory = asyncErrorHandler(async (req, res, next) => {
   const { name, description, image_url, tests } = req.body;
 
@@ -57,7 +34,6 @@ module.exports.createTestCategory = asyncErrorHandler(async (req, res, next) => 
   return successRes(res, 201, true, "Test Category created successfully", populatedCategory);
 });
 
-
 module.exports.getAllTestCategories = asyncErrorHandler(async (req, res, next) => {
   let { page, limit } = req.query;
   page = parseInt(page) || 1;
@@ -66,11 +42,19 @@ module.exports.getAllTestCategories = asyncErrorHandler(async (req, res, next) =
 
   const [total, categories] = await Promise.all([
     TestCategory.countDocuments(),
-    TestCategory.find()
-      .populate("tests")
-      .skip(skip)
-      .limit(limit)
-      .sort({ created_at: -1 })
+    TestCategory.aggregate([
+      { $sort: { created_at: -1 } },
+      { $skip: skip },
+      { $limit: limit },
+      {
+        $lookup: {
+          from: 'tests',
+          localField: '_id',
+          foreignField: 'categoryId',
+          as: 'tests'
+        }
+      }
+    ])
   ]);
 
   if (categories.length === 0) {
@@ -92,14 +76,26 @@ module.exports.getTestCategoryById = asyncErrorHandler(async (req, res, next) =>
     return next(new CustomError("Category ID is required", 400));
   }
 
-  const category = await TestCategory.findById(testCatgId).populate("tests");
-  if (!category) {
+  const categoryData = await TestCategory.aggregate([
+    {
+      $match: { _id: new mongoose.Types.ObjectId(testCatgId) }
+    },
+    {
+      $lookup: {
+        from: 'tests',
+        localField: '_id',
+        foreignField: 'categoryId',
+        as: 'tests'
+      }
+    }
+  ]);
+
+  if (!categoryData.length) {
     return next(new CustomError("Category not found", 404));
   }
 
-  return successRes(res, 200, true, "Category fetched successfully", category);
+  return successRes(res, 200, true, "Category fetched successfully", categoryData[0]);
 });
-
 
 module.exports.updateTestCategory = asyncErrorHandler(async (req, res, next) => {
   const { testCatgId, name, description, image_url, tests } = req.body;

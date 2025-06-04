@@ -57,7 +57,7 @@ module.exports.getAllTests = asyncErrorHandler(async (req, res, next) => {
 
   const [total, tests] = await Promise.all([
     Test.countDocuments(),
-    Test.find().sort({ createdAt: sortDir }).skip(skip).limit(limit),
+    Test.find().sort({ createdAt: sortDir }).skip(skip).limit(limit).populate("categoryId"),
   ]);
 
   if (tests.length === 0) {
@@ -79,7 +79,7 @@ module.exports.getTestById = asyncErrorHandler(async (req, res, next) => {
     return next(new CustomError("Test ID is required", 400));
   }
 
-  const test = await Test.findById(testId);
+  const test = await Test.findById(testId).populate("categoryId");
 
   if (!test) {
     return next(new CustomError("Test not found", 404));
