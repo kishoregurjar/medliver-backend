@@ -14,6 +14,7 @@ const { deliveryOrderStatus } = require("../../utils/helper");
 const { generateOTPNumber } = require("../../services/helper");
 const { pickupOrderMail } = require("../../services/sendMail");
 
+
 module.exports.getRequestedOrder = asyncErrorHandler(async (req, res, next) => {
   const deliveryPartnerId = req.partner._id;
   let { orderStatus } = req.query;

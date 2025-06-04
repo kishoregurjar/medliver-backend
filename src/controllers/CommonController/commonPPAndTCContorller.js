@@ -55,7 +55,7 @@ module.exports.getTermsAndConditions = asyncErrorHandler(
 
 module.exports.createOrUpdatePolicy = asyncErrorHandler(
   async (req, res, next) => {
-    const { type, content, userType } = req.body;
+    const { type, content, userType , policyId} = req.body;
 
     if (!type || !content || !userType) {
       return next(
@@ -64,7 +64,7 @@ module.exports.createOrUpdatePolicy = asyncErrorHandler(
     }
 
     const policy = await policySchema.findOneAndUpdate(
-      { type, userType },
+      { type, userType, _id: policyId },
       { content, updatedAt: new Date() },
       { new: true }
     );
