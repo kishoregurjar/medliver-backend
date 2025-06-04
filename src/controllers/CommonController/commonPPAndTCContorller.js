@@ -57,14 +57,15 @@ module.exports.createOrUpdatePolicy = asyncErrorHandler(
   async (req, res, next) => {
     const { type, content, userType , policyId} = req.body;
 
-    if (!type || !content || !userType) {
+
+    if (!policyId || !content ) {
       return next(
         new CustomError("Type, content and userType are required", 400)
       );
     }
 
     const policy = await policySchema.findOneAndUpdate(
-      { type, userType, _id: policyId },
+      {  _id: policyId },
       { content, updatedAt: new Date() },
       { new: true }
     );
