@@ -779,4 +779,13 @@ router.delete("/delete-policy", verifyAdminToken("superadmin"), indexController.
 router.post("/create-promo-banner", verifyAdminToken("superadmin"), indexController.promoBannerController.createPromoBanner);
 router.get("/get-all-promo-banner", verifyAdminToken("superadmin"), indexController.promoBannerController.getAllPromoBanners);
 
+
+/** Specila Test Offer */
+
+router.post("/create-special-test-offer", verifyAdminToken("superadmin"), indexController.specialTestOfferController.createTestSpecialOffer);
+router.put("/update-special-test-offer-status", verifyAdminToken("superadmin"), indexController.specialTestOfferController.updateSpecialTestOfferStatus);
+router.get("/get-all-special-test-offer",verifyAdminToken("superadmin"), indexController.specialTestOfferController.getSpecialTestOfferAdmin);
+router.get("/get-special-test-offer-by-id", verifyAdminToken("superadmin"), indexController.specialTestOfferController.getSpecialTestOfferById);
+router.delete("/delete-special-test-offer", verifyAdminToken("superadmin"), indexController.specialTestOfferController.deleteSpecialTestOffer);
+
 module.exports = router;

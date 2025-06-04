@@ -117,3 +117,8 @@ router.post("/test-booking", verifyUserToken(), indexController.customerTestOrde
 
 router.get('/get-all-banners', indexController.promoBannerController.getAllPromoBanners);
 
+
+/**  special test offer */
+
+router.get("/get-special-test-offer", indexController.specialTestOfferController.getSpecialTestOffer);
+
