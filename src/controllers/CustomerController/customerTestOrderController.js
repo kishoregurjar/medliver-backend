@@ -35,6 +35,10 @@ module.exports.createPathologyOrder = asyncErrorHandler(async (req, res, next) =
     return next(new CustomError("Delivery address not found", 404));
   }
   const convertedTestIds = test_ids.map(id => new mongoose.Types.ObjectId(id));
+  const existingTests = await TestModel.find({ _id: { $in: convertedTestIds } });
+  if (existingTests.length !== convertedTestIds.length) {
+    return next(new CustomError("Test not found", 400));
+  }
   const allCenters = await pathologySchema.find({
     isActive: true,
     availabilityStatus: "available",
@@ -164,29 +168,46 @@ module.exports.popularTest = asyncErrorHandler(async (req, res, next) => {
 });
 
 module.exports.getTestsByCategoryId = asyncErrorHandler(async (req, res, next) => {
-  const { categoryId } = req.query;
+  const { categoryId, page = 1, limit = 10 } = req.query;
 
-  const category = await TestCategory.findById(categoryId).populate({
-    path: "tests",
-    match: { available: true },
-    select: "name price description image_url bookedCount",
-  });
+  if (!categoryId) {
+    return next(new CustomError("Category ID is required", 400));
+  }
+
+  const skip = (parseInt(page) - 1) * parseInt(limit);
+
+  const [category, totalTests, tests] = await Promise.all([
+    TestCategory.findById(categoryId),
+    TestModel.countDocuments({ categoryId }),
+    TestModel.find({ categoryId })
+      .skip(skip)
+      .limit(parseInt(limit))
+      .sort({ createdAt: -1 }) // Optional: latest first
+  ]);
 
   if (!category) {
     return next(new CustomError("Test category not found", 404));
   }
 
+  // Step 3: Return combined response
   return successRes(res, 200, true, "Tests for this category fetched successfully", {
-    categoryName: category.name,
-    categoryDescription: category.description,
-    tests: category.tests,
+    category: {
+      _id: category._id,
+      name: category.name,
+      description: category.description,
+      image_url: category.image_url,
+    },
+    currentPage: parseInt(page),
+    totalPages: Math.ceil(totalTests / limit),
+    totalTests,
+    tests
   });
 });
 
 module.exports.getTestDetails = asyncErrorHandler(async (req, res, next) => {
   const { testId } = req.query;
 
-  const test = await TestModel.findById(testId)
+  const test = await TestModel.findById(testId).populate("categoryId");
 
   if (!test) {
     return next(new CustomError("Test not found", 404));
