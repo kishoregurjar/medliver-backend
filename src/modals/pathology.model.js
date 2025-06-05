@@ -91,3 +91,4 @@ const PathologyCenter = mongoose.model(
   pathologyCenterSchema
 );
 module.exports = PathologyCenter;
+

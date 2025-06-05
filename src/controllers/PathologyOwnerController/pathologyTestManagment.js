@@ -4,6 +4,8 @@ const asyncErrorHandler = require("../../utils/asyncErrorHandler");
 const CustomError = require("../../utils/customError");
 const mongoose = require("mongoose");
 const PathologyCenter = require("../../modals/pathology.model");
+const moment = require("moment");
+const OrderPathologyModel = require("../../modals/orderPathologyModel");
 
 module.exports.searchTest = asyncErrorHandler(async (req, res, next) => {
   let { query } = req.query;
@@ -297,3 +299,35 @@ module.exports.getDashboardStatus = asyncErrorHandler(async (req, res, next) => 
   return successRes(res, 200, true, "Stats fetched", { total, available, unavailable });
 });
 
+
+module.exports.getDashboardStatus = asyncErrorHandler(async (req, res, next) => {
+  const admin = req.admin;
+
+  const pathology = await PathologyCenter.findOne({ adminId: admin._id });
+
+  if (!pathology) return next(new CustomError("Pathology not found", 404));
+
+  const total = pathology.availableTests.length;
+
+  const available = pathology.availableTests.filter((test) => test.available).length;
+
+  const unavailable = total - available;
+
+  const startOfMonth = moment().startOf("month").toDate();
+  const endOfMonth = moment().endOf("month").toDate();
+
+  const monthlyInsight = await OrderPathologyModel.countDocuments({
+    pathologyCenterId: pathology._id,
+    createdAt: { $gte: startOfMonth, $lte: endOfMonth }
+  });
+//   const latestDoc = await OrderPathologyModel.findOne({
+//   createdAt: { $gte: startOfMonth, $lte: endOfMonth }
+// }).sort({ createdAt: -1 });
+
+  return successRes(res, 200, true, "Stats fetched", {
+    total,
+    available,
+    unavailable,
+    monthlyInsight
+  });
+});
