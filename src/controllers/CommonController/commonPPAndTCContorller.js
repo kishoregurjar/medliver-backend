@@ -22,7 +22,7 @@ module.exports.getPrivacyPolicy = asyncErrorHandler(async (req, res, next) => {
     );
   }
 
-  return successRes(res, 200, "Privacy policy fetched successfully", {
+  return successRes(res, 200,true, "Privacy policy fetched successfully", {
     policy,
   });
 });
