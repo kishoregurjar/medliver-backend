@@ -11,6 +11,9 @@ const adminSchema = require('../../modals/admin.Schema');
 const { sendExpoNotification } = require('../../utils/expoNotification');
 const { default: mongoose } = require('mongoose');
 const { getDistance } = require('../../utils/helper');
+const testClickHistoryModel = require('../../modals/testClickHistory.model');
+const jwt = require('jsonwebtoken');
+const testModel = require('../../modals/test.model');
 
 
 module.exports.createPathologyOrder = asyncErrorHandler(async (req, res, next) => {
@@ -35,6 +38,10 @@ module.exports.createPathologyOrder = asyncErrorHandler(async (req, res, next) =
     return next(new CustomError("Delivery address not found", 404));
   }
   const convertedTestIds = test_ids.map(id => new mongoose.Types.ObjectId(id));
+  const existingTests = await TestModel.find({ _id: { $in: convertedTestIds } });
+  if (existingTests.length !== convertedTestIds.length) {
+    return next(new CustomError("Test not found", 400));
+  }
   const allCenters = await pathologySchema.find({
     isActive: true,
     availabilityStatus: "available",
@@ -164,29 +171,46 @@ module.exports.popularTest = asyncErrorHandler(async (req, res, next) => {
 });
 
 module.exports.getTestsByCategoryId = asyncErrorHandler(async (req, res, next) => {
-  const { categoryId } = req.query;
+  const { categoryId, page = 1, limit = 10 } = req.query;
 
-  const category = await TestCategory.findById(categoryId).populate({
-    path: "tests",
-    match: { available: true },
-    select: "name price description image_url bookedCount",
-  });
+  if (!categoryId) {
+    return next(new CustomError("Category ID is required", 400));
+  }
+
+  const skip = (parseInt(page) - 1) * parseInt(limit);
+
+  const [category, totalTests, tests] = await Promise.all([
+    TestCategory.findById(categoryId),
+    TestModel.countDocuments({ categoryId }),
+    TestModel.find({ categoryId })
+      .skip(skip)
+      .limit(parseInt(limit))
+      .sort({ createdAt: -1 }) // Optional: latest first
+  ]);
 
   if (!category) {
     return next(new CustomError("Test category not found", 404));
   }
 
+  // Step 3: Return combined response
   return successRes(res, 200, true, "Tests for this category fetched successfully", {
-    categoryName: category.name,
-    categoryDescription: category.description,
-    tests: category.tests,
+    category: {
+      _id: category._id,
+      name: category.name,
+      description: category.description,
+      image_url: category.image_url,
+    },
+    currentPage: parseInt(page),
+    totalPages: Math.ceil(totalTests / limit),
+    totalTests,
+    tests
   });
 });
 
 module.exports.getTestDetails = asyncErrorHandler(async (req, res, next) => {
   const { testId } = req.query;
 
-  const test = await TestModel.findById(testId)
+  const test = await TestModel.findById(testId).populate("categoryId");
 
   if (!test) {
     return next(new CustomError("Test not found", 404));
@@ -343,5 +367,89 @@ module.exports.searchOrdersPathology = asyncErrorHandler(async (req, res, next) 
     totalPages: Math.ceil(totalOrders / limit),
     totalOrders,
   });
+});
+
+module.exports.logTestClick = asyncErrorHandler(async (req, res, next) => {
+  const token = req?.headers?.authorization
+
+  if (!token) {
+    return next(new CustomError("Authorization token missing", 401));
+  }
+
+  let decoded;
+  try {
+    decoded = jwt.verify(token, process.env.SECRET_KEY);
+  } catch (err) {
+    return next(new CustomError(err.message, 401));
+  }
+
+  const userId = decoded._id;
+  const { testId } = req.body;
+
+  if (!testId) {
+    return next(new CustomError("Test ID is required", 400));
+  }
+
+  await testClickHistoryModel.create({
+    user_id: userId,
+    test_id: testId,
+  });
+
+  return successRes(res, 200, true, "Click logged successfully");
+});
+
+module.exports.getLogHistoryTest = asyncErrorHandler(async (req, res, next) => {
+  const token = req.headers.authorization;
+  let topPicks = [];
+
+  // If no token, show random top picks
+  if (!token) {
+    topPicks = await testModel.aggregate([{ $sample: { size: 10 } }]);
+    return successRes(res, 200, true, "Showing random top picks", topPicks);
+  }
+
+  let decoded;
+  try {
+    decoded = jwt.verify(token, process.env.SECRET_KEY);
+  } catch (err) {
+    return next(new CustomError("Invalid or expired token", 401));
+  }
+
+  const userId = decoded._id;
+
+  // Get user's recent click history
+  const clickHistory = await testClickHistoryModel
+    .find({ user_id: userId }, { test_id: 1 })
+    .sort({ createdAt: -1 }) // optional: prioritize recent
+    .limit(5)
+    .lean();
+
+  const testIds = clickHistory.map(item => item.test_id);
+
+  if (testIds.length === 0) {
+    const randomTopPicks = await testModel.aggregate([{ $sample: { size: 10 } }]);
+    return successRes(res, 200, true, "Showing random top picks", randomTopPicks);
+  }
+
+  // Fetch top picked tests
+  const topPickedTests = await testModel.find({ _id: { $in: testIds } }).lean();
+
+  const categoryIds = topPickedTests.map(t => t.categoryId);
+
+  // Fetch similar tests from same categories, excluding the already picked ones
+  const similarTests = await testModel.find({
+    categoryId: { $in: categoryIds },
+    _id: { $nin: testIds }
+  }).limit(20).lean();
+
+  // Merge and de-duplicate
+  const testMap = new Map();
+
+  topPickedTests.forEach(test => testMap.set(test._id.toString(), test));
+  similarTests.forEach(test => testMap.set(test._id.toString(), test));
+
+  const combinedResults = Array.from(testMap.values());
+
+  return successRes(res, 200, true, "Top picks with similar medicines", combinedResults);
 });
 
