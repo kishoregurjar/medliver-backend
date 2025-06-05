@@ -87,6 +87,7 @@ module.exports = router;
 router.get('/get-notification-by-recipientId', verifyUserToken(), indexController.commonController.getNotifications);
 router.put('/update-notification-status', verifyUserToken(), indexController.commonController.updateNotificationStatus);
 router.post("/save-notification-id", indexController.commonNotificationController.saveNotificationId);
+router.get("/get-all-notification", indexController.commonNotificationController.getAllNotification);
 
 router.post('/get-automated-answer', indexController.chatBoatController.getAnswer);
 router.get('/chat-history', indexController.chatBoatController.getChatBoatHistory);

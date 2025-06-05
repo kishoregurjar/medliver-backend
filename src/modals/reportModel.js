@@ -6,6 +6,11 @@ const testReportSchema = new mongoose.Schema({
         ref: 'PathologyOrder',
         required: true
     },
+    pathologyCenterId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'PathologyCenter',
+        required: true
+    },
     customerId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Customer',

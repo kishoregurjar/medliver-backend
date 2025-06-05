@@ -16,8 +16,7 @@ const notificationSchema = new mongoose.Schema({
     },
     recipientId: {
         type: mongoose.Schema.Types.ObjectId,
-        refPath: "recipientType",
-        required: true,
+        refPath: "recipientType"
     },
     status: {
         type: String,
@@ -36,7 +35,8 @@ const notificationSchema = new mongoose.Schema({
             "delivery_partner_reached_pharmacy",
             "delivery_partner_received_order",
             "manual_pathology_assignment",
-            "pathology_order_cancelled_by_user"
+            "pathology_order_cancelled_by_user",
+            "global_notification"
         ],
         default: null
     },

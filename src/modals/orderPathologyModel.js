@@ -43,7 +43,7 @@ const pathologyOrderSchema = new mongoose.Schema({
     enum: ['not_uploaded', 'uploaded', 'in_progress'],
     default: 'not_uploaded'
   },
-  reportUrl: { type: String },
+  reportId: { type: mongoose.Schema.Types.ObjectId, ref: "TestReport" },
 
   paymentStatus: {
     type: String,

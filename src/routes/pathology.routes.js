@@ -38,4 +38,11 @@ router.get("/view-all-accepted-test-booking", verifyAdminToken('pathology'), ind
 router.put('/accept-reject-order', verifyAdminToken('pathology'), indexController.pathologyOrderController.acceptOrRejectTestOrder);
 
 
+/** Report Management */
+
+router.post("/add-test-report",verifyAdminToken('pathology'),indexController.reportManagementController.updateReportToAccount);
+router.get("/get-all-test-reports",verifyAdminToken('pathology'),indexController.reportManagementController.getAllTestReports);
+router.delete("/delete-test-report",verifyAdminToken('pathology'),indexController.reportManagementController.deleteTestReport);
+router.get("/get-test-report-details", verifyAdminToken('pathology'), indexController.reportManagementController.getTestReportDetailsById);
+
 module.exports = router;

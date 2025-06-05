@@ -186,30 +186,61 @@ module.exports.removeTestFromStock = asyncErrorHandler(async (req, res, next) =>
   return successRes(res, 200, true, "Test remove successfully", testRemove);
 });
 
+// module.exports.getSingleTestInfo = asyncErrorHandler(async (req, res, next) => {
+//   const admin = req.admin;
+//   const { testId } = req.query;
+
+//   const pathology = await PathologyCenter.findOne({ adminId: admin._id });
+//   // const pathologId = pathology._id
+//   //   console.log("pathology id is",pathologId);
+
+//   if (!pathology) {
+//     return next(new CustomError("Pathology not found", 404));
+//   }
+//   const findTestIndex = pathology.availableTests.findIndex((t) => {
+//     return t.testId.toString() === testId
+//   })
+
+//   if (findTestIndex === -1) {
+//     return next(new CustomError("Test not found in pathology center", 404));
+//   }
+//   console.log("test id's index is", findTestIndex);
+
+//   const test = pathology.availableTests[findTestIndex];
+//   return successRes(res, 200, true, "Test fethched successfully", test);
+
+// })
+
+
 module.exports.getSingleTestInfo = asyncErrorHandler(async (req, res, next) => {
   const admin = req.admin;
   const { testId } = req.query;
 
-  const pathology = await PathologyCenter.findOne({ adminId: admin._id });
-  // const pathologId = pathology._id
-  //   console.log("pathology id is",pathologId);
+  if (!testId) {
+    return next(new CustomError("Test ID is required", 400));
+  }
+
+  const pathology = await PathologyCenter.findOne({ adminId: admin._id })
+    .populate({
+      path: "availableTests.testId",
+      model: "Test",
+    });
 
   if (!pathology) {
-    return next(new CustomError("Pathology not found", 404));
+    return next(new CustomError("Pathology center not found", 404));
   }
-  const findTestIndex = pathology.availableTests.findIndex((t) => {
-    return t.testId.toString() === testId
-  })
 
-  if (findTestIndex === -1) {
+  // Yahan `testId` ko ObjectId string se compare nahi karenge directly, because after populate it's an object
+  const matchedTest = pathology.availableTests.find((t) => {
+    return t.testId && t.testId._id.toString() === testId;
+  });
+
+  if (!matchedTest) {
     return next(new CustomError("Test not found in pathology center", 404));
   }
-  console.log("test id's index is", findTestIndex);
 
-  const test = pathology.availableTests[findTestIndex];
-  return successRes(res, 200, true, "Test fethched successfully", test);
-
-})
+  return successRes(res, 200, true, "Test fetched successfully", matchedTest);
+});
 
 module.exports.searchTestInMyStock = asyncErrorHandler(async (req, res, next) => {
   const admin = req.admin;
