@@ -141,3 +141,20 @@ module.exports.updatePromoBannerStatus = asyncErrorHandler(async (req, res, next
     const updatedBanner = await promoBannerSchema.findByIdAndUpdate(bannerId, req.body, { new: true });
     return successRes(res, 200, true, "Banner updated successfully", updatedBanner);
 });
+
+module.exports.searchBanner = asyncErrorHandler(async (req, res, next) => {
+    const { search } = req.query;
+
+    if (!search) {
+        return next(new CustomError("Search query is required", 400));
+    }
+
+    const banners = await promoBannerSchema.find({
+        $or: [
+            { title: { $regex: search, $options: "i" } },
+            { description: { $regex: search, $options: "i" } }
+        ]
+    });
+
+    return successRes(res, 200, true, "Banners fetched successfully", banners);
+});
