@@ -97,7 +97,7 @@ router.get("/get-privacy-policy", indexController.commonPPAndTCContorller.getPri
 router.get("/get-terms-and-conditions", indexController.commonPPAndTCContorller.getTermsAndConditions);
 
 // customer test orderController
-router.get('/get-popular-test', validateQuery(populatTestApiValidation), verifyUserToken(), indexController.customerTestOrderController.popularTest);
+router.get('/get-popular-test', indexController.customerTestOrderController.popularTest);
 // router.get('/get-tests-by-category',verifyUserToken(),indexController.customerTestOrderController.getTestsByCategory);
 router.get('/get-tests-by-category', validateQuery(getTestsByCategoryId), verifyUserToken(), indexController.customerTestOrderController.getTestsByCategoryId);
 router.get('/search-test', validateQuery(searchTest), verifyUserToken(), indexController.adminTestController.searchTest)
