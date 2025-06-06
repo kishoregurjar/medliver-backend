@@ -13,6 +13,8 @@ const { getDistance, generateOrderNumber } = require("../../utils/helper");
 const adminSchema = require("../../modals/admin.Schema");
 const getRouteBetweenCoords = require("../../utils/distance.helper");
 
+/**
+
 module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
   const userId = req.user._id;
   const { item_ids, deliveryAddressId, paymentMethod } = req.body;
@@ -207,6 +209,214 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
     assignedTo: assignedPharmacy ? "pharmacy" : "admin",
   });
 });
+
+ */
+
+module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
+  const userId = req.user._id;
+  const { item_ids, deliveryAddressId, paymentMethod, razorpay_payment_id } = req.body;
+
+  if (!item_ids || !Array.isArray(item_ids) || item_ids.length === 0) {
+    return next(new CustomError("Item IDs are required", 400));
+  }
+
+  // If payment method is online, ensure payment ID is provided
+  if (paymentMethod !== "COD" && !razorpay_payment_id) {
+    return next(new CustomError("Payment info missing for online payment", 400));
+  }
+
+  const cart = await cartSchema.findOne({ user_id: userId });
+  if (!cart || cart.items.length === 0) {
+    return next(new CustomError("Cart is empty or not found", 404));
+  }
+
+  const itemsToOrder = cart.items.filter((item) =>
+    item_ids.includes(item.item_id.toString())
+  );
+
+  if (itemsToOrder.length === 0) {
+    return next(new CustomError("No valid items found in the cart", 404));
+  }
+
+  let totalPrice = 0;
+  let prescriptionRequired = false;
+  const orderItems = [];
+
+  for (const item of itemsToOrder) {
+    totalPrice += item.price * item.quantity;
+
+    const medicine = await medicineModel.findById(item.item_id);
+    if (medicine?.isPrescriptionRequired) prescriptionRequired = true;
+
+    orderItems.push({
+      medicineId: item.item_id,
+      quantity: item.quantity,
+      price: item.price,
+      medicineName: item.name,
+    });
+  }
+
+  const findAddress = await customerAddressModel.findOne({
+    customer_id: userId,
+    _id: deliveryAddressId,
+  });
+
+  if (!findAddress) {
+    return next(new CustomError("Delivery address not found", 404));
+  }
+
+  const allPharmacies = await pharmacySchema.find({
+    status: "active",
+    availabilityStatus: "available",
+    deviceToken: { $ne: null },
+    pharmacyCoordinates: { $ne: null },
+  });
+
+  const userCoords = findAddress.location;
+
+  const sortedPharmacies = allPharmacies
+    .map((pharmacy) => ({
+      pharmacy,
+      distance: getDistance(userCoords, pharmacy.pharmacyCoordinates),
+    }))
+    .sort((a, b) => a.distance - b.distance)
+    .map((entry) => entry.pharmacy);
+
+  const pharmacyQueue = sortedPharmacies.map((p) => p._id);
+  const assignedPharmacy = sortedPharmacies[0] || null;
+
+  const pharmacyAttempts = assignedPharmacy
+    ? [{
+      pharmacyId: assignedPharmacy._id,
+      status: "pending",
+      attemptAt: new Date(),
+    }]
+    : [];
+
+  let paymentDetails = null;
+
+  if (paymentMethod !== "COD" && razorpay_payment_id) {
+    const payment = await instance.payments.fetch(razorpay_payment_id);
+    if (!payment || payment.status !== "captured") {
+      return next(new CustomError("Payment not successful", 400));
+    }
+
+    paymentDetails = {
+      razorpay_payment_id,
+      amount: payment.amount,
+      currency: payment.currency,
+      status: payment.status,
+      method: payment.method,
+      email: payment.email,
+      contact: payment.contact,
+      vpa: payment.vpa || payment.upi?.vpa,
+      bank: payment.bank,
+      wallet: payment.wallet,
+      description: payment.description,
+      fee: payment.fee,
+      tax: payment.tax,
+      rrn: payment.acquirer_data?.rrn,
+      upi_transaction_id: payment.acquirer_data?.upi_transaction_id,
+    };
+
+    await userPaymentModel.create({
+      ...paymentDetails,
+      razorpay_order_id: payment.order_id,
+      razorpay_signature: req.body.razorpay_signature || "",
+    });
+  }
+
+  const newOrder = new orderSchema({
+    orderNumber: generateOrderNumber('medicine'),
+    customerId: userId,
+    orderType: "pharmacy",
+    items: orderItems,
+    totalAmount: totalPrice,
+    deliveryAddressId,
+    paymentMethod,
+    prescriptionRequired,
+    assignedPharmacyId: assignedPharmacy?._id || null,
+    pharmacyQueue,
+    pharmacyAttempts,
+    deliveryAddress: {
+      street: findAddress?.street,
+      city: findAddress?.city,
+      state: findAddress?.state,
+      pincode: findAddress?.pincode,
+      coordinates: {
+        lat: findAddress?.location?.lat,
+        long: findAddress?.location?.long,
+      },
+    },
+    paymentDetails: paymentDetails || null,
+  });
+
+  await newOrder.save();
+
+  // Update Cart
+  const updatedItems = cart.items.filter(
+    (item) => !item_ids.includes(item.item_id.toString())
+  );
+  cart.items = updatedItems;
+  cart.total_price = updatedItems.reduce(
+    (acc, item) => acc + item.price * item.quantity,
+    0
+  );
+  await cart.save();
+
+  // Notify
+  let notification;
+
+  if (assignedPharmacy) {
+    notification = new notificationModel({
+      title: "New Order",
+      message: "You have a new order",
+      recipientId: assignedPharmacy._id,
+      recipientType: "pharmacy",
+      NotificationTypeId: newOrder._id,
+      notificationType: "pharmacy_order_request",
+    });
+
+    await sendExpoNotification(
+      [assignedPharmacy.deviceToken],
+      "New Order",
+      "You have a new order",
+      notification
+    );
+  } else {
+    const admins = await adminSchema.find({ role: "superadmin" });
+
+    for (const admin of admins) {
+      notification = new notificationModel({
+        title: "Manual Order Assignment",
+        message: "No pharmacy available. Manual assignment required.",
+        recipientId: admin._id,
+        recipientType: "admin",
+        NotificationTypeId: newOrder._id,
+        notificationType: "manual_pharmacy_assignment",
+      });
+
+      newOrder.orderStatus = "need_manual_assignment_to_pharmacy";
+      await newOrder.save();
+
+      await sendExpoNotification(
+        [admin.deviceToken],
+        "Manual Assignment Needed",
+        "No pharmacy available for order",
+        notification
+      );
+    }
+  }
+
+  if (notification) await notification.save();
+
+  return successRes(res, 201, true, "Order placed successfully", {
+    order: newOrder,
+    notification,
+    assignedTo: assignedPharmacy ? "pharmacy" : "admin",
+  });
+});
+
 
 // module.exports.getAllOrders = asyncErrorHandler(async (req, res, next) => {
 //   const userId = req.user._id;
