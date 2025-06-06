@@ -10,6 +10,16 @@ const prescriptionSchema = new mongoose.Schema({
         ref: 'CustomerAddress',
         required: true
     },
+    deliveryAddress: {
+        street: String,
+        city: String,
+        state: String,
+        pincode: String,
+        coordinates: {
+            lat: Number,
+            long: Number,
+        },
+    },
     user_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Customer',
@@ -80,6 +90,14 @@ const prescriptionSchema = new mongoose.Schema({
             attemptedAt: { type: Date, default: Date.now }
         }
     ],
+    pharmacyToCustomerRoute: {
+        type: Array,
+        default: []
+    },
+    pharmacyToDeliveryPartnerRoute: {
+        type: Array,
+        default: []
+    },
     remarks: {
         type: String,
         default: null

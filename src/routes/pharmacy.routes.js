@@ -36,6 +36,7 @@ router.get("/get-terms-and-conditions", indexController.commonPPAndTCContorller.
 //prescription management
 
 router.get('/get-assigned-prescription', verifyAdminToken("pharmacy"), indexController.pharmacyOrderController.getAssignedPrescriptionOrder);
+router.post('/accept-reject-prescription', verifyAdminToken("pharmacy"), indexController.pharmacyOrderController.acceptOrRejectPrecription);
 
 
 module.exports = router;

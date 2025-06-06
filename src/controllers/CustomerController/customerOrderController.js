@@ -591,6 +591,16 @@ module.exports.uploadPrescription = asyncErrorHandler(async (req, res, next) => 
     prescriptions: filePaths,
     assigned_pharmacy: assignedPharmacy?._id || null,
     status: assignedPharmacy ? "assigned_to_pharmacy" : "pending",
+    deliveryAddress: {
+      street: findAddress?.street,
+      city: findAddress?.city,
+      state: findAddress?.state,
+      pincode: findAddress?.pincode,
+      coordinates: {
+        lat: findAddress?.location?.lat,
+        long: findAddress?.location?.long,
+      },
+    },
     pharmacyAttempts: assignedPharmacy
       ? [
         {

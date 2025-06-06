@@ -438,6 +438,205 @@ module.exports.getAssignedPrescriptionOrder = asyncErrorHandler(async (req, res,
 
 module.exports.acceptOrRejectPrecription = asyncErrorHandler(async (req, res, next) => {
   const adminId = req.admin._id;
-})
+  const { orderId, status } = req.body;
+
+  if (!["accepted", "rejected"].includes(status)) {
+    return next(new CustomError("Invalid status", 400));
+  }
+
+  const pharmacy = await pharmacyModel.findOne({ adminId }).select("_id pharmacyCoordinates pharmacyAddress deviceToken");
+  if (!pharmacy) return next(new CustomError("Pharmacy not found", 404));
+
+  if (!pharmacy.pharmacyCoordinates?.lat || !pharmacy.pharmacyCoordinates?.long) {
+    return next(new CustomError("Pharmacy coordinates are not available", 400));
+  }
+
+  const order = await PrescriptionSchema.findOne({ _id: orderId, assigned_pharmacy: pharmacy._id });
+  if (!order) return next(new CustomError("Order not found", 404));
+
+  if (order.status === "accepted_by_pharmacy") {
+    return next(new CustomError("Order already accepted", 400));
+  }
+
+  if (order.status === "rejected_by_pharmacy") {
+    return next(new CustomError("Order already rejected", 400));
+  }
+  // ---------------- ACCEPT ----------------
+  if (status === "accepted" && order.status === "assigned_to_pharmacy") {
+    order.status = "accepted_by_pharmacy";
+    order.pickupAddress = pharmacy.pharmacyAddress;
+    order.assignedPharmacyCoordinates = pharmacy.pharmacyCoordinates;
+    order.pharmacyAttempts.push({
+      pharmacyId: pharmacy._id,
+      status: "accepted",
+      attemptAt: new Date(),
+    })
+    if (order.deliveryAddress?.coordinates) {
+      console.log(pharmacy.pharmacyCoordinates, order.deliveryAddress.coordinates);
+      const route = await getRouteBetweenCoords(
+        pharmacy.pharmacyCoordinates,
+        order.deliveryAddress.coordinates
+      );
+      if (route) order.pharmacyToCustomerRoute = route;
+    }
+
+    const deliveryPartners = await DeliveryPartner.find({
+      availabilityStatus: "available",
+      isBlocked: false,
+      deviceToken: { $ne: null },
+      "location.lat": { $ne: null },
+      "location.long": { $ne: null },
+    });
+
+    const sortedPartners = deliveryPartners
+      .map((dp) => ({
+        ...dp._doc,
+        distance: getDistance(pharmacy.pharmacyCoordinates, dp.location),
+      }))
+      .sort((a, b) => a.distance - b.distance);
+
+    if (sortedPartners.length > 0) {
+      const nearestPartner = sortedPartners[0];
+
+      order.assigned_delivery_partner = nearestPartner._id;
+      order.status = "assigned_to_delivery_partner";
+      order.deliveryPartnerAttempts.push({
+        deliveryPartnerId: nearestPartner._id,
+        status: "pending",
+        attemptedAt: new Date(),
+      })
+
+      const notify = new notificationModel({
+        title: "New Pickup Order",
+        message: "You have a new pickup request",
+        recipientType: "delivery_partner",
+        notificationType: "delivery_partner_pickup_request",
+        NotificationTypeId: order._id,
+        recipientId: nearestPartner._id,
+      });
+
+      await notify.save();
+
+      if (nearestPartner.deviceToken) {
+        await sendExpoNotification(
+          [nearestPartner.deviceToken],
+          "New Pickup Request",
+          "You have a new pickup request",
+          notify
+        );
+      }
+    } else {
+      const admin = await adminSchema.findOne({ role: "superadmin" });
+      if (admin) {
+        const notify = new notificationModel({
+          title: "Manual Delivery Assignment Needed",
+          message: `No delivery partner available for prescription ${order._id}`,
+          recipientType: "admin",
+          notificationType: "manual_delivery_assignment",
+          NotificationTypeId: order._id,
+          recipientId: admin._id,
+        });
+        // await notify.save();
+
+        if (admin.deviceToken) {
+          await sendExpoNotification(
+            [admin.deviceToken],
+            "Manual Delivery Assignment",
+            "No delivery partner available. Manual assignment required.",
+            notify
+          );
+        }
+
+        order.status = "need_manual_assignment_to_delivery_partner";
+      }
+    }
+
+    await order.save();
+    return successRes(res, 200, true, "Prescription accepted successfully", order);
+  }
+
+  // ---------------- REJECT ----------------
+  if (status === "rejected" && order.status === "assigned_to_pharmacy") {
+    order.status = "pending";
+    order.assigned_pharmacy = null;
+    order.pharmacyAttempts.push({
+      pharmacyId: pharmacy._id,
+      status: "rejected",
+      attemptAt: new Date(),
+    })
+
+    // Reassign to next pharmacy if available
+    const alreadyAttempted = await PrescriptionSchema.distinct("assigned_pharmacy", {
+      _id: order._id,
+      "pharmacyAttempts.status": "rejected"
+    });
+
+    const customerCoords = order.deliveryAddress?.coordinates;
+
+    const availablePharmacies = await pharmacyModel.find({
+      _id: { $nin: [...alreadyAttempted, pharmacy._id] },
+      pharmacyCoordinates: { $ne: null },
+      deviceToken: { $ne: null },
+      status: "active",
+    });
+
+    const sorted = availablePharmacies
+      .map((p) => ({
+        ...p._doc,
+        distance: getDistance(customerCoords, p.pharmacyCoordinates),
+      }))
+      .sort((a, b) => a.distance - b.distance);
+
+    if (sorted.length > 0) {
+      const nextPharmacy = sorted[0];
+      order.assigned_pharmacy = nextPharmacy._id;
+      order.status = "assigned_to_pharmacy";
+
+      if (nextPharmacy.deviceToken) {
+        await sendExpoNotification(
+          [nextPharmacy.deviceToken],
+          "New Prescription Request",
+          "You have a new prescription request",
+          {
+            path: "PharmacyOrderScreen",
+            orderId: order._id,
+          }
+        );
+      }
+    } else {
+      // Notify admin if no pharmacies available
+      const admins = await adminSchema.find({ role: "superadmin" });
+
+      order.status = "need_manual_assignment_to_pharmacy";
+
+      for (let admin of admins) {
+        const notify = new notificationModel({
+          title: "Manual Pharmacy Assignment Required",
+          message: `No pharmacy available for prescription ${order._id}`,
+          recipientType: "admin",
+          notificationType: "manual_pharmacy_assignment",
+          NotificationTypeId: order._id,
+          recipientId: admin._id,
+        });
+        await notify.save();
+
+        if (admin.deviceToken) {
+          await sendExpoNotification(
+            [admin.deviceToken],
+            "Manual Assignment Required",
+            "No pharmacy available for this prescription",
+            notify
+          );
+        }
+      }
+    }
+
+    await order.save();
+    return successRes(res, 200, true, "Prescription rejected", order);
+  }
+
+  return next(new CustomError("Invalid order status or transition", 400));
+});
+
 
 
