@@ -1879,12 +1879,15 @@ const createOrderValidation = Joi.object({
     .message("deliveryAddressId must be a valid MongoDB ObjectId"),
 
   paymentMethod: Joi.string()
-    .valid("cash", "online", "upi", "card", "COD")
+    .valid("CASH", "ONLINE", "UPI", "CARD", "COD")
     .required()
     .messages({
       "any.only": "Payment method must be one of: cash, online, upi, card, COD",
       "any.required": "Payment method is required",
     }),
+  razorpay_payment_id: Joi.string().allow(null, "").messages({
+    "string.base": "razorpay_payment_id must be a string",
+  }),
 });
 const getOrderByIdValidation = Joi.object({
   orderId: Joi.string()

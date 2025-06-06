@@ -12,6 +12,7 @@ const notificationModel = require("../../modals/notification.model");
 const { getDistance, generateOrderNumber } = require("../../utils/helper");
 const adminSchema = require("../../modals/admin.Schema");
 const getRouteBetweenCoords = require("../../utils/distance.helper");
+const Razorpay = require('razorpay');
 
 /**
 
@@ -212,6 +213,11 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
 
  */
 
+const instance = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET
+});
+
 module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
   const userId = req.user._id;
   const { item_ids, deliveryAddressId, paymentMethod, razorpay_payment_id } = req.body;
@@ -319,11 +325,11 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
       upi_transaction_id: payment.acquirer_data?.upi_transaction_id,
     };
 
-    await userPaymentModel.create({
-      ...paymentDetails,
-      razorpay_order_id: payment.order_id,
-      razorpay_signature: req.body.razorpay_signature || "",
-    });
+    // await userPaymentModel.create({
+    //   ...paymentDetails,
+    //   razorpay_order_id: payment.order_id,
+    //   razorpay_signature: req.body.razorpay_signature || "",
+    // });
   }
 
   const newOrder = new orderSchema({
@@ -542,6 +548,7 @@ module.exports.uploadPrescription = asyncErrorHandler(
     }));
 
     const prescription = new pescriptionSchema({
+      prescriptionId: generateOrderNumber('prescription'),
       user_id: userId,
       prescriptions: filePaths,
     });

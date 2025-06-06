@@ -18,8 +18,10 @@ module.exports.getDistance = async (coord1, coord2) => {
 module.exports.generateOrderNumber = (type) => {
   if (type === "medicine") {
     return `MED${uuidv4().replace(/-/g, '').slice(0, 12).toUpperCase()}`;
-  } else {
+  } else if (type === "test") {
     return `TEST${uuidv4().replace(/-/g, '').slice(0, 12).toUpperCase()}`;
+  } else {
+    return `PRES${uuidv4().replace(/-/g, '').slice(0, 12).toUpperCase()}`;
   }
 }
 
