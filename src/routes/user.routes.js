@@ -113,7 +113,7 @@ router.get('/search-orders-pathology', verifyUserToken(), indexController.custom
 router.post("/test-booking", verifyUserToken(), indexController.customerTestOrderController.createPathologyOrder);
 router.post('/test-log-click', indexController.customerTestOrderController.logTestClick);
 router.get('/get-top-test-picks-for-user', indexController.customerTestOrderController.getLogHistoryTest);
-router.get('/get-all-test-category-pathology',verifyUserToken(), indexController.customerTestOrderController.getAllTestCategory)
+router.get('/get-all-test-category-pathology', indexController.customerTestOrderController.getAllTestCategory)
 
 /** Banners  */
 router.get('/get-all-banners', indexController.promoBannerController.getAllPromoBanners);
