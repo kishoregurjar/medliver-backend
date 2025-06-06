@@ -58,6 +58,28 @@ const prescriptionSchema = new mongoose.Schema({
             "reached_destination"],
         default: 'pending'
     },
+    pharmacyAttempts: [
+        {
+            pharmacyId: { type: mongoose.Schema.Types.ObjectId, ref: "Pharmacy" },
+            status: {
+                type: String,
+                enum: ["pending", "accepted", "rejected"],
+                default: "pending"
+            },
+            attemptedAt: { type: Date, default: Date.now }
+        }
+    ],
+    deliveryPartnerAttempts: [
+        {
+            deliveryPartnerId: { type: mongoose.Schema.Types.ObjectId, ref: "DeliveryPartner" },
+            status: {
+                type: String,
+                enum: ["pending", "accepted", "rejected"],
+                default: "pending"
+            },
+            attemptedAt: { type: Date, default: Date.now }
+        }
+    ],
     remarks: {
         type: String,
         default: null

@@ -591,6 +591,15 @@ module.exports.uploadPrescription = asyncErrorHandler(async (req, res, next) => 
     prescriptions: filePaths,
     assigned_pharmacy: assignedPharmacy?._id || null,
     status: assignedPharmacy ? "assigned_to_pharmacy" : "pending",
+    pharmacyAttempts: assignedPharmacy
+      ? [
+        {
+          pharmacyId: assignedPharmacy._id,
+          status: "pending",
+          attemptAt: new Date(),
+        },
+      ]
+      : [],
   });
 
   await prescription.save();
