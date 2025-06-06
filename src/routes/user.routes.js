@@ -99,7 +99,7 @@ router.get("/get-terms-and-conditions", indexController.commonPPAndTCContorller.
 // customer test orderController
 router.get('/get-popular-test', indexController.customerTestOrderController.popularTest);
 // router.get('/get-tests-by-category',verifyUserToken(),indexController.customerTestOrderController.getTestsByCategory);
-router.get('/get-tests-by-category', validateQuery(getTestsByCategoryId), verifyUserToken(), indexController.customerTestOrderController.getTestsByCategoryId);
+router.get('/get-tests-by-category', validateQuery(getTestsByCategoryId), indexController.customerTestOrderController.getTestsByCategoryId);
 router.get('/search-test', validateQuery(searchTest), verifyUserToken(), indexController.adminTestController.searchTest)
 router.get('/get-test-details', validateQuery(getTestsDetailsById), verifyUserToken(), indexController.customerTestOrderController.getTestDetails)
 
