@@ -56,7 +56,8 @@ module.exports.testList = asyncErrorHandler(async (req, res, next) => {
 });
 
 module.exports.addTestToStock = asyncErrorHandler(async (req, res, next) => {
-  const { testId, price, deliveryTime, availabilityAtHome, available } = req.body;
+  const { testId, price, deliveryTime, availabilityAtHome, available } =
+    req.body;
   const admin = req.admin;
 
   const pathology = await PathologyCenter.findOne({ adminId: admin._id });
@@ -82,7 +83,7 @@ module.exports.addTestToStock = asyncErrorHandler(async (req, res, next) => {
     price,
     deliveryTime,
     availabilityAtHome,
-    available
+    available,
   };
 
   pathology.availableTests.push(newTest);
@@ -97,11 +98,9 @@ module.exports.addTestToStock = asyncErrorHandler(async (req, res, next) => {
     price,
     deliveryTime,
     availabilityAtHome,
-    available
+    available,
   };
-  return successRes(res, 200, true, "Test added successfully",
-    populatedTest,
-  );
+  return successRes(res, 200, true, "Test added successfully", populatedTest);
 });
 
 module.exports.getAvailableTestsForPathology = asyncErrorHandler(
@@ -128,7 +127,8 @@ module.exports.getAvailableTestsForPathology = asyncErrorHandler(
 
 module.exports.updateTest = asyncErrorHandler(async (req, res, next) => {
   const admin = req.admin;
-  const { testId, price, deliveryTime, availabilityAtHome, available } = req.body;
+  const { testId, price, deliveryTime, availabilityAtHome, available } =
+    req.body;
 
   if (!testId) {
     return next(new CustomError("testId is required", 400));
@@ -141,78 +141,64 @@ module.exports.updateTest = asyncErrorHandler(async (req, res, next) => {
 
   const testIndex = pathology.availableTests.findIndex((t) => {
     return t.testId.toString() === testId;
-  })
-  console.log("test id ", testIndex)
+  });
+  console.log("test id ", testIndex);
 
   if (testIndex === -1) {
     return next(new CustomError("Test not found in pathology center", 404));
   }
 
   if (price !== undefined) pathology.availableTests[testIndex].price = price;
-  if (deliveryTime !== undefined || deliveryTime !== null) pathology.availableTests[testIndex].deliveryTime = deliveryTime;
-  if (availabilityAtHome !== undefined || availabilityAtHome !== null) pathology.availableTests[testIndex].availabilityAtHome = availabilityAtHome;
+  if (deliveryTime !== undefined || deliveryTime !== null)
+    pathology.availableTests[testIndex].deliveryTime = deliveryTime;
+  if (availabilityAtHome !== undefined || availabilityAtHome !== null)
+    pathology.availableTests[testIndex].availabilityAtHome = availabilityAtHome;
 
-  if (available !== undefined || available !== null) pathology.availableTests[testIndex].available = available;
+  if (available !== undefined || available !== null)
+    pathology.availableTests[testIndex].available = available;
 
   await pathology.save();
 
-  return successRes(res, 200, true, "Test updated successfully", pathology.availableTests[testIndex]);
+  return successRes(
+    res,
+    200,
+    true,
+    "Test updated successfully",
+    pathology.availableTests[testIndex]
+  );
 });
 
-module.exports.removeTestFromStock = asyncErrorHandler(async (req, res, next) => {
-  const admin = req.admin;
-  const { testId } = req.query; ``
+module.exports.removeTestFromStock = asyncErrorHandler(
+  async (req, res, next) => {
+    const admin = req.admin;
+    const { testId } = req.query;
+    ``;
 
-  if (!testId) {
-    return next(new CustomError("testId is required", 400));
+    if (!testId) {
+      return next(new CustomError("testId is required", 400));
+    }
+
+    const pathology = await PathologyCenter.findOne({ adminId: admin._id });
+    if (!pathology) {
+      return next(new CustomError("Pathology not found", 404));
+    }
+
+    const testIndex = pathology.availableTests.findIndex((t) => {
+      return t.testId.toString() === testId;
+    });
+    console.log("test id ", testIndex);
+
+    if (testIndex === -1) {
+      return next(new CustomError("Test not found in pathology center", 404));
+    }
+    const testRemove = pathology.availableTests[testIndex];
+
+    pathology.availableTests.splice(testIndex, 1);
+    await pathology.save();
+
+    return successRes(res, 200, true, "Test remove successfully", testRemove);
   }
-
-  const pathology = await PathologyCenter.findOne({ adminId: admin._id });
-  if (!pathology) {
-    return next(new CustomError("Pathology not found", 404));
-  }
-
-  const testIndex = pathology.availableTests.findIndex((t) => {
-    return t.testId.toString() === testId;
-  })
-  console.log("test id ", testIndex)
-
-  if (testIndex === -1) {
-    return next(new CustomError("Test not found in pathology center", 404));
-  }
-  const testRemove = pathology.availableTests[testIndex];
-
-  pathology.availableTests.splice(testIndex, 1);
-  await pathology.save();
-
-  return successRes(res, 200, true, "Test remove successfully", testRemove);
-});
-
-// module.exports.getSingleTestInfo = asyncErrorHandler(async (req, res, next) => {
-//   const admin = req.admin;
-//   const { testId } = req.query;
-
-//   const pathology = await PathologyCenter.findOne({ adminId: admin._id });
-//   // const pathologId = pathology._id
-//   //   console.log("pathology id is",pathologId);
-
-//   if (!pathology) {
-//     return next(new CustomError("Pathology not found", 404));
-//   }
-//   const findTestIndex = pathology.availableTests.findIndex((t) => {
-//     return t.testId.toString() === testId
-//   })
-
-//   if (findTestIndex === -1) {
-//     return next(new CustomError("Test not found in pathology center", 404));
-//   }
-//   console.log("test id's index is", findTestIndex);
-
-//   const test = pathology.availableTests[findTestIndex];
-//   return successRes(res, 200, true, "Test fethched successfully", test);
-
-// })
-
+);
 
 module.exports.getSingleTestInfo = asyncErrorHandler(async (req, res, next) => {
   const admin = req.admin;
@@ -222,17 +208,17 @@ module.exports.getSingleTestInfo = asyncErrorHandler(async (req, res, next) => {
     return next(new CustomError("Test ID is required", 400));
   }
 
-  const pathology = await PathologyCenter.findOne({ adminId: admin._id })
-    .populate({
-      path: "availableTests.testId",
-      model: "Test",
-    });
+  const pathology = await PathologyCenter.findOne({
+    adminId: admin._id,
+  }).populate({
+    path: "availableTests.testId",
+    model: "Test",
+  });
 
   if (!pathology) {
     return next(new CustomError("Pathology center not found", 404));
   }
 
-  // Yahan `testId` ko ObjectId string se compare nahi karenge directly, because after populate it's an object
   const matchedTest = pathology.availableTests.find((t) => {
     return t.testId && t.testId._id.toString() === testId;
   });
@@ -244,43 +230,45 @@ module.exports.getSingleTestInfo = asyncErrorHandler(async (req, res, next) => {
   return successRes(res, 200, true, "Test fetched successfully", matchedTest);
 });
 
-module.exports.searchTestInMyStock = asyncErrorHandler(async (req, res, next) => {
-  const admin = req.admin;
-  const { query } = req.query;
+module.exports.searchTestInMyStock = asyncErrorHandler(
+  async (req, res, next) => {
+    const admin = req.admin;
+    const { query } = req.query;
 
-  if (!query) {
-    return next(new CustomError("Search value is required", 400));
+    if (!query) {
+      return next(new CustomError("Search value is required", 400));
+    }
+
+    const pathology = await PathologyCenter.findOne({
+      adminId: admin._id,
+    }).populate("availableTests.testId");
+
+    if (!pathology) {
+      return next(new CustomError("Pathology center not found", 404));
+    }
+
+    const testIdsInStock = pathology.availableTests.map((t) => t.testId);
+    const regex = new RegExp(query.trim(), "i");
+    const matchingResult = pathology.availableTests.filter((test) => {
+      const testName = test.testId.name;
+      const testPrice = test.price;
+      const result = testName.match(regex) || testPrice.toString().match(regex);
+      return result;
+    });
+
+    if (matchingResult.length === 0) {
+      return successRes(
+        res,
+        200,
+        false,
+        "No matching tests found in your stock",
+        []
+      );
+    }
+
+    return successRes(res, 200, true, "Matching tests fetched", matchingResult);
   }
-
-  const pathology = await PathologyCenter.findOne({ adminId: admin._id }).populate("availableTests.testId");
-
-  if (!pathology) {
-    return next(new CustomError("Pathology center not found", 404));
-  }
-
-  const testIdsInStock = pathology.availableTests.map((t) => t.testId);
-  const regex = new RegExp(query.trim(), "i");
-
-  // const matchingTests = await TestModel.find({
-  //   _id: { $in: testIdsInStock },
-  //   name: regex,
-  //   available: true
-  // });
-
-
-  const matchingResult = pathology.availableTests.filter((test) => {
-    const testName = test.testId.name;
-    const testPrice = test.price;
-    const result = testName.match(regex) || testPrice.toString().match(regex);
-    return result;
-  });
-
-  if (matchingResult.length === 0) {
-    return successRes(res, 200, false, "No matching tests found in your stock", []);
-  }
-
-  return successRes(res, 200, true, "Matching tests fetched", matchingResult);
-});
+);
 
 module.exports.changeTestStatus = asyncErrorHandler(async (req, res, next) => {
   const { testId, available } = req.body;
@@ -300,7 +288,9 @@ module.exports.changeTestStatus = asyncErrorHandler(async (req, res, next) => {
   );
 
   if (index === -1) {
-    return next(new CustomError("Test does not belong to your pathology center", 403));
+    return next(
+      new CustomError("Test does not belong to your pathology center", 403)
+    );
   }
 
   pathology.availableTests[index].available = available;
@@ -308,57 +298,42 @@ module.exports.changeTestStatus = asyncErrorHandler(async (req, res, next) => {
   await pathology.save();
 
   return successRes(res, 200, true, "Test availability changed successfully", {
-    available: pathology.availableTests[index].available
+    available: pathology.availableTests[index].available,
   });
 });
 
-module.exports.getDashboardStatus = asyncErrorHandler(async (req, res, next) => {
-  const admin = req.admin;
+module.exports.getDashboardStatus = asyncErrorHandler(
+  async (req, res, next) => {
+    const admin = req.admin;
 
-  const pathology = await PathologyCenter.findOne({ adminId: admin._id });
+    const pathology = await PathologyCenter.findOne({ adminId: admin._id });
 
-  if (!pathology) return next(new CustomError("Pathology not found", 404));
+    if (!pathology) return next(new CustomError("Pathology not found", 404));
 
-  const total = pathology.availableTests.length;
-  // const available = pathology.availableTests.filter(t => t.available).length;
-  const available = pathology.availableTests.filter((test) => {
-    return test.available
-  }).length
+    const total = pathology.availableTests.length;
 
-  const unavailable = total - available;
+    const available = pathology.availableTests.filter(
+      (test) => test.available
+    ).length;
 
-  return successRes(res, 200, true, "Stats fetched", { total, available, unavailable });
-});
+    const unavailable = total - available;
 
+    const startOfMonth = moment().startOf("month").toDate();
+    const endOfMonth = moment().endOf("month").toDate();
 
-module.exports.getDashboardStatus = asyncErrorHandler(async (req, res, next) => {
-  const admin = req.admin;
+    const monthlyInsight = await OrderPathologyModel.countDocuments({
+      pathologyCenterId: pathology._id,
+      createdAt: { $gte: startOfMonth, $lte: endOfMonth },
+    });
+    //   const latestDoc = await OrderPathologyModel.findOne({
+    //   createdAt: { $gte: startOfMonth, $lte: endOfMonth }
+    // }).sort({ createdAt: -1 });
 
-  const pathology = await PathologyCenter.findOne({ adminId: admin._id });
-
-  if (!pathology) return next(new CustomError("Pathology not found", 404));
-
-  const total = pathology.availableTests.length;
-
-  const available = pathology.availableTests.filter((test) => test.available).length;
-
-  const unavailable = total - available;
-
-  const startOfMonth = moment().startOf("month").toDate();
-  const endOfMonth = moment().endOf("month").toDate();
-
-  const monthlyInsight = await OrderPathologyModel.countDocuments({
-    pathologyCenterId: pathology._id,
-    createdAt: { $gte: startOfMonth, $lte: endOfMonth }
-  });
-//   const latestDoc = await OrderPathologyModel.findOne({
-//   createdAt: { $gte: startOfMonth, $lte: endOfMonth }
-// }).sort({ createdAt: -1 });
-
-  return successRes(res, 200, true, "Stats fetched", {
-    total,
-    available,
-    unavailable,
-    monthlyInsight
-  });
-});
+    return successRes(res, 200, true, "Stats fetched", {
+      total,
+      available,
+      unavailable,
+      monthlyInsight,
+    });
+  }
+);

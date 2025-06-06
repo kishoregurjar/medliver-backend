@@ -454,3 +454,31 @@ module.exports.getLogHistoryTest = asyncErrorHandler(async (req, res, next) => {
   return successRes(res, 200, true, "Top picks with similar medicines", combinedResults);
 });
 
+module.exports.getAllTestCategory = asyncErrorHandler(async (req, res, next) => {
+    let { page, limit, sortOrder } = req.query;
+
+    page = parseInt(page) || 1;
+    limit = parseInt(limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const sortDir = sortOrder?.toLowerCase() === "asc" ? 1 : -1;
+
+    const [totalCategories, categories] = await Promise.all([
+        TestCategory.countDocuments(),
+        TestCategory.find()
+            .sort({ created_at: sortDir })
+            .skip(skip)
+            .limit(limit),
+    ]);
+
+    if (!categories || categories.length === 0) {
+        return successRes(res, 200, false, "No test categories found", []);
+    }
+
+    return successRes(res, 200, true, "Test categories fetched successfully", {
+        categories,
+        totalCategories,
+        currentPage: page,
+        totalPages: Math.ceil(totalCategories / limit),
+    });
+});
