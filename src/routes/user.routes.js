@@ -101,7 +101,7 @@ router.get('/get-popular-test', indexController.customerTestOrderController.popu
 // router.get('/get-tests-by-category',verifyUserToken(),indexController.customerTestOrderController.getTestsByCategory);
 router.get('/get-tests-by-category', validateQuery(getTestsByCategoryId), indexController.customerTestOrderController.getTestsByCategoryId);
 router.get('/search-test', validateQuery(searchTest), verifyUserToken(), indexController.adminTestController.searchTest)
-router.get('/get-test-details', validateQuery(getTestsDetailsById), verifyUserToken(), indexController.customerTestOrderController.getTestDetails)
+router.get('/get-test-details', validateQuery(getTestsDetailsById), indexController.customerTestOrderController.getTestDetails)
 
 
 /** test booking managemennt */
