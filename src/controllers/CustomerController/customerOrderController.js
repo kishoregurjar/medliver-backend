@@ -586,6 +586,7 @@ module.exports.uploadPrescription = asyncErrorHandler(async (req, res, next) => 
 
   const prescription = new pescriptionSchema({
     prescriptionNumber: generateOrderNumber("prescription"),
+    addressId: deliveryAddressId,
     user_id: userId,
     prescriptions: filePaths,
     assigned_pharmacy: assignedPharmacy?._id || null,

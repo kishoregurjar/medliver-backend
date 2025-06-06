@@ -5,6 +5,11 @@ const prescriptionSchema = new mongoose.Schema({
         type: String,
         unique: true
     },
+    addressId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'CustomerAddress',
+        required: true
+    },
     user_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Customer',

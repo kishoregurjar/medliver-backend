@@ -431,7 +431,7 @@ module.exports.getAssignedPrescriptionOrder = asyncErrorHandler(async (req, res,
   console.log("pharmacy", pharmacy);
   if (!pharmacy) return next(new CustomError("Pharmacy not found", 404));
 
-  const prescriptionOrders = await PrescriptionSchema.find({ assigned_pharmacy: pharmacy._id, status: "assigned_to_pharmacy" });
+  const prescriptionOrders = await PrescriptionSchema.find({ assigned_pharmacy: pharmacy._id, status: "assigned_to_pharmacy" }).populate("user_id", "fullName phoneNumber email").populate("assigned_pharmacy", "pharmacyName phone address pharmacyCoordinates").populate("addressId", "street city state pincode location");
 
   return successRes(res, 200, true, "Prescription orders fetched successfully", prescriptionOrders);
 });
