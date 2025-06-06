@@ -21,7 +21,7 @@ router.put('/accept-reject-order', verifyAdminToken("pharmacy"), indexController
 // router.get('/get-order-by-id', validateQuery(getOrderByIdValidation), verifyAdminToken("pharmacy"), indexController.pharmacyOrderController.getOrderById);
 // router.put('/cancel-order', validateQuery(getOrderByIdValidation), verifyAdminToken("pharmacy"), indexController.pharmacyOrderController.cancleOrder);
 router.get('/search-pharmacy-order', verifyAdminToken('pharmacy'), indexController.pharmacyOrderController.searchPharmacyOrder);
-router.get('/get-all-orders-details-by-id',verifyAdminToken("pharmacy"),indexController.pharmacyOrderController.getAllDetailsOfOrdersById)
+router.get('/get-all-orders-details-by-id', verifyAdminToken("pharmacy"), indexController.pharmacyOrderController.getAllDetailsOfOrdersById)
 
 // get notification routes
 router.get('/get-notification-by-recipientId', verifyAdminToken("pharmacy"), indexController.commonController.getNotifications);
@@ -30,8 +30,12 @@ router.get('/order-accepted-by-pharmacy', verifyAdminToken("pharmacy"), indexCon
 
 
 //privacy and terms routes
-router.get("/get-privacy-policy",  indexController.commonPPAndTCContorller.getPrivacyPolicy);
+router.get("/get-privacy-policy", indexController.commonPPAndTCContorller.getPrivacyPolicy);
 router.get("/get-terms-and-conditions", indexController.commonPPAndTCContorller.getTermsAndConditions);
+
+//prescription management
+
+router.get('/get-assigned-prescription', verifyAdminToken("pharmacy"), indexController.pharmacyOrderController.getAssignedPrescriptionOrder);
 
 
 module.exports = router;

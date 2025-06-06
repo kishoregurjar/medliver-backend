@@ -156,6 +156,23 @@ const orderSchema = new mongoose.Schema({
     type: Array,
     default: []
   },
+  paymentDetails: {
+    razorpay_payment_id: { type: String },
+    amount: { type: Number }, // in paisa
+    currency: { type: String, default: 'INR' },
+    status: { type: String },
+    method: { type: String }, // e.g. card, netbanking, upi
+    email: { type: String },
+    contact: { type: String },
+    vpa: { type: String },
+    bank: { type: String },
+    wallet: { type: String },
+    description: { type: String },
+    fee: { type: Number }, // Razorpay fee
+    tax: { type: Number }, // GST
+    rrn: { type: String }, // for netbanking/card
+    upi_transaction_id: { type: String }, // for UPI
+  },
   deliveryPartnerOTP: {
     type: String,
     default: null
