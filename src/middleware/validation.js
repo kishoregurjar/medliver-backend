@@ -2222,13 +2222,15 @@ const loginSchema = Joi.object({
     "any.required": "Password is required",
   }),
   location: Joi.object({
-    lat: Joi.number().required(),
-    long: Joi.number().required(),
-  })
-    .optional()
-    .messages({
-      "number.base": "Location coordinates must be numbers",
+    lat: Joi.number().required().messages({
+      "any.required": "Latitude is required",
+      "number.base": "Latitude must be a number",
     }),
+    long: Joi.number().required().messages({
+      "any.required": "Longitude is required",
+      "number.base": "Longitude must be a number",
+    }),
+  }).optional(),
   deviceToken: Joi.string().optional().default(null),
 });
 

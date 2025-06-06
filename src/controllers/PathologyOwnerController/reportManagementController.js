@@ -76,7 +76,7 @@ module.exports.getAllTestReports = asyncErrorHandler(async (req, res, next) => {
 
   const [totalReports, reports] = await Promise.all([
     TestReport.countDocuments(),
-    TestReport.find().sort({ createdAt: -1 }).skip(skip).limit(limit),
+    TestReport.find().populate("orderId").populate("customerId").sort({ createdAt: -1 }).skip(skip).limit(limit),
   ]);
   return successRes(res, 200, true, "Reports fetched successfully", {
     reports,
