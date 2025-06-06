@@ -423,40 +423,6 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
   });
 });
 
-
-// module.exports.getAllOrders = asyncErrorHandler(async (req, res, next) => {
-//   const userId = req.user._id;
-//   let { page = 1 , status } = req.query;
-//   let limit = 10;
-//   let skip = (page - 1) * limit;
-
-
-//   let [orders, totalOrders] = await Promise.all([
-//       await orderSchema
-//       .find({ customerId: userId })
-//       .populate("items.medicineId")
-//       .populate("deliveryAddressId")
-//       .sort({ createdAt: -1 }),
-//     await orderSchema.countDocuments({ customerId: userId }),
-//   ]);
-
-//   if (!orders || orders.length === 0) {
-//     return next(new CustomError("No orders found", 404));
-//   }
-//   if (orders.length > 0) {
-//     orders.forEach((order) => {
-//       order.items.forEach((item) => {
-//         if (item.medicineId && typeof item.medicineId === "object") {
-//           item.item_id = item.medicineId._id;
-//         }
-//       });
-//     });
-//   }
-
-//   return successRes(res, 200, true, "Orders fetched successfully", { orders , totalOrders, currentPage: page, totalPages: Math.ceil(totalOrders / limit) });
-// });
-
-
 module.exports.getAllOrders = asyncErrorHandler(async (req, res, next) => {
   const userId = req.user._id;
   let { page = 1, status } = req.query;
@@ -534,6 +500,9 @@ module.exports.cancleOrder = asyncErrorHandler(async (req, res, next) => {
   return successRes(res, 200, true, "Order cancelled successfully", { order });
 });
 
+/**
+ * 
+
 module.exports.uploadPrescription = asyncErrorHandler(
   async (req, res, next) => {
     const userId = req.user._id;
@@ -547,8 +516,15 @@ module.exports.uploadPrescription = asyncErrorHandler(
       uploaded_at: new Date(),
     }));
 
+    const allPharmacies = await pharmacySchema.find({
+      status: "active",
+      availabilityStatus: "available",
+      deviceToken: { $ne: null },
+      pharmacyCoordinates: { $ne: null },
+    });
+
     const prescription = new pescriptionSchema({
-      prescriptionId: generateOrderNumber('prescription'),
+      prescriptionNumber: generateOrderNumber('prescription'),
       user_id: userId,
       prescriptions: filePaths,
     });
@@ -564,6 +540,120 @@ module.exports.uploadPrescription = asyncErrorHandler(
     );
   }
 );
+*/
+
+module.exports.uploadPrescription = asyncErrorHandler(async (req, res, next) => {
+  const userId = req.user._id;
+  const { deliveryAddressId } = req.body;
+
+  if (!req.files || req.files.length === 0) {
+    return next(new CustomError("No files uploaded.", 400));
+  }
+
+  // Validate delivery address
+  const findAddress = await customerAddressModel.findOne({
+    customer_id: userId,
+    _id: deliveryAddressId,
+  });
+  if (!findAddress) {
+    return next(new CustomError("Delivery address not found", 404));
+  }
+  let userCoords = findAddress.location
+
+  // Prepare prescription file data
+  const filePaths = req.files.map((file) => ({
+    path: `${process.env.PRESCRIPTION_IMAGE_PATH}${file.filename}`,
+    uploaded_at: new Date(),
+  }));
+
+  // Find nearby pharmacies
+  const allPharmacies = await pharmacySchema.find({
+    status: "active",
+    availabilityStatus: "available",
+    deviceToken: { $ne: null },
+    pharmacyCoordinates: { $ne: null },
+  });
+
+  const sortedPharmacies = allPharmacies
+    .map((pharmacy) => ({
+      pharmacy,
+      distance: getDistance(userCoords, pharmacy.pharmacyCoordinates),
+    }))
+    .sort((a, b) => a.distance - b.distance)
+    .map((entry) => entry.pharmacy);
+
+  const assignedPharmacy = sortedPharmacies[0] || null;
+
+  const prescription = new pescriptionSchema({
+    prescriptionNumber: generateOrderNumber("prescription"),
+    user_id: userId,
+    prescriptions: filePaths,
+    assigned_pharmacy: assignedPharmacy?._id || null,
+    status: assignedPharmacy ? "assigned_to_pharmacy" : "pending",
+  });
+
+  await prescription.save();
+
+  let notification = null;
+
+  // Notify pharmacy if available
+  if (assignedPharmacy) {
+    notification = new notificationModel({
+      title: "New Order",
+      message: "You have a new order",
+      recipientId: assignedPharmacy._id,
+      recipientType: "pharmacy",
+      NotificationTypeId: prescription._id,
+      notificationType: "pharmacy_order_request",
+    });
+
+    await sendExpoNotification(
+      [assignedPharmacy.deviceToken],
+      "New Order",
+      "You have a new order",
+      notification
+    );
+  } else {
+    // Notify admins for manual assignment
+    const admins = await adminSchema.find({ role: "superadmin" });
+
+    prescription.status = "need_manual_assignment_to_pharmacy";
+    await prescription.save();
+
+    for (const admin of admins) {
+      notification = new notificationModel({
+        title: "Manual Order Assignment",
+        message: "No pharmacy available. Manual assignment required.",
+        recipientId: admin._id,
+        recipientType: "admin",
+        NotificationTypeId: prescription._id,
+        notificationType: "manual_pharmacy_assignment",
+      });
+
+      await sendExpoNotification(
+        [admin.deviceToken],
+        "Manual Assignment Needed",
+        "No pharmacy available for order",
+        notification
+      );
+
+      await notification.save();
+    }
+  }
+
+  if (notification && assignedPharmacy) {
+    await notification.save();
+  }
+
+  return successRes(
+    res,
+    200,
+    true,
+    "Prescriptions uploaded successfully. Our medical team will review it and contact you shortly.",
+    prescription
+  );
+});
+
 
 module.exports.searchOrder = asyncErrorHandler(async (req, res, next) => {
   let { value, page, limit } = req.query;
@@ -619,9 +709,6 @@ module.exports.getAllPrescriptions = asyncErrorHandler(
       pescriptionSchema.find({ user_id: userId }).skip(skip).limit(limit),
       pescriptionSchema.countDocuments({ user_id: userId }),
     ]);
-    // if (!prescriptions || prescriptions.length === 0) {
-    //     return next(new CustomError("No prescriptions found", 404));
-    // }
     return successRes(res, 200, true, "Prescriptions fetched successfully", {
       prescriptions,
       totalPrescriptions,

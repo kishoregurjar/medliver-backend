@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
 const prescriptionSchema = new mongoose.Schema({
+    prescriptionNumber: {
+        type: String,
+        unique: true
+    },
     user_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Customer',
@@ -32,7 +36,21 @@ const prescriptionSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['pending', 'assigned_to_pharmacy', 'ready_for_delivery', 'delivered'],
+        enum: ["pending",
+            "accepted_by_pharmacy",
+            "assigned_to_delivery_partner",
+            "assigned_to_pharmacy",
+            "accepted_by_delivery_partner",
+            "need_manual_assignment_to_pharmacy",
+            "need_manual_assignment_to_delivery_partner",
+            "accepted_by_delivery_partner_and_reached_pharmacy",
+            "out_for_pickup",
+            "picked_up",
+            "out_for_delivery",
+            "delivered",
+            "cancelled",
+            "reached_pharmacy",
+            "reached_destination"],
         default: 'pending'
     },
     remarks: {
