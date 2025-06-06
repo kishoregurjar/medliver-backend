@@ -11,9 +11,9 @@ const featuredProductModel = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
-  isActive:{
+  isActive: {
     type: Boolean,
-    default: true 
+    default: true
   }
 }, { timestamps: true });
 
