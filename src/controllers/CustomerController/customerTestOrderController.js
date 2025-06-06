@@ -10,7 +10,7 @@ const notificationModel = require('../../modals/notification.model');
 const adminSchema = require('../../modals/admin.Schema');
 const { sendExpoNotification } = require('../../utils/expoNotification');
 const { default: mongoose } = require('mongoose');
-const { getDistance } = require('../../utils/helper');
+const { getDistance, generateOrderNumber } = require('../../utils/helper');
 const testClickHistoryModel = require('../../modals/testClickHistory.model');
 const jwt = require('jsonwebtoken');
 const testModel = require('../../modals/test.model');
@@ -67,6 +67,7 @@ module.exports.createPathologyOrder = asyncErrorHandler(async (req, res, next) =
   const assignedCenter = sortedCenters[0] || null;
 
   const newOrder = new orderPathologyModel({
+    orderNumber: generateOrderNumber("test"),
     customerId: userId,
     pathologyCenterId: assignedCenter?._id || null,
     selectedTests: convertedTestIds.map(id => ({ testId: id })),

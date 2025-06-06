@@ -119,7 +119,7 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
     : [];
 
   const newOrder = new orderSchema({
-    orderNumber: generateOrderNumber(),
+    orderNumber: generateOrderNumber('medicine'),
     customerId: userId,
     orderType,
     items: orderItems,
