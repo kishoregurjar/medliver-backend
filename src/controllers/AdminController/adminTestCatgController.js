@@ -34,7 +34,7 @@ module.exports.createTestCategory = asyncErrorHandler(async (req, res, next) => 
     .populate("tests.test_id");
 
   return successRes(res, 201, true, "Test Category created successfully", populatedCategory);
-});
+});``
 
 // module.exports.createTestCategory = asyncErrorHandler(async (req, res, next) => {
 //   const { name, description, image_url, tests } = req.body;
@@ -109,7 +109,7 @@ module.exports.getTestCategoryById = asyncErrorHandler(async (req, res, next) =>
   const categoryData = await TestCategory.aggregate([
     {
       $match: { _id: new mongoose.Types.ObjectId(testCatgId) }
-    },
+      },
     {
       $lookup: {
         from: 'tests',
@@ -216,9 +216,6 @@ const isTestPresent = category.tests.findIndex(
   await category.save();
 
   const populateTest = await TestCategory.findById(testCatgId).populate('tests.test_id');
-  
-  // const populatedCategory = await TestCategory.findById(newCategory._id)
-  //   .populate("tests.test_id");
 
   return successRes(res, 200, true, "Test removed from category successfully", populateTest);
 });
@@ -244,7 +241,7 @@ module.exports.searchTestCategory = asyncErrorHandler(async (req, res, next) => 
 
   const [totalCategories, allCategories] = await Promise.all([
     TestCategory.countDocuments(searchQuery),
-    TestCategory.find(searchQuery)
+    TestCategory.find(searchQuery).populate('tests.test_id')
       // .populate("tests") 
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -254,6 +251,7 @@ module.exports.searchTestCategory = asyncErrorHandler(async (req, res, next) => 
   if (allCategories.length === 0) {
     return successRes(res, 200, false, "No Test Categories Found", []);
   }
+
 
   return successRes(res, 200, true, "Test Categories fetched successfully", {
     testCategories: allCategories,
