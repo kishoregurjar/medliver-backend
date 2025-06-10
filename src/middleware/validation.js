@@ -1562,7 +1562,10 @@ const registerCustomerSchema = Joi.object({
   userCoordinates: Joi.object({
     lat: Joi.number().required().optional(),
     long: Joi.number().required().optional(),
-  }).optional(), // optional based on your implementation
+  }).optional(), // optional based on your implementation,
+  agree: Joi.boolean().required().messages({
+    "any.required": "Agreement is required",
+  })
 });
 
 const CustomerverifyOtpSchema = Joi.object({

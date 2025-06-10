@@ -14,8 +14,14 @@ module.exports.registerUser = asyncErrorHandler(async (req, res, next) => {
   const session = await customerModel.startSession();
   session.startTransaction();
   try {
-    const { fullName, email, password, phoneNumber, userCoordinates } =
+    const { fullName, email, password, phoneNumber, userCoordinates, agree } =
       req.body;
+
+    if (!agree) {
+      await session.abortTransaction();
+      session.endSession();
+      return next(new CustomError("You must agree to the terms and conditions", 400));
+    }
 
     if (!fullName || !email || !password || !phoneNumber) {
       await session.abortTransaction();
@@ -247,7 +253,7 @@ module.exports.getUserDetails = asyncErrorHandler(async (req, res, next) => {
 
 module.exports.changeUserPassword = asyncErrorHandler(async (req, res, next) => {
   const userId = req.user._id;
-  const { newPassword,oldPassword } = req.body;
+  const { newPassword, oldPassword } = req.body;
   if (!newPassword || !oldPassword) {
     return next(new CustomError("Password is required", 400));
   }
