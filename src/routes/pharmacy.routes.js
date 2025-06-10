@@ -3,7 +3,7 @@ const indexController = require("../controllers/indexController");
 const { verifyAdminToken } = require('../utils/jsonWebToken');
 const router = express.Router();
 const { uploadLicenceImagePharmacy } = require('../services/multer');
-const { validate, validateQuery, createStockValidation, getStockByPharmacyIdValidation, getAllStockValidation, deleteStockValidation, updateStockValidation } = require('../middleware/validation');
+const { validate, validateQuery, createStockValidation, getStockByPharmacyIdValidation,searchMedicineValidation, getAllStockValidation, deleteStockValidation, updateStockValidation } = require('../middleware/validation');
 
 /*=======================================StockRoute=================================== */
 
@@ -37,6 +37,12 @@ router.get("/get-terms-and-conditions", indexController.commonPPAndTCContorller.
 
 router.get('/get-assigned-prescription', verifyAdminToken("pharmacy"), indexController.pharmacyOrderController.getAssignedPrescriptionOrder);
 router.post('/accept-reject-prescription', verifyAdminToken("pharmacy"), indexController.pharmacyOrderController.acceptOrRejectPrecription);
-
+router.get(
+    "/search-medicine",
+    validateQuery(searchMedicineValidation),
+    verifyAdminToken("superadmin"),
+    indexController.medicineController.searchMedicine
+);
+router.get('/search-accepted-pharmacy-prescription', verifyAdminToken("pharmacy"), indexController.pharmacyOrderController.searchAcceptedPrescriptions);
 
 module.exports = router;

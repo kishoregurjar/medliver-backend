@@ -638,5 +638,40 @@ module.exports.acceptOrRejectPrecription = asyncErrorHandler(async (req, res, ne
   return next(new CustomError("Invalid order status or transition", 400));
 });
 
+module.exports.searchAcceptedPrescriptions = asyncErrorHandler(async (req, res, next) => {
+    const { query, page = 1 } = req.query;
+    const pharmacyAdminId = req.admin._id;
 
+    const pharmacy = await pharmacyModel.findOne({ adminId: pharmacyAdminId });
+    if (!pharmacy) {
+        return errorRes(res, 404, false, "Pharmacy not found");
+    }
 
+    const limit = 30;
+    const skip = (parseInt(page) - 1) * limit;
+
+    const filter = {
+        pharmacyAttempts: {
+            $elemMatch: {
+                pharmacyId: pharmacy._id,
+                status: "accepted"
+            }
+        }
+    };
+
+    if (query) {
+        filter.prescriptionNumber = { $regex: query.trim(), $options: "i" };
+    }
+
+    const [prescriptions, totalCount] = await Promise.all([
+        PrescriptionSchema.find(filter).skip(skip).limit(limit),
+        PrescriptionSchema.countDocuments(filter)
+    ]);
+
+    return successRes(res, 200, true, "Accepted prescriptions found", {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(totalCount / limit),
+        totalResults: totalCount,
+        data: prescriptions
+    });
+});

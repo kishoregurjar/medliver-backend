@@ -176,7 +176,7 @@ module.exports.uploadUserProfilePic = uploadSingleFile("image", {
 });
 
 module.exports.uploadLicenceImagePharmacy = uploadSingleFile("image", {
-  fileTypes: /jpeg|jpg|png/,
+  fileTypes: /jpeg|jpg|png|pdf/,
   fileSize: 10000000,
   folder: "uploads/pharmacyDocuments",
 });
