@@ -43,6 +43,6 @@ router.get(
     verifyAdminToken("superadmin"),
     indexController.medicineController.searchMedicine
 );
-router.get('/search-accepted-pharmacy-prescription', verifyAdminToken("pharmacy"), indexController.pharmacyOrderController.searchAcceptedPrescriptions);
-
+router.get('/search-prescription-by-status', verifyAdminToken("pharmacy"), indexController.pharmacyOrderController.searchPrescriptionsByStatus);
+router.get('/search-orders-by-status',verifyAdminToken("pharmacy"), indexController.pharmacyOrderController.searchOrdersByStatus)
 module.exports = router;

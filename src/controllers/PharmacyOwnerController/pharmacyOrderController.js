@@ -638,45 +638,7 @@ module.exports.acceptOrRejectPrecription = asyncErrorHandler(async (req, res, ne
   return next(new CustomError("Invalid order status or transition", 400));
 });
 
-// module.exports.searchAcceptedPrescriptions = asyncErrorHandler(async (req, res, next) => {
-//     const { query, page = 1 } = req.query;
-//     const pharmacyAdminId = req.admin._id;
-
-//     const pharmacy = await pharmacyModel.findOne({ adminId: pharmacyAdminId });
-//     if (!pharmacy) {
-//         return errorRes(res, 404, false, "Pharmacy not found");
-//     }
-
-//     const limit = 30;
-//     const skip = (parseInt(page) - 1) * limit;
-
-//     const filter = {
-//         pharmacyAttempts: {
-//             $elemMatch: {
-//                 pharmacyId: pharmacy._id,
-//                 status: "accepted"
-//             }
-//         }
-//     };
-
-//     if (query) {
-//         filter.prescriptionNumber = { $regex: query.trim(), $options: "i" };
-//     }
-
-//     const [prescriptions, totalCount] = await Promise.all([
-//         PrescriptionSchema.find(filter).skip(skip).limit(limit),
-//         PrescriptionSchema.countDocuments(filter)
-//     ]);
-
-//     return successRes(res, 200, true, "Accepted prescriptions found", {
-//         currentPage: parseInt(page),
-//         totalPages: Math.ceil(totalCount / limit),
-//         totalResults: totalCount,
-//         data: prescriptions
-//     });
-// });
-
-// module.exports.searchAcceptedPrescriptions = asyncErrorHandler(async (req, res, next) => {
+// module.exports.searchPrescriptionsByStatus = asyncErrorHandler(async (req, res, next) => {
 //   let { query, page, limit, status } = req.query;
 
 //   if (!query) {
@@ -701,11 +663,15 @@ module.exports.acceptOrRejectPrecription = asyncErrorHandler(async (req, res, ne
 //       },
 //     },
 //   })
-//     .populate("user_id", "name email")
-//     .sort({ created_at: -1 });
+//     .populate({
+//       path: "user_id",
+//       select: "fullName email"
+//     })
+//     .sort({ created_at: -1 })
+//     .lean();
 
 //   const filteredPrescriptions = prescriptions.filter((p) => {
-//     const customerName = p.user_id?.name || "";
+//     const customerName = p.user_id?.fullName || "";
 //     return (
 //       regex.test(p.prescriptionNumber || "") ||
 //       regex.test(customerName)
@@ -726,32 +692,34 @@ module.exports.acceptOrRejectPrecription = asyncErrorHandler(async (req, res, ne
 //     totalPages: Math.ceil(totalResults / limit),
 //   });
 // });
-
-module.exports.searchAcceptedPrescriptions = asyncErrorHandler(async (req, res, next) => {
+module.exports.searchPrescriptionsByStatus = asyncErrorHandler(async (req, res, next) => {
   let { query, page, limit, status } = req.query;
 
-  if (!query) {
-    return next(new CustomError("Search value is required", 400));
-  }
-
-  const regex = new RegExp(query.trim(), "i");
   page = parseInt(page) || 1;
   limit = parseInt(limit) || 10;
   const skip = (page - 1) * limit;
+
+  // Check: At least one filter must be present
+  if (!query && !status) {
+    return next(new CustomError("Please provide either a search query or a status", 400));
+  }
 
   const pharmacy = await pharmacyModel.findOne({ adminId: req.admin._id });
   if (!pharmacy) {
     return errorRes(res, 404, false, "Pharmacy not found");
   }
 
-  const prescriptions = await PrescriptionSchema.find({
+  // Base filter by pharmacy
+  const baseFilter = {
     pharmacyAttempts: {
       $elemMatch: {
         pharmacyId: pharmacy._id,
         ...(status && { status }),
       },
     },
-  })
+  };
+
+  const prescriptions = await PrescriptionSchema.find(baseFilter)
     .populate({
       path: "user_id",
       select: "fullName email"
@@ -759,13 +727,17 @@ module.exports.searchAcceptedPrescriptions = asyncErrorHandler(async (req, res, 
     .sort({ created_at: -1 })
     .lean();
 
-  const filteredPrescriptions = prescriptions.filter((p) => {
-    const customerName = p.user_id?.fullName || "";
-    return (
-      regex.test(p.prescriptionNumber || "") ||
-      regex.test(customerName)
-    );
-  });
+  // Apply search filter if query is provided
+  const filteredPrescriptions = query
+    ? prescriptions.filter((p) => {
+        const regex = new RegExp(query.trim(), "i");
+        const customerName = p.user_id?.fullName || "";
+        return (
+          regex.test(p.prescriptionNumber || "") ||
+          regex.test(customerName)
+        );
+      })
+    : prescriptions;
 
   const totalResults = filteredPrescriptions.length;
   const paginatedResults = filteredPrescriptions.slice(skip, skip + limit);
@@ -782,3 +754,59 @@ module.exports.searchAcceptedPrescriptions = asyncErrorHandler(async (req, res, 
   });
 });
 
+module.exports.searchOrdersByStatus = asyncErrorHandler(async (req, res, next) => {
+  let { query, page, limit, status } = req.query;
+
+  page = parseInt(page) || 1;
+  limit = parseInt(limit) || 10;
+  const skip = (page - 1) * limit;
+
+  // Build base filter
+  let baseFilter = {};
+
+  // Filter by status if provided
+  if (status && ["pending", "accepted"].includes(status)) {
+    baseFilter.pharmacyAttempts = {
+      $elemMatch: { status }
+    };
+  }
+
+  const orders = await ordersModel.find(baseFilter)
+    .populate({
+      path: "customerId",
+      select: "fullName email"
+    })
+    .sort({ createdAt: -1 })
+    .lean();
+
+  // If neither query nor status is given, return error
+  if (!query && !status) {
+    return next(new CustomError("Please provide either a search query or a status", 400));
+  }
+
+  // If query is provided, filter orders by orderNumber or customer name
+  const filteredOrders = query
+    ? orders.filter((order) => {
+        const regex = new RegExp(query.trim(), "i");
+        const customerName = order.customerId?.fullName || "";
+        return (
+          regex.test(order.orderNumber || "") ||
+          regex.test(customerName)
+        );
+      })
+    : orders;
+
+  const totalResults = filteredOrders.length;
+  const paginatedResults = filteredOrders.slice(skip, skip + limit);
+
+  if (paginatedResults.length === 0) {
+    return successRes(res, 200, false, "No orders found", []);
+  }
+
+  return successRes(res, 200, true, "Orders fetched successfully", {
+    orders: paginatedResults,
+    totalResults,
+    currentPage: page,
+    totalPages: Math.ceil(totalResults / limit),
+  });
+});
