@@ -638,40 +638,147 @@ module.exports.acceptOrRejectPrecription = asyncErrorHandler(async (req, res, ne
   return next(new CustomError("Invalid order status or transition", 400));
 });
 
+// module.exports.searchAcceptedPrescriptions = asyncErrorHandler(async (req, res, next) => {
+//     const { query, page = 1 } = req.query;
+//     const pharmacyAdminId = req.admin._id;
+
+//     const pharmacy = await pharmacyModel.findOne({ adminId: pharmacyAdminId });
+//     if (!pharmacy) {
+//         return errorRes(res, 404, false, "Pharmacy not found");
+//     }
+
+//     const limit = 30;
+//     const skip = (parseInt(page) - 1) * limit;
+
+//     const filter = {
+//         pharmacyAttempts: {
+//             $elemMatch: {
+//                 pharmacyId: pharmacy._id,
+//                 status: "accepted"
+//             }
+//         }
+//     };
+
+//     if (query) {
+//         filter.prescriptionNumber = { $regex: query.trim(), $options: "i" };
+//     }
+
+//     const [prescriptions, totalCount] = await Promise.all([
+//         PrescriptionSchema.find(filter).skip(skip).limit(limit),
+//         PrescriptionSchema.countDocuments(filter)
+//     ]);
+
+//     return successRes(res, 200, true, "Accepted prescriptions found", {
+//         currentPage: parseInt(page),
+//         totalPages: Math.ceil(totalCount / limit),
+//         totalResults: totalCount,
+//         data: prescriptions
+//     });
+// });
+
+// module.exports.searchAcceptedPrescriptions = asyncErrorHandler(async (req, res, next) => {
+//   let { query, page, limit, status } = req.query;
+
+//   if (!query) {
+//     return next(new CustomError("Search value is required", 400));
+//   }
+
+//   const regex = new RegExp(query.trim(), "i");
+//   page = parseInt(page) || 1;
+//   limit = parseInt(limit) || 10;
+//   const skip = (page - 1) * limit;
+
+//   const pharmacy = await pharmacyModel.findOne({ adminId: req.admin._id });
+//   if (!pharmacy) {
+//     return errorRes(res, 404, false, "Pharmacy not found");
+//   }
+
+//   const prescriptions = await PrescriptionSchema.find({
+//     pharmacyAttempts: {
+//       $elemMatch: {
+//         pharmacyId: pharmacy._id,
+//         ...(status && { status }),
+//       },
+//     },
+//   })
+//     .populate("user_id", "name email")
+//     .sort({ created_at: -1 });
+
+//   const filteredPrescriptions = prescriptions.filter((p) => {
+//     const customerName = p.user_id?.name || "";
+//     return (
+//       regex.test(p.prescriptionNumber || "") ||
+//       regex.test(customerName)
+//     );
+//   });
+
+//   const totalResults = filteredPrescriptions.length;
+//   const paginatedResults = filteredPrescriptions.slice(skip, skip + limit);
+
+//   if (paginatedResults.length === 0) {
+//     return successRes(res, 200, false, "No prescriptions found", []);
+//   }
+
+//   return successRes(res, 200, true, "Prescriptions fetched successfully", {
+//     prescriptions: paginatedResults,
+//     totalResults,
+//     currentPage: page,
+//     totalPages: Math.ceil(totalResults / limit),
+//   });
+// });
+
 module.exports.searchAcceptedPrescriptions = asyncErrorHandler(async (req, res, next) => {
-    const { query, page = 1 } = req.query;
-    const pharmacyAdminId = req.admin._id;
+  let { query, page, limit, status } = req.query;
 
-    const pharmacy = await pharmacyModel.findOne({ adminId: pharmacyAdminId });
-    if (!pharmacy) {
-        return errorRes(res, 404, false, "Pharmacy not found");
-    }
+  if (!query) {
+    return next(new CustomError("Search value is required", 400));
+  }
 
-    const limit = 30;
-    const skip = (parseInt(page) - 1) * limit;
+  const regex = new RegExp(query.trim(), "i");
+  page = parseInt(page) || 1;
+  limit = parseInt(limit) || 10;
+  const skip = (page - 1) * limit;
 
-    const filter = {
-        pharmacyAttempts: {
-            $elemMatch: {
-                pharmacyId: pharmacy._id,
-                status: "accepted"
-            }
-        }
-    };
+  const pharmacy = await pharmacyModel.findOne({ adminId: req.admin._id });
+  if (!pharmacy) {
+    return errorRes(res, 404, false, "Pharmacy not found");
+  }
 
-    if (query) {
-        filter.prescriptionNumber = { $regex: query.trim(), $options: "i" };
-    }
+  const prescriptions = await PrescriptionSchema.find({
+    pharmacyAttempts: {
+      $elemMatch: {
+        pharmacyId: pharmacy._id,
+        ...(status && { status }),
+      },
+    },
+  })
+    .populate({
+      path: "user_id",
+      select: "fullName email"
+    })
+    .sort({ created_at: -1 })
+    .lean();
 
-    const [prescriptions, totalCount] = await Promise.all([
-        PrescriptionSchema.find(filter).skip(skip).limit(limit),
-        PrescriptionSchema.countDocuments(filter)
-    ]);
+  const filteredPrescriptions = prescriptions.filter((p) => {
+    const customerName = p.user_id?.fullName || "";
+    return (
+      regex.test(p.prescriptionNumber || "") ||
+      regex.test(customerName)
+    );
+  });
 
-    return successRes(res, 200, true, "Accepted prescriptions found", {
-        currentPage: parseInt(page),
-        totalPages: Math.ceil(totalCount / limit),
-        totalResults: totalCount,
-        data: prescriptions
-    });
+  const totalResults = filteredPrescriptions.length;
+  const paginatedResults = filteredPrescriptions.slice(skip, skip + limit);
+
+  if (paginatedResults.length === 0) {
+    return successRes(res, 200, false, "No prescriptions found", []);
+  }
+
+  return successRes(res, 200, true, "Prescriptions fetched successfully", {
+    prescriptions: paginatedResults,
+    totalResults,
+    currentPage: page,
+    totalPages: Math.ceil(totalResults / limit),
+  });
 });
+
