@@ -701,17 +701,15 @@ module.exports.searchPrescriptionsByStatus = asyncErrorHandler(async (req, res, 
   limit = parseInt(limit) || 10;
   const skip = (page - 1) * limit;
 
-  // Check: At least one filter must be present
   if (!query && !status) {
     return next(new CustomError("Please provide either a search query or a status", 400));
   }
 
   const pharmacy = await pharmacyModel.findOne({ adminId: req.admin._id });
   if (!pharmacy) {
-    return errorRes(res, 404, false, "Pharmacy not found");
+    return CustomError(res, 404, false, "Pharmacy not found");
   }
 
-  // Base filter by pharmacy
   const baseFilter = {
     pharmacyAttempts: {
       $elemMatch: {
@@ -729,7 +727,6 @@ module.exports.searchPrescriptionsByStatus = asyncErrorHandler(async (req, res, 
     .sort({ created_at: -1 })
     .lean();
 
-  // Apply search filter if query is provided
   const filteredPrescriptions = query
     ? prescriptions.filter((p) => {
         const regex = new RegExp(query.trim(), "i");
@@ -763,10 +760,8 @@ module.exports.searchOrdersByStatus = asyncErrorHandler(async (req, res, next) =
   limit = parseInt(limit) || 10;
   const skip = (page - 1) * limit;
 
-  // Build base filter
   let baseFilter = {};
 
-  // Filter by status if provided
   if (status && ["pending", "accepted"].includes(status)) {
     baseFilter.pharmacyAttempts = {
       $elemMatch: { status }
@@ -781,12 +776,10 @@ module.exports.searchOrdersByStatus = asyncErrorHandler(async (req, res, next) =
     .sort({ createdAt: -1 })
     .lean();
 
-  // If neither query nor status is given, return error
   if (!query && !status) {
     return next(new CustomError("Please provide either a search query or a status", 400));
   }
 
-  // If query is provided, filter orders by orderNumber or customer name
   const filteredOrders = query
     ? orders.filter((order) => {
         const regex = new RegExp(query.trim(), "i");

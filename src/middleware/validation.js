@@ -959,6 +959,10 @@ const createDoctoreLeadValidation = Joi.object({
   disease: Joi.string().trim().optional().messages({
     "string.base": "Disease must be a string",
   }),
+  agree: Joi.boolean().required().messages({
+    "boolean.base": "Agreement must be a boolean",
+    "any.required": "Agreement is required",
+  })
 });
 
 module.exports = { createDoctoreLeadValidation };
@@ -1203,6 +1207,10 @@ const applyInsuranceValidation = Joi.object({
   nominee_name: Joi.string().trim().optional(),
   nominee_relation: Joi.string().trim().optional(),
   lead_source: Joi.string().trim().optional(),
+  agree: Joi.boolean().required().messages({
+    "any.required": "Agreement is required",
+    "boolean.base": "Agreement must be a boolean value",
+  })
 });
 
 const getAllInsuranceLeadsValidation = Joi.object({
@@ -1706,10 +1714,15 @@ const addAddressValidation = Joi.object({
   location: Joi.object({
     lat: Joi.number().required().messages({
       "number.base": "Latitude must be a number",
+      "any.required": "Latitude is required",
     }),
     long: Joi.number().required().messages({
       "number.base": "Longitude must be a number",
-    }),
+      "any.required": "Longitude is required",
+    })
+  }).required().messages({
+    "object.base": "Location must be an object",
+    "any.required": "Location is required",
   }),
   is_default: Joi.boolean().optional(),
 });
