@@ -959,6 +959,10 @@ const createDoctoreLeadValidation = Joi.object({
   disease: Joi.string().trim().optional().messages({
     "string.base": "Disease must be a string",
   }),
+  agree: Joi.boolean().required().messages({
+    "boolean.base": "Agreement must be a boolean",
+    "any.required": "Agreement is required",
+  })
 });
 
 module.exports = { createDoctoreLeadValidation };
@@ -1203,6 +1207,10 @@ const applyInsuranceValidation = Joi.object({
   nominee_name: Joi.string().trim().optional(),
   nominee_relation: Joi.string().trim().optional(),
   lead_source: Joi.string().trim().optional(),
+  agree: Joi.boolean().required().messages({
+    "any.required": "Agreement is required",
+    "boolean.base": "Agreement must be a boolean value",
+  })
 });
 
 const getAllInsuranceLeadsValidation = Joi.object({

@@ -19,11 +19,16 @@ module.exports.applyInsurance = asyncErrorHandler(async (req, res, next) => {
     nominee_name,
     nominee_relation,
     income,
-    lead_source
+    lead_source,
+    agree
   } = req.body;
 
   if (!full_name || !phone_number || !lead_type || !age || !gender || !coverage_for) {
     return next(new CustomError("All required fields must be provided", 400));
+  }
+
+  if (!agree) {
+    return next(new CustomError("You must agree to the terms and conditions", 400));
   }
 
   if (!['health', 'life'].includes(lead_type)) {
@@ -104,7 +109,12 @@ module.exports.createDoctoreLead = asyncErrorHandler(async (req, res, next) => {
     phone,
     address,
     disease,
+    agree
   } = req.body;
+
+  if (!agree) {
+    return next(new CustomError("You must agree to the terms and conditions", 400));
+  }
 
   if (!name || !email) {
     return next(new CustomError("Name and Email are required", 400));
