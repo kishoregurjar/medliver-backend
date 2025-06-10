@@ -288,3 +288,43 @@ async function getRandomMedicineImage() {
 }
 
 
+
+module.exports.updateNotificationStatusUser = asyncErrorHandler(async (req, res, next) => {
+  const token = req.headers.authorization?.split(" ")[1]; // Support "Bearer <token>" format
+  const { notificationId } = req.body;
+
+  if (!token) {
+    return next(new CustomError("Authorization token is required", 401));
+  }
+
+  let userId;
+  try {
+    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+    userId = decoded._id;
+  } catch (err) {
+    return next(new CustomError("Invalid or expired token", 401));
+  }
+
+  if (!notificationId) {
+    return next(new CustomError("Notification ID is required", 400));
+  }
+
+  const updatedNotification = await Notification.findOneAndUpdate(
+    {
+      _id: notificationId,
+      recipientType: "customer",
+      $or: [
+        { recipientId: userId },
+        { recipientId: null }
+      ]
+    },
+    { $set: { status: "read" } },
+    { new: true } // return updated document
+  );
+
+  if (!updatedNotification) {
+    return successRes(res, 200, false, "Notification not found or already marked as read", []);
+  }
+
+  return successRes(res, 200, true, "Notification status updated to 'read'", updatedNotification);
+});
