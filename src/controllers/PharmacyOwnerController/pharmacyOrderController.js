@@ -706,7 +706,7 @@ module.exports.searchPrescriptionsByStatus = asyncErrorHandler(async (req, res, 
 
   const pharmacy = await pharmacyModel.findOne({ adminId: req.admin._id });
   if (!pharmacy) {
-    return errorRes(res, 404, false, "Pharmacy not found");
+    return CustomError(res, 404, false, "Pharmacy not found");
   }
 
   // Base filter by pharmacy
