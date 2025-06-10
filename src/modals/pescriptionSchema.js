@@ -20,6 +20,12 @@ const prescriptionSchema = new mongoose.Schema({
             long: Number,
         },
     },
+    medicines: [
+        {
+          medicineId: { type: mongoose.Schema.Types.ObjectId, ref: 'Medicine', required: true },
+          quantity: { type: Number, required: true },
+        }
+      ],
     user_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Customer',
@@ -42,6 +48,10 @@ const prescriptionSchema = new mongoose.Schema({
         default: null,
     },
     total_amount: {
+        type: Number,
+        default: 0,
+    },
+    discounted_amount: {
         type: Number,
         default: 0,
     },

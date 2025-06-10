@@ -11,6 +11,8 @@ const adminSchema = require("../../modals/admin.Schema");
 const Pharmacy = require("../../modals/pharmacy.model");
 const { getRouteBetweenCoords } = require("../../utils/distance.helper");
 const PrescriptionSchema = require("../../modals/pescriptionSchema");
+const stockModel = require("../../modals/stock.model");
+const { default: mongoose } = require("mongoose");
 
 module.exports.getAllAssignedOrder = asyncErrorHandler(
   async (req, res, next) => {
@@ -809,4 +811,42 @@ module.exports.searchOrdersByStatus = asyncErrorHandler(async (req, res, next) =
     currentPage: page,
     totalPages: Math.ceil(totalResults / limit),
   });
+});
+
+module.exports.createInvoiceForPrescription = asyncErrorHandler(async (req, res, next) => {
+  const adminId = req.admin._id;
+  const {orderId, medicines, total_amount, discounted_amount } = req.body;
+
+  const pharmacies = await pharmacyModel.findOne({ adminId });
+  if (!pharmacies) {
+    return next(new CustomError("Pharmacy not found", 404));
+  }
+
+  const order = await PrescriptionSchema.findOne({ _id: orderId, assigned_pharmacy: pharmacies._id });
+  if (!order) return next(new CustomError("Order not found", 404));
+
+  const unavailableMedicines = [];
+
+  for (let med of medicines) {
+    const stock = await stockModel.findOne({
+      pharmacyId: pharmacies._id,
+      medicineId: med.medicineId
+    });
+    if (!stock || stock.quantity < med.quantity) {
+      unavailableMedicines.push(med.medicineId);
+    }
+  }
+
+  if (unavailableMedicines.length > 0) {
+    return next(new CustomError(`Stock not available for medicines: ${unavailableMedicines.join(", ")}`, 400));
+    
+  }
+
+  order.total_amount = total_amount;
+  order.discounted_amount = discounted_amount;
+  order.medicines = medicines;
+
+  await order.save();
+
+  return successRes(res, 200, true, "Invoice created successfully", order);
 });

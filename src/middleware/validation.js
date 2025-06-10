@@ -2404,7 +2404,6 @@ const createStockValidation = Joi.object({
             "string.pattern.base": "Invalid medicine ID format",
             "any.required": "medicine ID is required",
           }),
-        name: Joi.string().required(),
         price: Joi.number().required(),
         quantity: Joi.number().default(0),
         discount: Joi.number().default(0),
