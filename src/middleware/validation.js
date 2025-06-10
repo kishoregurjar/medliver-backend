@@ -1714,10 +1714,15 @@ const addAddressValidation = Joi.object({
   location: Joi.object({
     lat: Joi.number().required().messages({
       "number.base": "Latitude must be a number",
+      "any.required": "Latitude is required",
     }),
     long: Joi.number().required().messages({
       "number.base": "Longitude must be a number",
-    }),
+      "any.required": "Longitude is required",
+    })
+  }).required().messages({
+    "object.base": "Location must be an object",
+    "any.required": "Location is required",
   }),
   is_default: Joi.boolean().optional(),
 });
