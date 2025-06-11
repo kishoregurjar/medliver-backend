@@ -2,7 +2,7 @@ const express = require("express");
 const indexController = require("../controllers/indexController");
 const { verifyDeliveryPartnerToken } = require("../utils/jsonWebToken");
 const { uploadDeliveryProfile, uploadAdharcardImages, uploadLicenceImage, uploadRCCard } = require("../services/multer");
-const { validate, validateQuery, registerDeliveryPartnerValidation, verifyOtpSchema, loginSchema, editDeliveryPartnerSchema, forgetPasswordSchema, changePasswordSchema, resetPasswordSchema, updateDeliveryPartnerStatusSchema, verifyForgotPasswordOtpSchema, getCompleteRouteDetailsSchema,getRequestedOrderValidation ,getDeliveryOrderByIdValidation,acceptRejectOrderValidation} = require("../middleware/validation")
+const { validate, validateQuery, registerDeliveryPartnerValidation, verifyOtpSchema, loginSchema, editDeliveryPartnerSchema, forgetPasswordSchema, changePasswordSchema, resetPasswordSchema, updateDeliveryPartnerStatusSchema, verifyForgotPasswordOtpSchema, getCompleteRouteDetailsSchema, getRequestedOrderValidation, getDeliveryOrderByIdValidation, acceptRejectOrderValidation } = require("../middleware/validation")
 
 
 const router = express.Router();
@@ -29,11 +29,14 @@ router.post('/calculate-distance-rate', validate(getCompleteRouteDetailsSchema),
 
 //************************ */
 
-router.get('/get-requested-order', validateQuery(getRequestedOrderValidation),verifyDeliveryPartnerToken(), indexController.deliveryOrderController.getRequestedOrder);
-router.get('/get-order-by-id', validateQuery(getDeliveryOrderByIdValidation),verifyDeliveryPartnerToken(), indexController.deliveryOrderController.getOrderById);
-router.post("/accept-or-reject-order",validate(acceptRejectOrderValidation) ,verifyDeliveryPartnerToken(), indexController.deliveryOrderController.acceptRejectOrder);
-router.put("/update-order-delivery-current-status" ,verifyDeliveryPartnerToken(), indexController.deliveryOrderController.updateDeliveryStatus);
+router.get('/get-requested-order', validateQuery(getRequestedOrderValidation), verifyDeliveryPartnerToken(), indexController.deliveryOrderController.getRequestedOrder);
+router.get('/get-order-by-id', validateQuery(getDeliveryOrderByIdValidation), verifyDeliveryPartnerToken(), indexController.deliveryOrderController.getOrderById);
+router.post("/accept-or-reject-order", validate(acceptRejectOrderValidation), verifyDeliveryPartnerToken(), indexController.deliveryOrderController.acceptRejectOrder);
+router.put("/update-order-delivery-current-status", verifyDeliveryPartnerToken(), indexController.deliveryOrderController.updateDeliveryStatus);
 router.put('/reached-assigned-pharmacy', verifyDeliveryPartnerToken(), indexController.deliveryOrderController.reachedPharmacy);
+router.put('/reached-destination', verifyDeliveryPartnerToken(), indexController.deliveryOrderController.reachedDestination);
+router.put('/verify-customer-otp', verifyDeliveryPartnerToken(), indexController.deliveryOrderController.verifyCustomerOtp);
+router.post('/generate-upi-qr-code', verifyDeliveryPartnerToken(), indexController.deliveryOrderController.generateUPIQRCode);
 
 // get notification routes
 router.get('/get-notification-by-recipientId', verifyDeliveryPartnerToken(), indexController.commonController.getNotifications);
@@ -43,7 +46,7 @@ router.get("/get-notification-by-id", indexController.commonNotificationControll
 
 // privacy and terms routes
 
-router.get("/get-privacy-policy",  indexController.commonPPAndTCContorller.getPrivacyPolicy);
+router.get("/get-privacy-policy", indexController.commonPPAndTCContorller.getPrivacyPolicy);
 router.get("/get-terms-and-conditions", indexController.commonPPAndTCContorller.getTermsAndConditions);
 
 // Heartbeat routes
