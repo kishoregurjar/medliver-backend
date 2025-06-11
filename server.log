@@ -1080,3 +1080,81 @@
 2025-04-17T07:38:12.397Z [info]: ::1 - - [17/Apr/2025:07:38:12 +0000] "PUT /api/v1/admin/update-pathology HTTP/1.1" 200 993 "-" "PostmanRuntime/7.43.3"
 2025-04-17T07:38:23.150Z [info]: ::1 - - [17/Apr/2025:07:38:23 +0000] "DELETE /api/v1/admin/delete-pathology?pathologyCenterId=67ff9cc91d8f6faf8d21d26b HTTP/1.1" 500 373 "-" "PostmanRuntime/7.43.3"
 2025-04-17T07:38:34.848Z [info]: ::1 - - [17/Apr/2025:07:38:34 +0000] "DELETE /api/v1/pharmacy/delete-stock?stockId=6800a63a1e0f99039b539f4e HTTP/1.1" 500 347 "-" "PostmanRuntime/7.43.3"
+2025-06-09T12:23:49.898Z [info]: Request from local IP: ::1 | URL: /api/v1/pharmacy/accept-reject-prescription
+2025-06-09T12:23:50.499Z [info]: ::1 - - [09/Jun/2025:12:23:50 +0000] "POST /api/v1/pharmacy/accept-reject-prescription HTTP/1.1" 400 400 "-" "PostmanRuntime/7.44.0"
+2025-06-11T05:32:26.235Z [info]: Request from local IP: ::1 | URL: /api/v1/pharmacy/get-all-assigned-orders
+2025-06-11T05:32:26.444Z [info]: ::1 - - [11/Jun/2025:05:32:26 +0000] "GET /api/v1/pharmacy/get-all-assigned-orders HTTP/1.1" 200 - "-" "PostmanRuntime/7.44.0"
+2025-06-11T05:32:40.923Z [info]: Request from local IP: ::1 | URL: /api/v1/pharmacy/accept-reject-order
+2025-06-11T05:32:41.033Z [info]: ::1 - - [11/Jun/2025:05:32:41 +0000] "PUT /api/v1/pharmacy/accept-reject-order HTTP/1.1" 403 417 "-" "PostmanRuntime/7.44.0"
+2025-06-11T05:33:08.437Z [info]: Request from local IP: ::1 | URL: /api/v1/pharmacy/accept-reject-order
+2025-06-11T05:33:08.546Z [info]: ::1 - - [11/Jun/2025:05:33:08 +0000] "PUT /api/v1/pharmacy/accept-reject-order HTTP/1.1" 403 417 "-" "PostmanRuntime/7.44.0"
+2025-06-11T05:34:07.016Z [info]: Request from local IP: ::1 | URL: /api/v1/admin/admin-login
+2025-06-11T05:34:07.157Z [info]: ::1 - - [11/Jun/2025:05:34:07 +0000] "POST /api/v1/admin/admin-login HTTP/1.1" 200 - "-" "PostmanRuntime/7.44.0"
+2025-06-11T05:34:34.098Z [info]: Request from local IP: ::1 | URL: /api/v1/pharmacy/get-all-assigned-orders
+2025-06-11T05:34:34.263Z [info]: ::1 - - [11/Jun/2025:05:34:34 +0000] "GET /api/v1/pharmacy/get-all-assigned-orders HTTP/1.1" 200 - "-" "PostmanRuntime/7.44.0"
+2025-06-11T05:35:38.462Z [info]: Request from local IP: ::1 | URL: /api/v1/pharmacy/accept-reject-order
+2025-06-11T05:35:38.568Z [info]: ::1 - - [11/Jun/2025:05:35:38 +0000] "PUT /api/v1/pharmacy/accept-reject-order HTTP/1.1" 400 375 "-" "PostmanRuntime/7.44.0"
+2025-06-11T06:03:41.009Z [info]: Request from local IP: ::1 | URL: /api/v1/delivery/login-delivery-partner
+2025-06-11T06:03:41.220Z [info]: ::1 - - [11/Jun/2025:06:03:41 +0000] "POST /api/v1/delivery/login-delivery-partner HTTP/1.1" 200 - "-" "PostmanRuntime/7.44.0"
+2025-06-11T06:04:17.828Z [info]: Request from local IP: ::1 | URL: /api/v1/delivery/get-requested-order
+2025-06-11T06:04:17.904Z [info]: ::1 - - [11/Jun/2025:06:04:17 +0000] "GET /api/v1/delivery/get-requested-order HTTP/1.1" 200 79 "-" "PostmanRuntime/7.44.0"
+2025-06-11T06:06:46.518Z [info]: Request from local IP: ::1 | URL: /api/v1/delivery/login-delivery-partner
+2025-06-11T06:06:46.675Z [info]: ::1 - - [11/Jun/2025:06:06:46 +0000] "POST /api/v1/delivery/login-delivery-partner HTTP/1.1" 200 - "-" "PostmanRuntime/7.44.0"
+2025-06-11T06:07:22.394Z [info]: Request from local IP: ::1 | URL: /api/v1/delivery/get-requested-order
+2025-06-11T06:07:22.470Z [info]: ::1 - - [11/Jun/2025:06:07:22 +0000] "GET /api/v1/delivery/get-requested-order HTTP/1.1" 200 79 "-" "PostmanRuntime/7.44.0"
+2025-06-11T06:07:45.542Z [info]: Request from local IP: ::1 | URL: /api/v1/delivery/login-delivery-partner
+2025-06-11T06:07:45.635Z [info]: ::1 - - [11/Jun/2025:06:07:45 +0000] "POST /api/v1/delivery/login-delivery-partner HTTP/1.1" 400 303 "-" "PostmanRuntime/7.44.0"
+2025-06-11T06:09:39.441Z [info]: Request from local IP: ::1 | URL: /api/v1/delivery/login-delivery-partner
+2025-06-11T06:09:39.580Z [info]: ::1 - - [11/Jun/2025:06:09:39 +0000] "POST /api/v1/delivery/login-delivery-partner HTTP/1.1" 200 - "-" "PostmanRuntime/7.44.0"
+2025-06-11T06:09:53.808Z [info]: Request from local IP: ::1 | URL: /api/v1/delivery/get-requested-order
+2025-06-11T06:09:53.883Z [info]: ::1 - - [11/Jun/2025:06:09:53 +0000] "GET /api/v1/delivery/get-requested-order HTTP/1.1" 200 79 "-" "PostmanRuntime/7.44.0"
+2025-06-11T06:09:55.167Z [info]: Request from local IP: ::1 | URL: /api/v1/delivery/get-requested-order
+2025-06-11T06:09:55.241Z [info]: ::1 - - [11/Jun/2025:06:09:55 +0000] "GET /api/v1/delivery/get-requested-order HTTP/1.1" 200 79 "-" "PostmanRuntime/7.44.0"
+2025-06-11T06:12:11.955Z [info]: Request from local IP: ::1 | URL: /api/v1/delivery/get-requested-order?orderStatus=assigned_to_delivery_partner
+2025-06-11T06:12:12.182Z [info]: ::1 - - [11/Jun/2025:06:12:12 +0000] "GET /api/v1/delivery/get-requested-order?orderStatus=assigned_to_delivery_partner HTTP/1.1" 200 - "-" "PostmanRuntime/7.44.0"
+2025-06-11T06:12:36.411Z [info]: Request from local IP: ::1 | URL: /api/v1/delivery/accept-or-reject-order
+2025-06-11T06:12:37.515Z [info]: ::1 - - [11/Jun/2025:06:12:37 +0000] "POST /api/v1/delivery/accept-or-reject-order HTTP/1.1" 200 - "-" "PostmanRuntime/7.44.0"
+2025-06-11T06:13:55.520Z [info]: Request from local IP: ::1 | URL: /api/v1/delivery/reached-destination
+2025-06-11T06:13:55.529Z [info]: ::1 - - [11/Jun/2025:06:13:55 +0000] "POST /api/v1/delivery/reached-destination HTTP/1.1" 404 - "-" "PostmanRuntime/7.44.0"
+2025-06-11T06:14:04.901Z [info]: Request from local IP: ::1 | URL: /api/v1/delivery/reached-destination
+2025-06-11T06:14:04.904Z [info]: ::1 - - [11/Jun/2025:06:14:04 +0000] "PUT /api/v1/delivery/reached-destination HTTP/1.1" 404 - "-" "PostmanRuntime/7.44.0"
+2025-06-11T06:15:05.180Z [info]: Request from local IP: ::1 | URL: /api/v1/delivery/reached-destination
+2025-06-11T06:15:05.344Z [info]: ::1 - - [11/Jun/2025:06:15:05 +0000] "PUT /api/v1/delivery/reached-destination HTTP/1.1" 500 369 "-" "PostmanRuntime/7.44.0"
+2025-06-11T06:15:24.110Z [info]: Request from local IP: ::1 | URL: /api/v1/delivery/reached-destination
+2025-06-11T06:15:24.203Z [info]: ::1 - - [11/Jun/2025:06:15:24 +0000] "PUT /api/v1/delivery/reached-destination HTTP/1.1" 400 423 "-" "PostmanRuntime/7.44.0"
+2025-06-11T06:16:06.632Z [info]: Request from local IP: ::1 | URL: /api/v1/delivery/reached-destination
+2025-06-11T06:16:07.558Z [info]: ::1 - - [11/Jun/2025:06:16:07 +0000] "PUT /api/v1/delivery/reached-destination HTTP/1.1" 200 - "-" "PostmanRuntime/7.44.0"
+2025-06-11T06:16:29.784Z [info]: Request from local IP: ::1 | URL: /api/v1/delivery/reached-destination
+2025-06-11T06:16:30.437Z [info]: ::1 - - [11/Jun/2025:06:16:30 +0000] "PUT /api/v1/delivery/reached-destination HTTP/1.1" 200 - "-" "PostmanRuntime/7.44.0"
+2025-06-11T06:25:15.157Z [info]: Request from local IP: ::1 | URL: /api/v1/delivery/verify-customer-otp
+2025-06-11T06:25:15.266Z [info]: ::1 - - [11/Jun/2025:06:25:15 +0000] "PUT /api/v1/delivery/verify-customer-otp HTTP/1.1" 200 210 "-" "PostmanRuntime/7.44.0"
+2025-06-11T06:26:43.358Z [info]: Request from local IP: ::1 | URL: /api/v1/delivery/verify-customer-otp
+2025-06-11T06:26:43.516Z [info]: ::1 - - [11/Jun/2025:06:26:43 +0000] "PUT /api/v1/delivery/verify-customer-otp HTTP/1.1" 200 211 "-" "PostmanRuntime/7.44.0"
+2025-06-11T06:33:08.103Z [info]: Request from local IP: ::1 | URL: /api/v1/delivery/generate-upi-qr-code
+2025-06-11T06:33:08.140Z [info]: ::1 - - [11/Jun/2025:06:33:08 +0000] "PUT /api/v1/delivery/generate-upi-qr-code HTTP/1.1" 404 - "-" "PostmanRuntime/7.44.0"
+2025-06-11T06:33:15.713Z [info]: Request from local IP: ::1 | URL: /api/v1/delivery/generate-upi-qr-code
+2025-06-11T06:33:15.829Z [info]: ::1 - - [11/Jun/2025:06:33:15 +0000] "POST /api/v1/delivery/generate-upi-qr-code HTTP/1.1" 200 118 "-" "PostmanRuntime/7.44.0"
+2025-06-11T06:34:26.210Z [info]: Request from local IP: ::1 | URL: /api/v1/delivery/generate-upi-qr-code
+2025-06-11T06:34:27.063Z [info]: ::1 - - [11/Jun/2025:06:34:27 +0000] "POST /api/v1/delivery/generate-upi-qr-code HTTP/1.1" 400 213 "-" "PostmanRuntime/7.44.0"
+2025-06-11T06:34:44.244Z [info]: Request from local IP: ::1 | URL: /api/v1/delivery/generate-upi-qr-code
+2025-06-11T06:34:45.547Z [info]: ::1 - - [11/Jun/2025:06:34:45 +0000] "POST /api/v1/delivery/generate-upi-qr-code HTTP/1.1" 200 166 "-" "PostmanRuntime/7.44.0"
+2025-06-11T06:36:56.740Z [info]: Request from local IP: ::1 | URL: /api/v1/delivery/generate-upi-qr-code
+2025-06-11T06:36:57.969Z [info]: ::1 - - [11/Jun/2025:06:36:57 +0000] "POST /api/v1/delivery/generate-upi-qr-code HTTP/1.1" 200 165 "-" "PostmanRuntime/7.44.0"
+2025-06-11T06:52:38.279Z [info]: Request from local IP: ::1 | URL: /api/v1/delivery/generate-upi-qr-code
+2025-06-11T06:52:38.396Z [info]: ::1 - - [11/Jun/2025:06:52:38 +0000] "POST /api/v1/delivery/generate-upi-qr-code HTTP/1.1" 500 355 "-" "PostmanRuntime/7.44.0"
+2025-06-11T06:52:55.661Z [info]: Request from local IP: ::1 | URL: /api/v1/delivery/generate-upi-qr-code
+2025-06-11T06:52:55.760Z [info]: ::1 - - [11/Jun/2025:06:52:55 +0000] "POST /api/v1/delivery/generate-upi-qr-code HTTP/1.1" 500 355 "-" "PostmanRuntime/7.44.0"
+2025-06-11T06:53:16.502Z [info]: Request from local IP: ::1 | URL: /api/v1/delivery/generate-upi-qr-code
+2025-06-11T06:53:17.990Z [info]: ::1 - - [11/Jun/2025:06:53:17 +0000] "POST /api/v1/delivery/generate-upi-qr-code HTTP/1.1" 200 685 "-" "PostmanRuntime/7.44.0"
+2025-06-11T06:55:07.888Z [info]: Request from local IP: ::1 | URL: /api/v1/delivery/generate-upi-qr-code
+2025-06-11T06:55:09.173Z [info]: ::1 - - [11/Jun/2025:06:55:09 +0000] "POST /api/v1/delivery/generate-upi-qr-code HTTP/1.1" 200 687 "-" "PostmanRuntime/7.44.0"
+2025-06-11T07:04:23.726Z [info]: Request from local IP: ::1 | URL: /api/v1/delivery/generate-upi-qr-code
+2025-06-11T07:04:24.981Z [info]: ::1 - - [11/Jun/2025:07:04:24 +0000] "POST /api/v1/delivery/generate-upi-qr-code HTTP/1.1" 500 355 "-" "PostmanRuntime/7.44.0"
+2025-06-11T07:04:57.790Z [info]: Request from local IP: ::1 | URL: /api/v1/delivery/generate-upi-qr-code
+2025-06-11T07:04:59.044Z [info]: ::1 - - [11/Jun/2025:07:04:59 +0000] "POST /api/v1/delivery/generate-upi-qr-code HTTP/1.1" 500 580 "-" "PostmanRuntime/7.44.0"
+2025-06-11T07:05:33.902Z [info]: Request from local IP: ::1 | URL: /api/v1/delivery/generate-upi-qr-code
+2025-06-11T07:05:35.320Z [info]: ::1 - - [11/Jun/2025:07:05:35 +0000] "POST /api/v1/delivery/generate-upi-qr-code HTTP/1.1" 500 580 "-" "PostmanRuntime/7.44.0"
+2025-06-11T07:06:47.183Z [info]: Request from local IP: ::1 | URL: /api/v1/delivery/generate-upi-qr-code
+2025-06-11T07:06:48.491Z [info]: ::1 - - [11/Jun/2025:07:06:48 +0000] "POST /api/v1/delivery/generate-upi-qr-code HTTP/1.1" 200 - "-" "PostmanRuntime/7.44.0"
+2025-06-11T07:07:54.523Z [info]: Request from local IP: ::1 | URL: /api/v1/delivery/generate-upi-qr-code
+2025-06-11T07:07:56.345Z [info]: ::1 - - [11/Jun/2025:07:07:56 +0000] "POST /api/v1/delivery/generate-upi-qr-code HTTP/1.1" 200 - "-" "PostmanRuntime/7.44.0"

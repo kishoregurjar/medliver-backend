@@ -68,7 +68,8 @@ const orderSchema = new mongoose.Schema({
       "delivered",
       "cancelled",
       "reached_pharmacy",
-      "reached_destination"
+      "reached_destination",
+      "verified_by_customer"
     ],
     default: "pending",
   },

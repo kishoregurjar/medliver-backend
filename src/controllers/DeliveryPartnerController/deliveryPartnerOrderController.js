@@ -13,6 +13,9 @@ const adminSchema = require("../../modals/admin.Schema");
 const { deliveryOrderStatus } = require("../../utils/helper");
 const { generateOTPNumber } = require("../../services/helper");
 const { pickupOrderMail } = require("../../services/sendMail");
+const Razorpay = require("razorpay");
+const moment = require("moment");
+
 
 
 module.exports.getRequestedOrder = asyncErrorHandler(async (req, res, next) => {
@@ -312,6 +315,10 @@ module.exports.reachedDestination = asyncErrorHandler(async (req, res, next) => 
     return next(new CustomError("Order not found", 404));
   }
 
+  if (order.orderStatus !== "accepted_by_delivery_partner") {
+    return next(new CustomError("Order is not accepted by delivery partner", 400));
+  }
+
   if (!deliveryPartner) {
     return next(new CustomError("Delivery partner not found", 404));
   }
@@ -325,6 +332,111 @@ module.exports.reachedDestination = asyncErrorHandler(async (req, res, next) => 
 
   return successRes(res, 200, true, "Delivery partner reached destination successfully", order);
 });
+
+module.exports.verifyCustomerOtp = asyncErrorHandler(async (req, res, next) => {
+  const deliveryPartnerId = req.partner._id;
+  const { orderId, otp } = req.body;
+
+  if (!orderId) {
+    return next(new CustomError("Order ID is required", 400));
+  }
+
+  // Fetch both order and delivery partner details in parallel
+  const [order, deliveryPartner] = await Promise.all([
+    ordersModel.findOne({ _id: orderId, deliveryPartnerId }),
+    DeliveryPartner.findById(deliveryPartnerId),
+  ]);
+
+  if (!order) {
+    return next(new CustomError("Order not found", 404));
+  }
+
+  if (!deliveryPartner) {
+    return next(new CustomError("Delivery partner not found", 404));
+  }
+
+  if (order.orderStatus !== "reached_destination") {
+    return next(new CustomError("Order is not reached destination", 400));
+  }
+
+  if (order.customerOTP !== otp) {
+    return next(new CustomError("Invalid OTP", 400));
+  }
+  order.orderStatus = "verified_by_customer";
+  order.customerOTP = null;
+  await order.save();
+
+  let response = {
+    paymentStatus: order.paymentStatus,
+    paymentMethod: order.paymentMethod,
+    orderStatus: order.orderStatus,
+    orderid: order._id,
+  }
+
+  return successRes(res, 200, true, "Delivery partner verified successfully", response);
+});
+
+module.exports.generateUPIQRCode = asyncErrorHandler(async (req, res, next) => {
+  const deliveryPartnerId = req.partner._id;
+  const { orderId } = req.body;
+
+  if (!orderId) {
+    return next(new CustomError("Order ID is required", 400));
+  }
+
+  const [order, deliveryPartner] = await Promise.all([
+    ordersModel.findOne({ _id: orderId, deliveryPartnerId }),
+    DeliveryPartner.findById(deliveryPartnerId),
+  ]);
+
+  if (!order) return next(new CustomError("Order not found", 404));
+  if (!deliveryPartner) return next(new CustomError("Delivery partner not found", 404));
+
+  if (order.orderStatus !== "verified_by_customer") {
+    return next(new CustomError("Order is not verified by customer", 400));
+  }
+
+  const razorpay = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET,
+  });
+
+  // Calculate expiry time (e.g., 15 minutes from now)
+  const closeBy = moment().add(15, 'minutes').unix();
+
+  const qrPayload = {
+    type: "upi_qr",
+    name: `Order ${order._id}`,
+    usage: "single_use",
+    fixed_amount: true,
+    payment_amount: Math.round(order.totalAmount * 100), // Amount in paise
+    description: `Payment for Order ${order._id}`,
+    close_by: closeBy,
+    notes: {
+      purpose: "Medicine Delivery Payment",
+      deliveryPartnerId: deliveryPartnerId.toString(),
+    }
+  };
+
+  // Optional: If you have a saved Razorpay customer_id for the user
+  // if (order.customerRazorpayId) {
+  //   qrPayload.customer_id = order.customerRazorpayId;
+  // }
+
+  const qrResponse = await razorpay.qrCode.create(qrPayload);
+
+  // You can store this QR code ID in the order if needed
+  // order.qrCodeId = qrResponse.id;
+  // await order.save();
+
+  return successRes(res, 200, true, "UPI QR Code generated successfully", {
+    qrCodeId: qrResponse.id,
+    image_url: qrResponse.image_url,
+    payload: qrResponse, // Optional full payload
+  });
+});
+
+
 
 module.exports.deliverOrder = asyncErrorHandler(async (req, res, next) => {
   const deliveryPartnerId = req.partner._id;
