@@ -82,7 +82,7 @@ module.exports.getAllNotification = asyncErrorHandler(
 
 module.exports.getNotificationById = asyncErrorHandler(async (req, res, next) => {
   const token = req?.headers?.authorization;
-  const { notificationId } = req.query;
+  const { notificationId , recipientType} = req.query;
 
   let userId = null;
 
@@ -102,6 +102,9 @@ module.exports.getNotificationById = asyncErrorHandler(async (req, res, next) =>
     recipientType: "customer",
   };
 
+  if(recipientType){
+    query.recipientType = recipientType
+  }
   if (userId) {
     query.$or = [
       { recipientId: userId },

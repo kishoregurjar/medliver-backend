@@ -39,6 +39,7 @@ router.put('/reached-assigned-pharmacy', verifyDeliveryPartnerToken(), indexCont
 router.get('/get-notification-by-recipientId', verifyDeliveryPartnerToken(), indexController.commonController.getNotifications);
 router.put('/update-notification-status', verifyDeliveryPartnerToken(), indexController.commonController.updateNotificationStatus);
 router.get('/check-delivery-partner-currenct-status', verifyDeliveryPartnerToken(), indexController.deliveryPartnerController.getDeliveryPartnerCurrentStatus);
+router.get("/get-notification-by-id", indexController.commonNotificationController.getNotificationById);
 
 // privacy and terms routes
 
