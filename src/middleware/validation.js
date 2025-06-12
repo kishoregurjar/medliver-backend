@@ -642,6 +642,7 @@ const loginValidation = Joi.object({
   password: Joi.string().required().messages({
     "any.required": "Password is required",
   }),
+  deviceToken:Joi.string().optional()
 });
 
 const forgetPasswordValidation = Joi.object({
