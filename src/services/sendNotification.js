@@ -1,55 +1,28 @@
-// // const admin = require('firebase-admin');
-
-// // // 👇 path to the JSON file you downloaded
-// // const serviceAccount = require('../config/firebaseServiceAccount.config.json');
-
-// // // 👇 initialize admin SDK
-// // admin.initializeApp({
-// //   credential: admin.credential.cert(serviceAccount)
-// // });
-
-// // const registrationToken = 'ExponentPushToken[xxxxxxx]'; // Expo token
-
-// // const message = {
-// //   notification: {
-// //     title: 'Hello from Medliver',
-// //     body: 'New task assigned to you',
-// //   },
-// //   token: registrationToken,
-// // };
-
-// // admin.messaging().send(message)
-// //   .then(response => {
-// //     console.log('Successfully sent message:', response);
-// //   })
-// //   .catch(error => {
-// //     console.log('Error sending message:', error);
-// //   });
-
-
-
-
-// // utils/sendFirebaseNotification.js
-
 const admin = require('firebase-admin');
-const serviceAccount = require('../config/firebaseServiceAccount.config.json');
+
+let serviceAccount = {
+  type: "service_account",
+  project_id: process.env.FIREBASE_PROJECT_ID,
+  private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
+  private_key: process.env.FIREBASE_PRIVATE_KEY,
+  client_email: process.env.FIREBASE_CLIENT_EMAIL,
+  client_id: process.env.FIREBASE_CLIENT_ID,
+  auth_uri: process.env.FIREBASE_AUTH_URI,
+  token_uri: process.env.FIREBASE_TOKEN_URI,
+  auth_provider_x509_cert_url: process.env.FIREBASE_AUTH_PROVIDER_X509_CERT_URL,
+  client_x509_cert_url: process.env.FIREBASE_CLIENT_X509_CERT_URL,
+  universe_domain: process.env.FIREBASE_UNIVERSE_DOMAIN
+}
 
 // Initialize Firebase only once
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
-    projectId: 'medliversetup',
+    projectId: 'medlivurr-web',
   });
 }
 
-/**
- * Send FCM Notification to a single device (HTTP v1)
- * @param {string} deviceToken - FCM token of the device
- * @param {string} title - Notification title
- * @param {string} body - Notification body
- * @returns {Promise<{ success: boolean, response?: any, error?: any }>}
- */
-const sendFirebaseNotification = async (deviceToken, title, body) => {
+const sendFirebaseNotification = async (deviceToken, title, body, data = {}) => {
   try {
     const message = {
       token: deviceToken,

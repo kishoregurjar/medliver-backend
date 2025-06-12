@@ -12,7 +12,7 @@ const PathologyCenter = require('../../modals/pathology.model');
 require('dotenv').config();
 
 module.exports.login = asyncErrorHandler(async (req, res, next) => {
-  let { email, password } = req.body;
+  let { email, password, deviceToken } = req.body;
 
   if (!email || !password) {
     return next(new CustomError("Email and password are required", 400));
@@ -43,6 +43,10 @@ module.exports.login = asyncErrorHandler(async (req, res, next) => {
     return next(new CustomError("Account is not active, Contact Administration", 400));
   }
 
+  if (deviceToken) {
+    findAdmin.deviceToken = deviceToken
+    await findAdmin.save()
+  }
   const payload = {
     _id: findAdmin._id,
     email: findAdmin.email,
@@ -178,7 +182,7 @@ module.exports.changedPassword = asyncErrorHandler(async (req, res, next) => {
 });
 
 module.exports.updateAdminProfile = asyncErrorHandler(async (req, res, next) => {
-  
+
   const adminId = req.admin._id;
   const findAdmin = await adminSchema.findById(adminId);
   if (!findAdmin) {
@@ -192,7 +196,7 @@ module.exports.updateAdminProfile = asyncErrorHandler(async (req, res, next) => 
     new: true,
     runValidators: true,
   });
-  
+
   return successRes(res, 200, true, `${findRole} updated successfully`, updateAdmin);
 
 });
