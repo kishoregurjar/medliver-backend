@@ -105,6 +105,7 @@ module.exports.acceptOrRejectOrder = asyncErrorHandler(async (req, res, next) =>
 
     if (sortedPartners.length > 0) {
       const nearest = sortedPartners[0];
+      console.log(nearest, "nearest")
 
       order.deliveryPartnerId = nearest._id;
       order.deliveryPartnerQueue.push(nearest._id);
@@ -126,6 +127,7 @@ module.exports.acceptOrRejectOrder = asyncErrorHandler(async (req, res, next) =>
       await notification.save();
 
       if (nearest.deviceToken) {
+        console.log(nearest.deviceToken, "nearest.deviceToken");
         await sendExpoNotification(
           [nearest.deviceToken],
           "New Delivery Request",
@@ -146,7 +148,7 @@ module.exports.acceptOrRejectOrder = asyncErrorHandler(async (req, res, next) =>
           NotificationTypeId: order._id,
           recipientId: admin._id,
         });
-        await notify.save();
+        // await notify.save();
 
         if (admin.deviceToken) {
           await sendExpoNotification(
@@ -161,7 +163,7 @@ module.exports.acceptOrRejectOrder = asyncErrorHandler(async (req, res, next) =>
       order.orderStatus = "need_manual_assignment_to_delivery_partner";
     }
 
-    await order.save();
+    // await order.save();
     return successRes(res, 200, true, "Order accepted successfully", order);
   }
 
@@ -816,20 +818,20 @@ module.exports.createInvoiceForPrescription = asyncErrorHandler(async (req, res,
 
   const unavailableMedicines = [];
 
-  // for (let med of medicines) {
-  //   const stock = await stockModel.findOne({
-  //     pharmacyId: pharmacies._id,
-  //     medicineId: med.medicineId
-  //   });
-  //   if (!stock || stock.quantity < med.quantity) {
-  //     unavailableMedicines.push(med.medicineId);
-  //   }
-  // }
+  for (let med of medicines) {
+    const stock = await stockModel.findOne({
+      pharmacyId: pharmacies._id,
+      medicineId: med.medicineId
+    });
+    if (!stock || stock.quantity < med.quantity) {
+      unavailableMedicines.push(med.medicineId);
+    }
+  }
 
-  // if (unavailableMedicines.length > 0) {
-  //   return next(new CustomError(`Stock not available for medicines: ${unavailableMedicines.join(", ")}`, 400));
+  if (unavailableMedicines.length > 0) {
+    return next(new CustomError(`Stock not available for medicines: ${unavailableMedicines.join(", ")} `, 400));
 
-  // }
+  }
 
   order.total_amount = total_amount;
   order.discounted_amount = discounted_amount;

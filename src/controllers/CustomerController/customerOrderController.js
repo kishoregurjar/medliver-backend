@@ -160,7 +160,7 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
     paymentDetails: paymentDetails || null,
   });
 
-  // await newOrder.save();
+  await newOrder.save();
 
   const updatedItems = cart.items.filter(
     (item) => !item_ids.includes(item.item_id.toString())
@@ -170,7 +170,7 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
     (acc, item) => acc + item.price * item.quantity,
     0
   );
-  // await cart.save();
+  await cart.save();
 
   // Notify
   let notification;
@@ -217,7 +217,7 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
       });
 
       newOrder.orderStatus = "need_manual_assignment_to_pharmacy";
-      // await newOrder.save();
+      await newOrder.save();
 
       //send notification
       await sendFirebaseNotification(
@@ -229,7 +229,7 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
     }
   }
 
-  // if (notification) await notification.save();
+  if (notification) await notification.save();
 
   return successRes(res, 201, true, "Order placed successfully", {
     order: newOrder,

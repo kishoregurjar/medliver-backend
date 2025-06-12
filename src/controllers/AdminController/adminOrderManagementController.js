@@ -7,6 +7,8 @@ const { sendExpoNotification } = require("../../utils/expoNotification");
 const { getDistance } = require("../../utils/helper");
 const notificationModel = require("../../modals/notification.model");
 const deliveryModel = require("../../modals/delivery.model");
+const sendFirebaseNotification = require("../../services/sendNotification");
+const notificationEnum = require("../../services/notificationEnum");
 
 
 module.exports.getAllManualOrderAssignment = asyncErrorHandler(async (req, res, next) => {
@@ -101,23 +103,25 @@ module.exports.manuallyAssignOrderToPhramacy = asyncErrorHandler(async (req, res
         status: "pending", // can later be updated by pharmacy
         attemptedAt: new Date()
     });
-
+    let notificationType = "pharmacy_order_request";
+    let role = 'pharmacy';
+    let notificiationRes = notificationEnum.getNotification(role, notificationType);
     // Create and send notification
     let newNotification = new notificationModel({
-        title: "New Order",
-        message: "You have a new order",
+        title: notificiationRes.title,
+        message: notificiationRes.message,
         recipientType: "pharmacy",
-        notificationType: "pharmacy_order_request",
+        notificationType: notificationType,
         NotificationTypeId: order._id,
-        recipientId: pharmacyDeviceToken
+        recipientId: pharmacyId
     });
 
     await newNotification.save();
 
-    await sendExpoNotification(
-        [pharmacyDeviceToken],
-        "New Order",
-        "You have a new order",
+    await sendFirebaseNotification(
+        pharmacyDeviceToken,
+        notificiationRes.title,
+        notificiationRes.message,
         newNotification
     );
 
