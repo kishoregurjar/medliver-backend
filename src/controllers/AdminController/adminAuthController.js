@@ -12,65 +12,66 @@ const PathologyCenter = require('../../modals/pathology.model');
 require('dotenv').config();
 
 module.exports.login = asyncErrorHandler(async (req, res, next) => {
-  let { email, password } = req.body;
+  const { email, password, deviceToken } = req.body;
 
   if (!email || !password) {
     return next(new CustomError("Email and password are required", 400));
   }
 
-  const findAdmin = await adminSchema.findOne({ email });
-
-  if (!findAdmin) {
+  const admin = await adminSchema.findOne({ email });
+  if (!admin || !admin.password) {
     return next(new CustomError("Invalid Email or Password", 404));
   }
 
-  if (!findAdmin.password) {
-    return next(new CustomError("Password not found for this account", 404));
-  }
-
-  let isMatch;
-  try {
-    isMatch = await bcrypt.compare(password, findAdmin.password);
-  } catch (error) {
-    return next(new CustomError("Error comparing password", 500));
-  }
-
+  const isMatch = await bcrypt.compare(password, admin.password);
   if (!isMatch) {
     return next(new CustomError("Invalid Email or Password", 404));
   }
 
-  if (findAdmin.accountStatus === "blocked") {
-    return next(new CustomError("Account is not active, Contact Administration", 400));
+  if (admin.accountStatus === "blocked") {
+    return next(new CustomError("Account is not active, Contact Administration", 403));
   }
 
-  const payload = {
-    _id: findAdmin._id,
-    email: findAdmin.email,
-    role: findAdmin.role,
-    permissions: findAdmin.permissions,
-  };
+  // Update deviceToken if provided
+  if (deviceToken) {
+    admin.deviceToken = deviceToken;
 
+    // Update token in role-based model only if needed
+    if (admin.role === "pharmacy") {
+      await pharmacyModel.updateOne({ adminId: admin._id }, { deviceToken });
+    } else if (admin.role === "pathology") {
+      await PathologyCenter.updateOne({ adminId: admin._id }, { deviceToken });
+    }
+
+    await admin.save();
+  }
+
+  // Prepare JWT payload and sign
+  const payload = {
+    _id: admin._id,
+    email: admin.email,
+    role: admin.role,
+    permissions: admin.permissions,
+  };
   const token = assignJwt(payload);
 
-  const sanitizedAdmin = findAdmin.toObject();
+  // Remove sensitive data
+  const sanitizedAdmin = admin.toObject();
   delete sanitizedAdmin.password;
 
+  // Fetch role-based extra data
   let roleData = null;
-
-  // Fetch role-specific data
-  if (findAdmin.role === "pharmacy") {
-    roleData = await pharmacyModel.findOne({ adminId: findAdmin._id }).lean();
-  } else if (findAdmin.role === "pathology") {
-    roleData = await PathologyCenter.findOne({ adminId: findAdmin._id }).lean();
+  if (admin.role === "pharmacy") {
+    roleData = await pharmacyModel.findOne({ adminId: admin._id }).lean();
+  } else if (admin.role === "pathology") {
+    roleData = await PathologyCenter.findOne({ adminId: admin._id }).lean();
   }
 
   return successRes(
     res,
     200,
     true,
-    sanitizedAdmin.role === "superadmin"
-      ? "Super Admin logged in successfully"
-      : `${sanitizedAdmin.role} logged in successfully`,
+    `${admin.role === "superadmin" ? "Super Admin" : admin.role} logged in successfully`,
     {
       ...sanitizedAdmin,
       token,
@@ -78,6 +79,7 @@ module.exports.login = asyncErrorHandler(async (req, res, next) => {
     }
   );
 });
+
 
 module.exports.getAdminDetails = asyncErrorHandler(async (req, res, next) => {
   const admin = req.admin._id;
@@ -178,7 +180,7 @@ module.exports.changedPassword = asyncErrorHandler(async (req, res, next) => {
 });
 
 module.exports.updateAdminProfile = asyncErrorHandler(async (req, res, next) => {
-  
+
   const adminId = req.admin._id;
   const findAdmin = await adminSchema.findById(adminId);
   if (!findAdmin) {
@@ -192,7 +194,7 @@ module.exports.updateAdminProfile = asyncErrorHandler(async (req, res, next) => 
     new: true,
     runValidators: true,
   });
-  
+
   return successRes(res, 200, true, `${findRole} updated successfully`, updateAdmin);
 
 });

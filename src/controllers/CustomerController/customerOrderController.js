@@ -13,6 +13,8 @@ const { getDistance, generateOrderNumber } = require("../../utils/helper");
 const adminSchema = require("../../modals/admin.Schema");
 const getRouteBetweenCoords = require("../../utils/distance.helper");
 const Razorpay = require('razorpay');
+const sendFirebaseNotification = require("../../services/sendNotification");
+const notificationEnum = require("../../services/notificationEnum");
 
 const instance = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -158,9 +160,8 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
     paymentDetails: paymentDetails || null,
   });
 
-  await newOrder.save();
+  // await newOrder.save();
 
-  // Update Cart
   const updatedItems = cart.items.filter(
     (item) => !item_ids.includes(item.item_id.toString())
   );
@@ -169,45 +170,58 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
     (acc, item) => acc + item.price * item.quantity,
     0
   );
-  await cart.save();
+  // await cart.save();
 
   // Notify
   let notification;
 
   if (assignedPharmacy) {
+    const notificationType = "pharmacy_order_request";
+    const role = "pharmacy";
+
+    const notificationRes = notificationEnum.getNotification(role, notificationType);
+
     notification = new notificationModel({
-      title: "New Order",
-      message: "You have a new order",
+      title: notificationRes.title,
+      message: notificationRes.message,
       recipientId: assignedPharmacy._id,
       recipientType: "pharmacy",
       NotificationTypeId: newOrder._id,
-      notificationType: "pharmacy_order_request",
+      notificationType: notificationType,
     });
 
-    await sendExpoNotification(
-      [assignedPharmacy.deviceToken],
-      "New Order",
-      "You have a new order",
+    await sendFirebaseNotification(
+      assignedPharmacy.deviceToken,
+      notificationRes.title,
+      notificationRes.message,
       notification
     );
+
   } else {
     const admins = await adminSchema.find({ role: "superadmin" });
 
     for (const admin of admins) {
+
+      const notificationType = "manual_pharmacy_assignment";
+      const role = "superAdmin";
+
+      const notificationRes = notificationEnum.getNotification(role, notificationType);
+
       notification = new notificationModel({
-        title: "Manual Order Assignment",
-        message: "No pharmacy available. Manual assignment required.",
+        title: notificationRes.title,
+        message: notificationRes.message,
         recipientId: admin._id,
         recipientType: "admin",
         NotificationTypeId: newOrder._id,
-        notificationType: "manual_pharmacy_assignment",
+        notificationType: notificationType,
       });
 
       newOrder.orderStatus = "need_manual_assignment_to_pharmacy";
-      await newOrder.save();
+      // await newOrder.save();
 
-      await sendExpoNotification(
-        [admin.deviceToken],
+      //send notification
+      await sendFirebaseNotification(
+        admin.deviceToken,
         "Manual Assignment Needed",
         "No pharmacy available for order",
         notification
@@ -215,7 +229,7 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
     }
   }
 
-  if (notification) await notification.save();
+  // if (notification) await notification.save();
 
   return successRes(res, 201, true, "Order placed successfully", {
     order: newOrder,
