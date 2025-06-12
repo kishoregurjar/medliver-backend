@@ -40,7 +40,7 @@ router.post('/accept-reject-prescription', verifyAdminToken("pharmacy"), indexCo
 router.get(
     "/search-medicine",
     validateQuery(searchMedicineValidation),
-    verifyAdminToken("superadmin"),
+    verifyAdminToken("pharmacy"),
     indexController.medicineController.searchMedicine
 );
 router.get('/search-prescription-by-status', verifyAdminToken("pharmacy"), indexController.pharmacyOrderController.searchPrescriptionsByStatus);
