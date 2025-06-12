@@ -538,7 +538,7 @@ module.exports.acceptOrRejectPrecription = asyncErrorHandler(async (req, res, ne
           NotificationTypeId: order._id,
           recipientId: admin._id,
         });
-        // await notify.save();
+        await notify.save();
 
         if (admin.deviceToken) {
           await sendExpoNotification(
@@ -729,13 +729,13 @@ module.exports.searchPrescriptionsByStatus = asyncErrorHandler(async (req, res, 
 
   const filteredPrescriptions = query
     ? prescriptions.filter((p) => {
-        const regex = new RegExp(query.trim(), "i");
-        const customerName = p.user_id?.fullName || "";
-        return (
-          regex.test(p.prescriptionNumber || "") ||
-          regex.test(customerName)
-        );
-      })
+      const regex = new RegExp(query.trim(), "i");
+      const customerName = p.user_id?.fullName || "";
+      return (
+        regex.test(p.prescriptionNumber || "") ||
+        regex.test(customerName)
+      );
+    })
     : prescriptions;
 
   const totalResults = filteredPrescriptions.length;
@@ -782,13 +782,13 @@ module.exports.searchOrdersByStatus = asyncErrorHandler(async (req, res, next) =
 
   const filteredOrders = query
     ? orders.filter((order) => {
-        const regex = new RegExp(query.trim(), "i");
-        const customerName = order.customerId?.fullName || "";
-        return (
-          regex.test(order.orderNumber || "") ||
-          regex.test(customerName)
-        );
-      })
+      const regex = new RegExp(query.trim(), "i");
+      const customerName = order.customerId?.fullName || "";
+      return (
+        regex.test(order.orderNumber || "") ||
+        regex.test(customerName)
+      );
+    })
     : orders;
 
   const totalResults = filteredOrders.length;
@@ -808,7 +808,7 @@ module.exports.searchOrdersByStatus = asyncErrorHandler(async (req, res, next) =
 
 module.exports.createInvoiceForPrescription = asyncErrorHandler(async (req, res, next) => {
   const adminId = req.admin._id;
-  const {orderId, medicines, total_amount, discounted_amount } = req.body;
+  const { orderId, medicines, total_amount, discounted_amount } = req.body;
 
   const pharmacies = await pharmacyModel.findOne({ adminId });
   if (!pharmacies) {
@@ -832,7 +832,7 @@ module.exports.createInvoiceForPrescription = asyncErrorHandler(async (req, res,
 
   if (unavailableMedicines.length > 0) {
     return next(new CustomError(`Stock not available for medicines: ${unavailableMedicines.join(", ")}`, 400));
-    
+
   }
 
   order.total_amount = total_amount;
