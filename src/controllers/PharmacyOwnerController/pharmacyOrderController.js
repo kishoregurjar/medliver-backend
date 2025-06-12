@@ -25,18 +25,14 @@ module.exports.getAllAssignedOrder = asyncErrorHandler(
 
     const pharmacyId = findPharmacy._id;
     const orders = await ordersModel.find({
-      pharmacyResponseStatus: "pending",
-      pharmacyAttempts: {
-        $elemMatch: {
-          pharmacyId: pharmacyId,
-          status: "pending",
-        },
-      },
+      orderStatus: "pending",
+      assignedPharmacyId: pharmacyId,
     });
 
     return successRes(res, 200, true, "Orders fetched successfully", orders);
   }
 );
+
 
 module.exports.acceptOrRejectOrder = asyncErrorHandler(async (req, res, next) => {
   const adminId = req.admin._id;

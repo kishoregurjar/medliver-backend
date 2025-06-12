@@ -14,6 +14,11 @@ const notificationSchema = new mongoose.Schema({
         enum: ["customer", "delivery_partner", "admin", "pharmacy", "pathology"],
         required: true,
     },
+    orderId:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Order"
+    },
+
     recipientId: {
         type: mongoose.Schema.Types.ObjectId,
         refPath: "recipientType"
@@ -41,7 +46,7 @@ const notificationSchema = new mongoose.Schema({
         default: null
     },
     NotificationTypeId: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId, 
     },
     sentAt: {
         type: Date,
