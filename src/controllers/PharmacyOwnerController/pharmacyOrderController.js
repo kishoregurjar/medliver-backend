@@ -816,20 +816,20 @@ module.exports.createInvoiceForPrescription = asyncErrorHandler(async (req, res,
 
   const unavailableMedicines = [];
 
-  for (let med of medicines) {
-    const stock = await stockModel.findOne({
-      pharmacyId: pharmacies._id,
-      medicineId: med.medicineId
-    });
-    if (!stock || stock.quantity < med.quantity) {
-      unavailableMedicines.push(med.medicineId);
-    }
-  }
+  // for (let med of medicines) {
+  //   const stock = await stockModel.findOne({
+  //     pharmacyId: pharmacies._id,
+  //     medicineId: med.medicineId
+  //   });
+  //   if (!stock || stock.quantity < med.quantity) {
+  //     unavailableMedicines.push(med.medicineId);
+  //   }
+  // }
 
-  if (unavailableMedicines.length > 0) {
-    return next(new CustomError(`Stock not available for medicines: ${unavailableMedicines.join(", ")}`, 400));
+  // if (unavailableMedicines.length > 0) {
+  //   return next(new CustomError(`Stock not available for medicines: ${unavailableMedicines.join(", ")}`, 400));
 
-  }
+  // }
 
   order.total_amount = total_amount;
   order.discounted_amount = discounted_amount;
