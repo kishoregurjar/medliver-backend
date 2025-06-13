@@ -22,13 +22,14 @@ if (!admin.apps.length) {
   });
 }
 
-const sendFirebaseNotification = async (deviceToken, title, body, data = {}) => {
+const sendFirebaseNotification = async (deviceToken, title, body, data = {}, imageUrl = '') => {
   try {
     const message = {
       token: deviceToken,
       notification: {
         title,
         body,
+        image: 'https://media.istockphoto.com/id/1183183791/photo/talented-female-artist-works-on-abstract-oil-painting-using-paint-brush-she-creates-modern.jpg?s=2048x2048&w=is&k=20&c=dJJrGrY-BS5Flffk3JEBPKEhw5kR_fRoIbYsgiINKeQ=', // ✅ Include image URL here
       },
       android: {
         priority: 'high',
@@ -47,11 +48,19 @@ const sendFirebaseNotification = async (deviceToken, title, body, data = {}) => 
           },
         },
       },
+      webpush: {
+        notification: {
+          title,
+          body,
+          icon: 'https://medliver-admin-panel.vercel.app/fulllogo.png',     // Optional icon
+          image: 'https://media.istockphoto.com/id/1183183791/photo/talented-female-artist-works-on-abstract-oil-painting-using-paint-brush-she-creates-modern.jpg?s=2048x2048&w=is&k=20&c=dJJrGrY-BS5Flffk3JEBPKEhw5kR_fRoIbYsgiINKeQ=',    // ✅ Main image for web push
+        },
+      },
+      // data, // optional data payload
     };
 
     const response = await admin.messaging().send(message);
     console.log('✅ Notification sent successfully:', response);
-
     return { success: true, response };
   } catch (error) {
     console.error('❌ Error sending FCM notification:', {
@@ -69,5 +78,54 @@ const sendFirebaseNotification = async (deviceToken, title, body, data = {}) => 
     };
   }
 };
+
+
+// const sendFirebaseNotification = async (deviceToken, title, body, data = {}) => {
+//   try {
+//     const message = {
+//       token: deviceToken,
+//       notification: {
+//         title,
+//         body,
+//       },
+//       android: {
+//         priority: 'high',
+//       },
+//       apns: {
+//         headers: {
+//           'apns-priority': '10',
+//         },
+//         payload: {
+//           aps: {
+//             alert: {
+//               title,
+//               body,
+//             },
+//             sound: 'default',
+//           },
+//         },
+//       },
+//     };
+
+//     const response = await admin.messaging().send(message);
+//     console.log('✅ Notification sent successfully:', response);
+
+//     return { success: true, response };
+//   } catch (error) {
+//     console.error('❌ Error sending FCM notification:', {
+//       message: error.message,
+//       code: error.code,
+//       details: error.details || error.stack,
+//     });
+
+//     return {
+//       success: false,
+//       error: {
+//         message: error.message,
+//         code: error.code,
+//       },
+//     };
+//   }
+// };
 
 module.exports = sendFirebaseNotification;

@@ -111,7 +111,6 @@ router.post('/cancel-pathology-booking-from-user', verifyUserToken(), indexContr
 router.get('/get-orders-pathology', verifyUserToken(), indexController.customerTestOrderController.getOrdersPathology);
 router.get('/get-order-details-pathology', verifyUserToken(), indexController.customerTestOrderController.getOrderDetailsPathology);
 router.get('/search-orders-pathology', verifyUserToken(), indexController.customerTestOrderController.searchOrdersPathology);
-router.post("/test-booking", verifyUserToken(), indexController.customerTestOrderController.createPathologyOrder);
 router.post('/test-log-click', indexController.customerTestOrderController.logTestClick);
 router.get('/get-top-test-picks-for-user', indexController.customerTestOrderController.getLogHistoryTest);
 router.get('/get-all-test-category-pathology', indexController.customerTestOrderController.getAllTestCategory)

@@ -433,47 +433,56 @@ module.exports.uploadPrescription = asyncErrorHandler(async (req, res, next) => 
 
   // Notify pharmacy if available
   if (assignedPharmacy) {
+    let notificationType = "pharmacy_order_request";
+    let role = "pharmacy";
+    let notificationRes = notificationEnum.getNotification(role, notificationType);
+
     notification = new notificationModel({
-      title: "New Order",
-      message: "You have a new order",
-      recipientId: assignedPharmacy._id,
-      recipientType: "pharmacy",
+      title: notificationRes.title,
+      message: notificationRes.message,
+      recipientType: "pharmacyOwner",
+      notificationType: notificationType,
       NotificationTypeId: prescription._id,
-      notificationType: "pharmacy_order_request",
+      recipientId: assignedPharmacy._id,
     });
 
-    await sendExpoNotification(
-      [assignedPharmacy.deviceToken],
-      "New Order",
-      "You have a new order",
+    await sendFirebaseNotification(
+      assignedPharmacy.deviceToken,
+      notificationRes.title,
+      notificationRes.message,
       notification
-    );
+    )
   } else {
     // Notify admins for manual assignment
-    const admins = await adminSchema.find({ role: "superadmin" });
+    const admin = await adminSchema.findOne({ role: "superadmin" });
 
     prescription.status = "need_manual_assignment_to_pharmacy";
     await prescription.save();
 
-    for (const admin of admins) {
-      notification = new notificationModel({
-        title: "Manual Order Assignment",
-        message: "No pharmacy available. Manual assignment required.",
-        recipientId: admin._id,
-        recipientType: "admin",
-        NotificationTypeId: prescription._id,
-        notificationType: "manual_pharmacy_assignment",
-      });
+    let notificationType = "manual_pharmacy_assignment";
+    let role = "superAdmin";
+    let notificationRes = notificationEnum.getNotification(role, notificationType);
 
-      await sendExpoNotification(
-        [admin.deviceToken],
-        "Manual Assignment Needed",
-        "No pharmacy available for order",
+    notification = new notificationModel({
+      title: notificationRes.title,
+      message: notificationRes.message,
+      recipientType: "admin",
+      notificationType: notificationType,
+      NotificationTypeId: prescription._id,
+      recipientId: admin._id,
+    });
+
+    await notification.save();
+
+    if (admin.deviceToken) {
+      await sendFirebaseNotification(
+        admin.deviceToken,
+        notificationRes.title,
+        notificationRes.message,
         notification
-      );
-
-      await notification.save();
+      )
     }
+
   }
 
   if (notification && assignedPharmacy) {

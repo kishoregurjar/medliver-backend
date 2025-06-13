@@ -14,6 +14,8 @@ const { getDistance, generateOrderNumber } = require('../../utils/helper');
 const testClickHistoryModel = require('../../modals/testClickHistory.model');
 const jwt = require('jsonwebtoken');
 const testModel = require('../../modals/test.model');
+const sendFirebaseNotification = require('../../services/sendNotification');
+const notificationEnum = require('../../services/notificationEnum');
 
 
 module.exports.createPathologyOrder = asyncErrorHandler(async (req, res, next) => {
@@ -53,6 +55,8 @@ module.exports.createPathologyOrder = asyncErrorHandler(async (req, res, next) =
       }
     }
   });
+
+  console.log(allCenters, "allCenters");
 
   const userCoords = findAddress.location;
 
@@ -101,40 +105,45 @@ module.exports.createPathologyOrder = asyncErrorHandler(async (req, res, next) =
   let notification;
 
   if (assignedCenter) {
+    let notificationType = "pathology_order_request";
+    let role = "pathology";
+    let notificationRes = notificationEnum.getNotification(role, notificationType);
+
     notification = new notificationModel({
-      title: "New Pathology Order",
-      message: "You have a new test booking",
-      recipientId: assignedCenter._id,
+      title: notificationRes.title,
+      message: notificationRes.message,
       recipientType: "pathology",
+      notificationType: notificationType,
       NotificationTypeId: newOrder._id,
-      notificationType: "pathology_order_request",
+      recipientId: assignedCenter._id,
+    })
+    if (assignedCenter.deviceToken) {
+      await sendFirebaseNotification(
+        assignedCenter.deviceToken,
+        notificationRes.title,
+        notificationRes.message,
+        notification
+      )
+    }
+  } else {
+    const admin = await adminSchema.findOne({ role: "superadmin" });
+
+    notification = new notificationModel({
+      title: "Manual Pathology Assignment",
+      message: "No pathology center available. Manual assignment required.",
+      recipientId: admin._id,
+      recipientType: "admin",
+      NotificationTypeId: newOrder._id,
+      notificationType: "manual_pathology_assignment",
     });
+    newOrder.orderStatus = "need_manual_assignment_to_pathology";
+    await newOrder.save();
     await sendExpoNotification(
-      [assignedCenter.deviceToken],
-      "New Test Booking",
-      "You have a new pathology test booking",
+      [admin.deviceToken],
+      "Manual Assignment Needed",
+      "No pathology center available",
       notification
     );
-  } else {
-    const admins = await adminSchema.find({ role: "superadmin" });
-    for (const admin of admins) {
-      notification = new notificationModel({
-        title: "Manual Pathology Assignment",
-        message: "No pathology center available. Manual assignment required.",
-        recipientId: admin._id,
-        recipientType: "admin",
-        NotificationTypeId: newOrder._id,
-        notificationType: "manual_pathology_assignment",
-      });
-      newOrder.orderStatus = "need_manual_assignment_to_pathology";
-      await newOrder.save();
-      await sendExpoNotification(
-        [admin.deviceToken],
-        "Manual Assignment Needed",
-        "No pathology center available",
-        notification
-      );
-    }
   }
 
   if (notification) await notification.save();
@@ -455,30 +464,30 @@ module.exports.getLogHistoryTest = asyncErrorHandler(async (req, res, next) => {
 });
 
 module.exports.getAllTestCategory = asyncErrorHandler(async (req, res, next) => {
-    let { page, limit, sortOrder } = req.query;
+  let { page, limit, sortOrder } = req.query;
 
-    page = parseInt(page) || 1;
-    limit = parseInt(limit) || 10;
-    const skip = (page - 1) * limit;
+  page = parseInt(page) || 1;
+  limit = parseInt(limit) || 10;
+  const skip = (page - 1) * limit;
 
-    const sortDir = sortOrder?.toLowerCase() === "asc" ? 1 : -1;
+  const sortDir = sortOrder?.toLowerCase() === "asc" ? 1 : -1;
 
-    const [totalCategories, categories] = await Promise.all([
-        TestCategory.countDocuments(),
-        TestCategory.find()
-            .sort({ created_at: sortDir })
-            .skip(skip)
-            .limit(limit),
-    ]);
+  const [totalCategories, categories] = await Promise.all([
+    TestCategory.countDocuments(),
+    TestCategory.find()
+      .sort({ created_at: sortDir })
+      .skip(skip)
+      .limit(limit),
+  ]);
 
-    if (!categories || categories.length === 0) {
-        return successRes(res, 200, false, "No test categories found", []);
-    }
+  if (!categories || categories.length === 0) {
+    return successRes(res, 200, false, "No test categories found", []);
+  }
 
-    return successRes(res, 200, true, "Test categories fetched successfully", {
-        categories,
-        totalCategories,
-        currentPage: page,
-        totalPages: Math.ceil(totalCategories / limit),
-    });
+  return successRes(res, 200, true, "Test categories fetched successfully", {
+    categories,
+    totalCategories,
+    currentPage: page,
+    totalPages: Math.ceil(totalCategories / limit),
+  });
 });

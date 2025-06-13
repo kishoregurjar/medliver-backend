@@ -19,6 +19,18 @@ const notificationEnum = {
             message: "You have a new order"
         }
     },
+    pathology: {
+        pathology_order_request: {
+            title: "New Order",
+            message: "You have a new order"
+        }
+    },
+    delivery: {
+        delivery_order_request: {
+            title: "New Order",
+            message: "You have a new order"
+        }
+    },
 
     getNotification(role, type) {
         const roleNotifications = this[role];
