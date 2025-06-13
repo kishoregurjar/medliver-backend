@@ -1628,7 +1628,7 @@ const resetPasswordCustomerValidation = Joi.object({
 });
 
 const updateUserProfileValidation = Joi.object({
-  fullName: Joi.string()
+  fullName: Joi.string().allow('', null)
     .min(2)
     .max(50)
     .optional()
@@ -1637,55 +1637,55 @@ const updateUserProfileValidation = Joi.object({
       "string.max": "Full name must not exceed 50 characters",
     }),
 
-  email: Joi.string()
+  email: Joi.string().allow('', null)
     .email()
     .optional()
     .messages({
       "string.email": "Please enter a valid email address",
     }),
 
-  phoneNumber: Joi.string()
+  phoneNumber: Joi.string().allow('', null)
     .pattern(/^[6-9]\d{9}$/)
     .optional()
     .messages({
       "string.pattern.base": "Phone number must be a valid 10-digit Indian number",
     }),
 
-  password: Joi.string()
+  password: Joi.string().allow('', null)
     .min(6)
     .optional()
     .messages({
       "string.min": "Password must be at least 6 characters long",
     }),
 
-  address: Joi.string()
+  address: Joi.string().allow('', null)
     .optional()
     .messages({
       "string.base": "Address must be a string",
     }),
 
-  height: Joi.string()
+  height: Joi.string().allow('', null)
     .pattern(/^\d+\s?(cm|CM)$/)
     .optional()
     .messages({
       "string.pattern.base": "Height must be in cm (e.g., '170 cm')",
     }),
 
-  weight: Joi.string()
+  weight: Joi.string().allow('', null)
     .pattern(/^\d+\s?(kg|KG)?$/)
     .optional()
     .messages({
       "string.pattern.base": "Weight must be in kg (e.g., '70 kg')",
     }),
 
-  bloodGroup: Joi.string()
+  bloodGroup: Joi.string().allow('', null)
     .valid("A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-")
     .optional()
     .messages({
       "any.only": "Blood group must be a valid type (e.g., 'A+', 'O-')",
     }),
 
-  profilePicture: Joi.string()
+  profilePicture: Joi.string().allow('', null)
     .uri()
     .optional()
     .messages({
@@ -1702,7 +1702,7 @@ const updateUserProfileValidation = Joi.object({
       "any.required": "Longitude is required inside userCoordinates",
     }),
   })
-    .optional()
+    .optional().allow('', null)
     .messages({
       "object.base": "User coordinates must be an object with lat and long",
     }),
