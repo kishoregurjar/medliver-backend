@@ -1626,28 +1626,47 @@ const resetPasswordCustomerValidation = Joi.object({
         "Password must be at least 6 characters and include uppercase, lowercase, number, and special character",
     }),
 });
-const updateUserProfileValidation = Joi.object({
-  fullName: Joi.string().min(2).max(50).optional().messages({
-    "string.min": "Full name must be at least 2 characters",
-    "string.max": "Full name must not exceed 50 characters",
-  }),
 
-  email: Joi.string().email().optional().messages({
-    "string.email": "Please enter a valid email address",
-  }),
+const updateUserProfileValidation = Joi.object({
+  fullName: Joi.string()
+    .min(2)
+    .max(50)
+    .optional()
+    .messages({
+      "string.min": "Full name must be at least 2 characters",
+      "string.max": "Full name must not exceed 50 characters",
+    }),
+
+  email: Joi.string()
+    .email()
+    .optional()
+    .messages({
+      "string.email": "Please enter a valid email address",
+    }),
 
   phoneNumber: Joi.string()
     .pattern(/^[6-9]\d{9}$/)
     .optional()
     .messages({
-      "string.pattern.base":
-        "Phone number must be a valid 10-digit Indian number",
+      "string.pattern.base": "Phone number must be a valid 10-digit Indian number",
+    }),
+
+  password: Joi.string()
+    .min(6)
+    .optional()
+    .messages({
+      "string.min": "Password must be at least 6 characters long",
+    }),
+
+  address: Joi.string()
+    .optional()
+    .messages({
+      "string.base": "Address must be a string",
     }),
 
   height: Joi.string()
     .pattern(/^\d+\s?(cm|CM)$/)
     .optional()
-    .allow(null)
     .messages({
       "string.pattern.base": "Height must be in cm (e.g., '170 cm')",
     }),
@@ -1655,7 +1674,6 @@ const updateUserProfileValidation = Joi.object({
   weight: Joi.string()
     .pattern(/^\d+\s?(kg|KG)?$/)
     .optional()
-    .allow(null)
     .messages({
       "string.pattern.base": "Weight must be in kg (e.g., '70 kg')",
     }),
@@ -1663,15 +1681,33 @@ const updateUserProfileValidation = Joi.object({
   bloodGroup: Joi.string()
     .valid("A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-")
     .optional()
-    .allow(null)
     .messages({
       "any.only": "Blood group must be a valid type (e.g., 'A+', 'O-')",
     }),
 
-  profilePicture: Joi.string().optional().allow(null).messages({
-    "string.base": "Profile picture must be a string (e.g., a URL or filename)",
-  }),
+  profilePicture: Joi.string()
+    .uri()
+    .optional()
+    .messages({
+      "string.uri": "Profile picture must be a valid URL",
+    }),
+
+  userCoordinates: Joi.object({
+    lat: Joi.number().required().messages({
+      "number.base": "Latitude must be a number",
+      "any.required": "Latitude is required inside userCoordinates",
+    }),
+    long: Joi.number().required().messages({
+      "number.base": "Longitude must be a number",
+      "any.required": "Longitude is required inside userCoordinates",
+    }),
+  })
+    .optional()
+    .messages({
+      "object.base": "User coordinates must be an object with lat and long",
+    }),
 });
+
 
 const signUpSignInWithGoogleValidation = Joi.object({
   email: Joi.string().email().required().messages({
