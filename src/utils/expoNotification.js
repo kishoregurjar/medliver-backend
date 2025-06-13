@@ -17,14 +17,9 @@ module.exports.sendExpoNotification = async (tokens, title, body, data = {}) => 
         },
       })
     );
-    try {
-      const responses = await Promise.all(sendPromises);
-      console.log(responses[0].data, "responses")
-      const results = responses.map(res => res.data);
-      return results;
-    } catch (error) {
-      console.log(error, "errororororor")
-    }
+    const responses = await Promise.all(sendPromises);
+    const results = responses.map(res => res.data);
+    return results;
   } catch (error) {
     console.error("❌ Notification send error:", error.message);
     return false;

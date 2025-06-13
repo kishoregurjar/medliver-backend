@@ -4,7 +4,7 @@ const notificationEnum = {
             title: "Manual Pharmacy Assignment Needed",
             message: "No pharmacy available. Manual assignment required."
         },
-        manual_assignment_to_delivery_partner: {
+        manual_delivery_assignment: {
             title: "Manual Delivery Assignment Needed",
             message: "No delivery partner available. Manual assignment required."
         },

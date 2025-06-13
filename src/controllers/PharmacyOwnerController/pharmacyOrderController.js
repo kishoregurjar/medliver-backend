@@ -13,6 +13,8 @@ const { getRouteBetweenCoords } = require("../../utils/distance.helper");
 const PrescriptionSchema = require("../../modals/pescriptionSchema");
 const stockModel = require("../../modals/stock.model");
 const { default: mongoose } = require("mongoose");
+const notificationEnum = require("../../services/notificationEnum");
+const sendFirebaseNotification = require("../../services/sendNotification");
 
 module.exports.getAllAssignedOrder = asyncErrorHandler(
   async (req, res, next) => {
@@ -33,7 +35,8 @@ module.exports.getAllAssignedOrder = asyncErrorHandler(
   }
 );
 
-
+/**
+ 
 module.exports.acceptOrRejectOrder = asyncErrorHandler(async (req, res, next) => {
   const adminId = req.admin._id;
   const { orderId, status } = req.body;
@@ -127,7 +130,6 @@ module.exports.acceptOrRejectOrder = asyncErrorHandler(async (req, res, next) =>
       await notification.save();
 
       if (nearest.deviceToken) {
-        console.log(nearest.deviceToken, "nearest.deviceToken");
         await sendExpoNotification(
           [nearest.deviceToken],
           "New Delivery Request",
@@ -138,23 +140,26 @@ module.exports.acceptOrRejectOrder = asyncErrorHandler(async (req, res, next) =>
       order.orderStatus = "assigned_to_delivery_partner";
     } else {
       const admin = await adminSchema.findOne({ role: "superadmin" });
-
+      let notificationType = "manual_delivery_assignment";
+      let role = "superAdmin";
+      let notificationRes = notificationEnum.getNotification(role, NotificationType);
       if (admin) {
         const notify = new notificationModel({
-          title: "Manual Delivery Partner Assignment Required",
-          message: `No delivery partner available for order ${order._id}`,
+          title: notificationRes.title,
+          message: notificationRes.message,
           recipientType: "admin",
-          notificationType: "manual_delivery_assignment",
+          notificationType: notificationType,
           NotificationTypeId: order._id,
           recipientId: admin._id,
         });
         // await notify.save();
 
         if (admin.deviceToken) {
-          await sendExpoNotification(
-            [admin.deviceToken],
-            "Manual Assignment Needed",
-            "No delivery partner available for order",
+          console.log(admin.deviceToken, "admin device token")
+          await sendFirebaseNotification(
+            admin.deviceToken,
+            notificationRes.title,
+            notificationRes.message,
             notify
           );
         }
@@ -205,21 +210,32 @@ module.exports.acceptOrRejectOrder = asyncErrorHandler(async (req, res, next) =>
   }
 
   if (!nextPharmacy) {
-    await order.save();
 
-    const admins = await adminSchema.find({ role: "superadmin" });
+    // await order.save();
+    let notificationType = "manual_pharmacy_assignment";
+    let role = "superAdmin";
+    let notificationRes = notificationEnum.getNotification(role, notificationType);
 
-    for (let admin of admins) {
-      const notify = new notificationModel({
-        title: "Manual Pharmacy Assignment Required",
-        message: `No pharmacy available for order ${order._id}`,
-        recipientType: "admin",
-        notificationType: "manual_pharmacy_assignment",
-        NotificationTypeId: order._id,
-        recipientId: admin._id,
-      });
-      await notify.save();
+    const admin = await adminSchema.findOne({ role: "superadmin" });
+    const notify = new notificationModel({
+      title: notificationRes.title,
+      message: notificationRes.message,
+      recipientType: "admin",
+      notificationType: notificationType,
+      NotificationTypeId: order._id,
+      recipientId: admin._id,
+    });
+    // await notify.save();
+
+    if (admin.deviceToken) {
+      console.log((admin.deviceToken), "admin device token")
+      await sendFirebaseNotification(
+        admin.deviceToken,
+        "Manual Assignment Required",
+        "No pharmacy available for order",
+        notify)
     }
+    order.orderStatus = "need_manual_assignment_to_pharmacy";
 
     return successRes(res, 200, true, "Order rejected.", order);
   }
@@ -229,19 +245,28 @@ module.exports.acceptOrRejectOrder = asyncErrorHandler(async (req, res, next) =>
   order.pharmacyResponseStatus = "pending";
   order.pharmacyQueue.push(nextPharmacy._id);
 
-  await order.save();
+  // await order.save();
+  let notificationType = "pharmacy_order_request";
+  let role = "pharmacy";
+  let notificationRes = notificationEnum.getNotification(role, notificationType);
+
+  const notification = new notificationModel({
+    title: notificationRes.title,
+    message: notificationRes.message,
+    recipientId: nextPharmacy._id,
+    recipientType: "pharmacy",
+    NotificationTypeId: order._id,
+    notificationType: notificationType,
+  });
+
+
 
   if (nextPharmacy.deviceToken) {
-    await sendExpoNotification(
-      [nextPharmacy.deviceToken],
-      "New Order Request",
-      "You have a new pharmacy order request",
-      {
-        path: "PharmacyOrderScreen",
-        orderId: order._id,
-        medicineName: order.items[0]?.medicineName || "Order",
-        orderType: order.orderType,
-      }
+    await sendFirebaseNotification(
+      nextPharmacy.deviceToken,
+      notificationRes.title,
+      notificationRes.message,
+      notification
     );
   }
 
@@ -253,6 +278,255 @@ module.exports.acceptOrRejectOrder = asyncErrorHandler(async (req, res, next) =>
     order
   );
 });
+ */
+
+module.exports.acceptOrRejectOrder = asyncErrorHandler(async (req, res, next) => {
+  const adminId = req.admin._id;
+  const { orderId, status } = req.body;
+
+  if (!["accepted", "rejected"].includes(status)) {
+    return next(new CustomError("Invalid status", 400));
+  }
+
+  const pharmacy = await pharmacyModel.findOne({ adminId }).select("_id pharmacyCoordinates pharmacyAddress");
+  if (!pharmacy) return next(new CustomError("Pharmacy not found", 404));
+
+  const pharmacyId = pharmacy._id.toString();
+  const { pharmacyCoordinates, pharmacyAddress } = pharmacy;
+
+  if (!pharmacyCoordinates?.lat || !pharmacyCoordinates?.long) {
+    return next(new CustomError("Pharmacy coordinates are not available", 400));
+  }
+
+  const order = await ordersModel.findById(orderId);
+  if (!order) return next(new CustomError("Order not found", 404));
+
+  if (order.assignedPharmacyId?.toString() !== pharmacyId) {
+    return next(new CustomError("This pharmacy is not assigned to this order", 403));
+  }
+
+  const alreadyAcceptedStatuses = [
+    "accepted_by_pharmacy",
+    "assigned_to_delivery_partner",
+    "accepted_by_delivery_partner",
+    "need_manual_assignment_to_delivery_partner",
+  ];
+
+  if (status === "accepted" && alreadyAcceptedStatuses.includes(order.orderStatus)) {
+    return next(new CustomError("Order already accepted", 400));
+  }
+
+  if (status === "rejected" && order.orderStatus === "accepted_by_pharmacy") {
+    return next(new CustomError("Order already accepted. Cannot reject now", 400));
+  }
+
+  order.pharmacyAttempts.push({
+    pharmacyId,
+    status,
+    attemptedAt: new Date(),
+  });
+
+  // ---------------- ACCEPT ----------------
+  if (status === "accepted") {
+    Object.assign(order, {
+      pharmacyResponseStatus: "accepted",
+      orderStatus: "accepted_by_pharmacy",
+      assignedPharmacyCoordinates: pharmacyCoordinates,
+      pharmacyQueue: [],
+      pickupAddress: pharmacyAddress,
+    });
+
+    if (order.deliveryAddress?.coordinates) {
+      const route = await getRouteBetweenCoords(pharmacyCoordinates, order.deliveryAddress.coordinates);
+      if (route) order.pharmacyToCustomerRoute = route;
+    }
+
+    const availablePartners = await DeliveryPartner.find({
+      availabilityStatus: "available",
+      isBlocked: false,
+      deviceToken: { $ne: null },
+      "location.lat": { $ne: null },
+      "location.long": { $ne: null },
+    });
+
+    if (availablePartners.length) {
+      const sorted = availablePartners
+        .map(dp => ({
+          ...dp._doc,
+          distance: getDistance(pharmacyCoordinates, dp.location),
+        }))
+        .sort((a, b) => a.distance - b.distance);
+
+      const nearest = sorted[0];
+      order.deliveryPartnerId = nearest._id;
+      order.orderStatus = "assigned_to_delivery_partner";
+      order.deliveryPartnerQueue.push(nearest._id);
+      order.deliveryPartnerAttempts.push({
+        deliveryPartnerId: nearest._id,
+        status: "pending",
+        attemptedAt: new Date(),
+      });
+
+      const notification = new notificationModel({
+        title: "New Pickup Order",
+        message: "You have a new pickup order request",
+        recipientType: "delivery_partner",
+        notificationType: "delivery_partner_pickup_request",
+        NotificationTypeId: order._id,
+        recipientId: nearest._id,
+      });
+
+      await notification.save();
+
+      if (nearest.deviceToken) {
+        await sendExpoNotification(
+          [nearest.deviceToken],
+          "New Delivery Request",
+          "You have a new delivery request",
+          notification
+        );
+      }
+    } else {
+      const admin = await adminSchema.findOne({ role: "superadmin" });
+      const notificationType = "manual_delivery_assignment";
+      const role = "superAdmin";
+      const notificationRes = notificationEnum.getNotification(role, notificationType);
+
+      if (admin?.deviceToken) {
+        const notify = new notificationModel({
+          title: notificationRes.title,
+          message: notificationRes.message,
+          recipientType: "admin",
+          notificationType,
+          NotificationTypeId: order._id,
+          recipientId: admin._id,
+        });
+
+        await notify.save();
+
+        await sendFirebaseNotification(
+          admin.deviceToken,
+          notificationRes.title,
+          notificationRes.message,
+          notify
+        );
+      }
+
+      order.orderStatus = "need_manual_assignment_to_delivery_partner";
+    }
+
+    await order.save(); // ✅ SAVE ORDER
+
+    return successRes(res, 200, true, "Order accepted successfully", order);
+  }
+
+  // ---------------- REJECT ----------------
+  order.pharmacyResponseStatus = "rejected";
+  order.assignedPharmacyId = null;
+  order.pharmacyQueue = order.pharmacyQueue.filter(id => id.toString() !== pharmacyId);
+
+  const attemptedIds = new Set(order.pharmacyAttempts.map(a => a.pharmacyId.toString()));
+
+  let nextPharmacy = null;
+
+  for (let id of order.pharmacyQueue) {
+    if (!attemptedIds.has(id.toString())) {
+      nextPharmacy = await pharmacyModel.findById(id).select("_id deviceToken");
+      break;
+    }
+  }
+
+  if (!nextPharmacy) {
+    const customerCoords = order.deliveryAddress?.coordinates;
+    const remaining = await pharmacyModel.find({
+      _id: { $nin: [...attemptedIds] },
+      "location.coordinates": { $exists: true },
+    });
+
+    if (remaining.length) {
+      nextPharmacy = remaining
+        .map(p => ({
+          ...p._doc,
+          distance: getDistance(customerCoords, p.location.coordinates),
+        }))
+        .sort((a, b) => a.distance - b.distance)[0];
+    }
+  }
+
+  if (!nextPharmacy) {
+    const admin = await adminSchema.findOne({ role: "superadmin" });
+    const notificationType = "manual_pharmacy_assignment";
+    const role = "superAdmin";
+    const notificationRes = notificationEnum.getNotification(role, notificationType);
+
+    if (admin?.deviceToken) {
+      const notify = new notificationModel({
+        title: notificationRes.title,
+        message: notificationRes.message,
+        recipientType: "admin",
+        notificationType,
+        NotificationTypeId: order._id,
+        recipientId: admin._id,
+      });
+
+      await notify.save();
+
+      await sendFirebaseNotification(
+        admin.deviceToken,
+        "Manual Assignment Required",
+        "No pharmacy available for order",
+        notify
+      );
+    }
+
+    order.orderStatus = "need_manual_assignment_to_pharmacy";
+
+    await order.save(); // ✅ SAVE ORDER
+
+    return successRes(res, 200, true, "Order rejected.", order);
+  }
+
+  // Assign to next pharmacy
+  order.assignedPharmacyId = nextPharmacy._id;
+  order.pharmacyResponseStatus = "pending";
+  order.pharmacyQueue.push(nextPharmacy._id);
+
+  const notificationType = "pharmacy_order_request";
+  const role = "pharmacy";
+  const notificationRes = notificationEnum.getNotification(role, notificationType);
+
+  const notification = new notificationModel({
+    title: notificationRes.title,
+    message: notificationRes.message,
+    recipientId: nextPharmacy._id,
+    recipientType: "pharmacy",
+    NotificationTypeId: order._id,
+    notificationType,
+  });
+
+  await notification.save();
+
+  if (nextPharmacy.deviceToken) {
+    await sendFirebaseNotification(
+      nextPharmacy.deviceToken,
+      notificationRes.title,
+      notificationRes.message,
+      notification
+    );
+  }
+
+  await order.save(); // ✅ SAVE ORDER
+
+  return successRes(
+    res,
+    200,
+    true,
+    "Order rejected and reassigned to another pharmacy",
+    order
+  );
+});
+
+
 
 module.exports.getAcceptedOrdersByPharmacy = asyncErrorHandler(
   async (req, res) => {
