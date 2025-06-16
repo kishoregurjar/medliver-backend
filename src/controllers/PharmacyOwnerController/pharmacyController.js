@@ -2,6 +2,7 @@ const pharmacyModel = require("../../modals/pharmacy.model");
 const { getLatLngFromPlaceId } = require("../../services/helper");
 const { successRes } = require("../../services/response");
 const asyncErrorHandler = require("../../utils/asyncErrorHandler");
+const CustomError = require("../../utils/customError");
 
 module.exports.updatePharmacyAddress = asyncErrorHandler(async (req, res, next) => {
     const pharmacyId = req.admin._id;
@@ -37,7 +38,7 @@ module.exports.changePharmacyAvailabilityStatus = asyncErrorHandler(async (req, 
     return next(new CustomError("availabilityStatus is required", 400));
   }
   if (!["available", "unavailable"].includes(availabilityStatus)) {
-    return next(new CustomError("Status is invalid", 400));
+   return next(new CustomError(`Status '${availabilityStatus}' is invalid. Must be 'available' or 'unavailable'`, 400));
   }
 
   const pharmacy = await pharmacyModel.findOne({ adminId: admin._id });
