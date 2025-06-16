@@ -1,8 +1,8 @@
+// socketServer.js
 const { Server } = require("socket.io");
 
 let io;
-
-const liveLocations = {}; 
+const liveLocations = {}; // { orderId: { partnerId: { location, userCoordinates } } }
 
 const initializeSocket = (server) => {
   io = new Server(server, {
@@ -13,24 +13,34 @@ const initializeSocket = (server) => {
   });
 
   console.log("Socket.io initialized");
+
   io.on("connection", (socket) => {
     console.log("User connected:", socket.id);
 
-
+    // User joins an order room
     socket.on("join_order_room", (orderId) => {
       socket.join(orderId);
       console.log(`User joined room: ${orderId}`);
     });
-  
-    // Delivery partner sends location update with orderId and partnerId
+
+    // Delivery partner sends location update
     socket.on("update_location", (data) => {
       const { orderId, partnerId, newLocation } = data;
-  
+
+      if (!orderId || !partnerId || !newLocation) return;
+
       if (!liveLocations[orderId]) liveLocations[orderId] = {};
-      liveLocations[orderId][partnerId] = newLocation;
-  
-      // Broadcast updated locations for this order to all users tracking it
-      io.to(orderId).emit("location_update", liveLocations[orderId]);
+      liveLocations[orderId][partnerId] = {
+        location: newLocation
+      };
+
+      // Broadcast location to all users tracking this order
+      io.to(orderId).emit("location_update", {
+        orderId,
+        partnerId,
+        location: newLocation,
+        timestamp: new Date(),
+      });
     });
 
     socket.on("disconnect", () => {
