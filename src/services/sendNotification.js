@@ -23,6 +23,7 @@ if (!admin.apps.length) {
 }
 
 const sendFirebaseNotification = async (deviceToken, title, body, data = {}, imageUrl = '') => {
+  console.log(deviceToken, title, body, data, imageUrl);
   try {
     const message = {
       token: deviceToken,
@@ -78,54 +79,4 @@ const sendFirebaseNotification = async (deviceToken, title, body, data = {}, ima
     };
   }
 };
-
-
-// const sendFirebaseNotification = async (deviceToken, title, body, data = {}) => {
-//   try {
-//     const message = {
-//       token: deviceToken,
-//       notification: {
-//         title,
-//         body,
-//       },
-//       android: {
-//         priority: 'high',
-//       },
-//       apns: {
-//         headers: {
-//           'apns-priority': '10',
-//         },
-//         payload: {
-//           aps: {
-//             alert: {
-//               title,
-//               body,
-//             },
-//             sound: 'default',
-//           },
-//         },
-//       },
-//     };
-
-//     const response = await admin.messaging().send(message);
-//     console.log('✅ Notification sent successfully:', response);
-
-//     return { success: true, response };
-//   } catch (error) {
-//     console.error('❌ Error sending FCM notification:', {
-//       message: error.message,
-//       code: error.code,
-//       details: error.details || error.stack,
-//     });
-
-//     return {
-//       success: false,
-//       error: {
-//         message: error.message,
-//         code: error.code,
-//       },
-//     };
-//   }
-// };
-
 module.exports = sendFirebaseNotification;

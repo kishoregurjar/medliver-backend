@@ -12,12 +12,17 @@ const notificationEnum = {
             title: "Manual Pathology Assignment Needed",
             message: "No pathology center available. Manual assignment required."
         },
+
     },
     pharmacy: {
         pharmacy_order_request: {
             title: "New Order",
             message: "You have a new order"
-        }
+        },
+        delivery_partner_reached_pharmacy: {
+            title: "Please Dispatch Order",
+            message: "Delivery Partner Reached Pharmacy"
+        },
     },
     pathology: {
         pathology_order_request: {

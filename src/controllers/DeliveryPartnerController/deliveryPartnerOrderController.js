@@ -15,6 +15,9 @@ const { generateOTPNumber } = require("../../services/helper");
 const { pickupOrderMail } = require("../../services/sendMail");
 const Razorpay = require("razorpay");
 const moment = require("moment");
+const notificationEnum = require("../../services/notificationEnum");
+const sendFirebaseNotification = require("../../services/sendNotification");
+
 
 
 
@@ -266,6 +269,7 @@ module.exports.reachedPharmacy = asyncErrorHandler(async (req, res, next) => {
   }
 
   let findPharmacy = await pharmacyModel.findOne({ _id: order.assignedPharmacyId }).select("deviceToken");
+  console.log(findPharmacy, "findPharmacy");
   let pharmacyDeviceToken = findPharmacy.deviceToken;
 
   const otp = generateOTPNumber(4);
@@ -275,24 +279,29 @@ module.exports.reachedPharmacy = asyncErrorHandler(async (req, res, next) => {
   pickupOrderMail(
     deliveryPartner.email,
     deliveryPartner.fullname, otp, order._id);
+  let notificationType = "delivery_partner_reached_pharmacy";
+  let notificationRes = notificationEnum.getNotification("pharmacy", notificationType);
 
   let newNotification = new notificationModel({
-    title: "Delivery Partner Reached Pharmacy",
-    message: "Delivery Partner Reached Pharmacy",
+    title: notificationRes.title,
+    message: notificationRes.message,
     recipientType: "pharmacy",
-    notificationType: "delivery_partner_reached_pharmacy",
+    notificationType: notificationType,
     NotificationTypeId: order._id,
     recipientId: order.assignedPharmacyId
   });
-  await newNotification.save();
-  await sendExpoNotification(
-    [pharmacyDeviceToken],
-    "Delivery Partner Reached Pharmacy",
-    "Delivery Partner Reached Pharmacy",
-    newNotification
-  );
 
-  await order.save();
+
+  // await newNotification.save();
+
+  await sendFirebaseNotification(
+    pharmacyDeviceToken,
+    notificationRes.title,
+    notificationRes.message,
+    newNotification
+  )
+
+  // await order.save();
 
   return successRes(res, 200, true, "Delivery partner reached pharmacy successfully", order);
 });
