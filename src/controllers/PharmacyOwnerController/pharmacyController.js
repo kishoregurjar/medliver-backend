@@ -28,3 +28,25 @@ module.exports.updatePharmacyAddress = asyncErrorHandler(async (req, res, next) 
 
     return successRes(res, 200, true, "Address updated successfully", updatedPharmacy);
 });
+
+module.exports.changePharmacyAvailabilityStatus = asyncErrorHandler(async (req, res, next) => {
+  const { availabilityStatus } = req.body;
+  const admin = req.admin;
+
+  if (!availabilityStatus) {
+    return next(new CustomError("availabilityStatus is required", 400));
+  }
+  if (!["available", "unavailable"].includes(availabilityStatus)) {
+    return next(new CustomError("Status is invalid", 400));
+  }
+
+  const pharmacy = await pharmacyModel.findOne({ adminId: admin._id });
+  if (!pharmacy) {
+    return next(new CustomError("Pharmacy not found", 404));
+  }
+
+  pharmacy.availabilityStatus = availabilityStatus;
+  await pharmacy.save();
+
+  return successRes(res, 200, true, "Status changed successfully", pharmacy);
+});
