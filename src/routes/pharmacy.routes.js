@@ -46,4 +46,8 @@ router.get(
 router.get('/search-prescription-by-status', verifyAdminToken("pharmacy"), indexController.pharmacyOrderController.searchPrescriptionsByStatus);
 router.get('/search-orders-by-status',verifyAdminToken("pharmacy"), indexController.pharmacyOrderController.searchOrdersByStatus)
 router.post("/create-invoice-for-prescription", verifyAdminToken('pharmacy'), indexController.pharmacyOrderController.createInvoiceForPrescription);
+
+// Toggle availability status 
+router.put("/change-availability-status", verifyAdminToken('pharmacy'), indexController.pharmacyController.changePharmacyAvailabilityStatus);
+
 module.exports = router;
