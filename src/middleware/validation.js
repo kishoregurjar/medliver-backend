@@ -2437,13 +2437,6 @@ const changeDoctorePasswordSchema = Joi.object({
 
 //stock routes validation
 const createStockValidation = Joi.object({
-  pharmacyId: Joi.string()
-    .pattern(/^[0-9a-fA-F]{24}$/)
-    .required()
-    .messages({
-      "string.pattern.base": "Invalid pharmacy ID format",
-      "any.required": "pharmacy ID is required",
-    }),
   medicines: Joi.array()
     .items(
       Joi.object({
@@ -2454,6 +2447,7 @@ const createStockValidation = Joi.object({
             "string.pattern.base": "Invalid medicine ID format",
             "any.required": "medicine ID is required",
           }),
+          name: Joi.string().required(),
         price: Joi.number().required(),
         quantity: Joi.number().default(0),
         discount: Joi.number().default(0),
@@ -2499,13 +2493,13 @@ const deleteStockValidation = Joi.object({
 });
 
 const updateStockValidation = Joi.object({
-  pharmacyId: Joi.string()
-    .pattern(/^[0-9a-fA-F]{24}$/)
-    .required()
-    .messages({
-      "string.empty": "Pharmacy ID is required",
-      "string.pattern.base": "Invalid Pharmacy ID format",
-    }),
+  // pharmacyId: Joi.string()
+  //   .pattern(/^[0-9a-fA-F]{24}$/)
+  //   .required()
+  //   .messages({
+  //     "string.empty": "Pharmacy ID is required",
+  //     "string.pattern.base": "Invalid Pharmacy ID format",
+  //   }),
 
   medicineId: Joi.string()
     .pattern(/^[0-9a-fA-F]{24}$/)
@@ -2515,17 +2509,16 @@ const updateStockValidation = Joi.object({
       "string.pattern.base": "Invalid Medicine ID format",
     }),
 
-  quantity: Joi.number().min(0).optional().messages({
+  quantity: Joi.number().min(0).optional().allow('',null).messages({
     "number.base": "Quantity must be a number",
-    "number.min": "Quantity cannot be negative",
   }),
 
-  price: Joi.number().positive().optional().messages({
+  price: Joi.number().positive().optional().allow('',null).messages({
     "number.base": "Price must be a number",
     "number.positive": "Price must be a positive number",
   }),
 
-  discount: Joi.number().min(0).max(100).optional().messages({
+  discount: Joi.number().min(0).max(100).optional().allow('',null).messages({
     "number.base": "Discount must be a number",
     "number.min": "Discount cannot be less than 0",
     "number.max": "Discount cannot be more than 100",

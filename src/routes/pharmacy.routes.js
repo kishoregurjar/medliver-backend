@@ -8,7 +8,7 @@ const { validate, validateQuery, createStockValidation, getStockByPharmacyIdVali
 /*=======================================StockRoute=================================== */
 
 router.post("/create-stock", validate(createStockValidation), verifyAdminToken("pharmacy"), indexController.stockController.createStock)
-router.get("/get-medicine-by-pharmacy-id", validateQuery(getStockByPharmacyIdValidation), verifyAdminToken("pharmacy"), indexController.stockController.getStockByPharmacyId)
+router.get("/get-medicine-by-pharmacy-id", verifyAdminToken("pharmacy"), indexController.stockController.getStockByPharmacyId)
 router.get("/get-all-stock", verifyAdminToken("pharmacy"), validateQuery(getAllStockValidation), indexController.stockController.getAllStock)
 router.put("/update-stock", verifyAdminToken("pharmacy"), validate(updateStockValidation), indexController.stockController.updateStock)
 router.delete("/delete-stock", verifyAdminToken("pharmacy"), validateQuery(deleteStockValidation), indexController.stockController.deleteStock)

@@ -5,11 +5,18 @@ const asyncErrorHandler = require("../utils/asyncErrorHandler");
 const CustomError = require("../utils/customError")
 const { successRes } = require('../services/response');
 
+
 module.exports.createStock = asyncErrorHandler(async (req, res, next) => {
-    const { pharmacyId, medicines } = req.body;
+      const adminId = req.admin._id;    
+      const pharmacyId = await Pharmacy.findOne({ adminId });
+
+      if (!pharmacyId) {
+        return next(new CustomError("Pharmacy not found", 404));
+      }
+    const { medicines } = req.body;
   
-    if (!pharmacyId || medicines.length === 0) {
-      return next(new CustomError("pharmacyId and medicines are required", 400));
+    if ( medicines.length === 0) {
+      return next(new CustomError("medicines are required", 400));
     }
     const createdStocks = [];
     for (const item of medicines) {
@@ -42,11 +49,12 @@ module.exports.createStock = asyncErrorHandler(async (req, res, next) => {
   });
   
   module.exports.getStockByPharmacyId = asyncErrorHandler(async (req, res, next) => {
-    const { pharmacyId } = req.query;
-  
-    if (!pharmacyId) {
-      return next(new CustomError("pharmacyId is required", 400));
-    }
+      const adminId = req.admin._id;    
+      const pharmacyId = await Pharmacy.findOne({ adminId });
+
+      if (!pharmacyId) {
+        return next(new CustomError("Pharmacy not found", 404));
+      }
   
     const stocks = await Stock.find({ pharmacyId }).populate("medicineId");
   
@@ -87,7 +95,12 @@ module.exports.createStock = asyncErrorHandler(async (req, res, next) => {
   });
   
   module.exports.updateStock = asyncErrorHandler(async (req, res, next) => {
-    const { pharmacyId, medicineId, quantity, price, discount } = req.body;
+      const adminId = req.admin._id;    
+      const pharmacyId = await Pharmacy.findOne({ adminId });
+      if (!pharmacyId) {
+        return next(new CustomError("Pharmacy not found", 404));
+      }
+    const { medicineId, quantity, price, discount } = req.body;
   
     if (!pharmacyId || !medicineId) {
       return next(new CustomError("pharmacyId and medicineId are required", 400));
@@ -116,23 +129,29 @@ module.exports.createStock = asyncErrorHandler(async (req, res, next) => {
   });
   
 
-  module.exports.deleteStock = asyncErrorHandler(async (req, res, next) => {
-    const { stockId } = req.query;
-    if(!stockId){
-      return next(new CustomError("Stock Id Id Is Requiered", 400));
+module.exports.deleteStock = asyncErrorHandler(async (req, res, next) => {
+  const adminId = req.admin._id;
 
-    }
+  const pharmacy = await Pharmacy.findOne({ adminId });
+  if (!pharmacy) {
+    return next(new CustomError("Pharmacy not found", 404));
+  }
 
-    const stock = await Stock.findById(stockId);
-  
-    if (!stock) {
-      return next(new CustomError('stock not found', 404));
-    }
-  
-    await Stock.findByIdAndDelete(stockId);
-  
-    return successRes(res, 200, true, 'stock deleted successfully.');
-  });
+  const { stockId } = req.query;
+  if (!stockId) {
+    return next(new CustomError("Stock Id is required", 400));
+  }
+
+  const stock = await Stock.findOne({ _id: stockId, pharmacyId: pharmacy._id });
+  if (!stock) {
+    return next(new CustomError('Stock not found or not owned by your pharmacy', 404));
+  }
+
+  await Stock.findByIdAndDelete(stockId);
+
+  return successRes(res, 200, true, 'Stock deleted successfully.',stock);
+});
+
 
   module.exports.searchStock = asyncErrorHandler(async (req, res, next) => {
   let { query, page, limit } = req.query;
