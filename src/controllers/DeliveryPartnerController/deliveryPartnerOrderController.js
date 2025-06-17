@@ -17,6 +17,8 @@ const Razorpay = require("razorpay");
 const moment = require("moment");
 const notificationEnum = require("../../services/notificationEnum");
 const sendFirebaseNotification = require("../../services/sendNotification");
+const deliveryRateModel = require("../../modals/deliveryRate.model");
+const deliveryPartnerPaymentModel = require("../../modals/deliveryPartnerPayment.model");
 
 
 
@@ -445,42 +447,59 @@ module.exports.generateUPIQRCode = asyncErrorHandler(async (req, res, next) => {
   });
 });
 
-
-
 module.exports.deliverOrder = asyncErrorHandler(async (req, res, next) => {
   const deliveryPartnerId = req.partner._id;
   const { orderId, otp } = req.body;
 
-  if (!orderId) {
-    return next(new CustomError("Order ID is required", 400));
-  }
+  if (!orderId) return next(new CustomError("Order ID is required", 400));
 
-  // Fetch both order and delivery partner details in parallel
   const [order, deliveryPartner] = await Promise.all([
     ordersModel.findOne({ _id: orderId, deliveryPartnerId }),
     DeliveryPartner.findById(deliveryPartnerId),
   ]);
 
-  if (!order) {
-    return next(new CustomError("Order not found", 404));
-  }
-
-  if (!deliveryPartner) {
-    return next(new CustomError("Delivery partner not found", 404));
-  }
-
+  if (!order) return next(new CustomError("Order not found", 404));
+  if (!deliveryPartner) return next(new CustomError("Delivery partner not found", 404));
   if (order.orderStatus !== "reached_destination") {
-    return next(new CustomError("Order is not reached destination", 400));
+    return next(new CustomError("Order is not at destination", 400));
   }
+  if (order.customerOTP !== otp) return next(new CustomError("Invalid OTP", 400));
 
-  if (order.customerOTP !== otp) {
-    return next(new CustomError("Invalid OTP", 400));
-  }
+  if (order.paymentStatus !== "paid") return next(new CustomError("Order is not paid", 400));
+
+  const routeData = order.pharmacyToCustomerRoute?.[0];
+  const distanceStr = routeData?.distance || "0 km";
+  const numericDistance = parseFloat(distanceStr); // e.g. "4.8 km" -> 4.8
+
+  const deliveryRate = await deliveryRateModel
+    .findOne({ is_active: true })
+    .select("per_km_price");
+
+  const ratePerKm = deliveryRate?.per_km_price || 10;
+  const amount = parseFloat((numericDistance * ratePerKm).toFixed(2));
+
+  const deliveryPartnerPayment = await deliveryPartnerPaymentModel.create({
+    deliveryPartnerId,
+    orderId: order._id.toString(),
+    amount,
+    distanceInKm: numericDistance,
+    pharmacyCoordinates: {
+      lat: order.assignedPharmacyCoordinates?.lat,
+      lng: order.assignedPharmacyCoordinates?.long,
+    },
+    userCoordinates: {
+      lat: order.deliveryAddress?.coordinates?.lat,
+      lng: order.deliveryAddress?.coordinates?.long,
+    },
+    paymentStatus: "pending",
+    remarks: "Auto-added on delivery confirmation",
+  });
 
   order.orderStatus = "delivered";
   order.status = "delivered";
+  order.deliveryPartnerPaymentId = deliveryPartnerPayment._id;
 
   await order.save();
 
-  return successRes(res, 200, true, "Order delivered successfully", order);
-})
+  return successRes(res, 200, true, "Order delivered and payment recorded", deliveryPartnerPayment);
+});

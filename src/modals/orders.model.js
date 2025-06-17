@@ -181,7 +181,17 @@ const orderSchema = new mongoose.Schema({
   customerOTP: {
     type: String,
     default: null
-  }
+  },
+  deliveryPartnerPaymentId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "DeliveryPartnerPayment",
+    default: null
+  },
+  pharmacyPaymentId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "PharmacyPayment",
+    default: null
+  },
 
 }, { timestamps: true });
 

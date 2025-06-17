@@ -37,6 +37,7 @@ router.put('/reached-assigned-pharmacy', verifyDeliveryPartnerToken(), indexCont
 router.put('/reached-destination', verifyDeliveryPartnerToken(), indexController.deliveryOrderController.reachedDestination);
 router.put('/verify-customer-otp', verifyDeliveryPartnerToken(), indexController.deliveryOrderController.verifyCustomerOtp);
 router.post('/generate-upi-qr-code', verifyDeliveryPartnerToken(), indexController.deliveryOrderController.generateUPIQRCode);
+router.post('/deliver-order', verifyDeliveryPartnerToken(), indexController.deliveryOrderController.deliverOrder);
 
 // get notification routes
 router.get('/get-notification-by-recipientId', verifyDeliveryPartnerToken(), indexController.commonController.getNotifications);
