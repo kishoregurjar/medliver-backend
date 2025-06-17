@@ -42,6 +42,7 @@ const customerTestOrderController = require('./CustomerController/customerTestOr
 const promoBannerController = require('./CommonController/promoBannerController');
 const specialTestOfferController = require('./AdminController/adminTestSpecialOffers');
 const reportManagementController = require('./PathologyOwnerController/reportManagementController');
+const deliveryPartnerPaymentController = require('./DeliveryPartnerController/deliveryPartnerPaymentController');
 
 
 module.exports = {
@@ -87,5 +88,6 @@ module.exports = {
     pathologyOrderController,
     promoBannerController,
     specialTestOfferController,
-    reportManagementController
+    reportManagementController,
+    deliveryPartnerPaymentController
 }   

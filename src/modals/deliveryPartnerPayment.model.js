@@ -7,9 +7,9 @@ const DeliveryPartnerPayment = new mongoose.Schema({
         required: true,
     },
     orderId: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Order',
         required: true,
-        unique: true,
     },
     amount: {
         type: Number,
