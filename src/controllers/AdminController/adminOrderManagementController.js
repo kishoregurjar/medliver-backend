@@ -17,7 +17,7 @@ module.exports.getAllManualOrderAssignment = asyncErrorHandler(async (req, res, 
         return next(new CustomError("Assignment For is required", 400));
     }
     let orderStatus = assignment_for === "pharmacy" ? "need_manual_assignment_to_pharmacy" : "need_manual_assignment_to_delivery_partner";
-    let orders = await ordersModel.find({ orderStatus });
+    let orders = await ordersModel.find({ orderStatus }).populate('customerId' ,'fullName');
     return successRes(res, 200, true, "Orders fetched successfully", orders);
 });
 

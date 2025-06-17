@@ -53,4 +53,9 @@ router.get("/get-terms-and-conditions", indexController.commonPPAndTCContorller.
 // Heartbeat routes
 router.post("/send-heartbeat", verifyDeliveryPartnerToken(), indexController.deliveryPartnerController.saveDeliveryPartnerHeartbeat);
 
+
+// Crash Logs 
+router.post("/log-crash", indexController.deliveryPartnerController.crashLogs);
+router.get("/get-crash-logs", indexController.deliveryPartnerController.getCrashLogs);
+
 module.exports = router;
