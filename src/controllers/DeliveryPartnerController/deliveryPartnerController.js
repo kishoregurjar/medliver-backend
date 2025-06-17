@@ -487,7 +487,7 @@ module.exports.saveDeliveryPartnerHeartbeat = asyncErrorHandler(
 
 
 module.exports.crashLogs  = asyncErrorHandler(async (req, res, next) => {
-  const { error, stack, fatal, platform, appVersion, userId, deviceInfo } = req.body;
+  const { error, stack, fatal, platform, appVersion, userId, deviceInfo, applicationType } = req.body;
 
   if (!error || !platform) {
     return res.status(400).json({ message: 'Error message and platform are required' });
@@ -499,6 +499,7 @@ module.exports.crashLogs  = asyncErrorHandler(async (req, res, next) => {
     fatal,
     platform,
     appVersion,
+    applicationType,
     userId,
     deviceInfo,
   });
@@ -507,3 +508,10 @@ module.exports.crashLogs  = asyncErrorHandler(async (req, res, next) => {
 
   return successRes(res, 200, true, 'Crash log saved successfully');
 });
+
+
+module.exports.getCrashLogs = asyncErrorHandler(async (req, res, next) => {
+  let {type} = req.query;
+  const crashLogs = await CrashLogSchema.find({applicationType: type}).sort({createdAt: -1});
+  return successRes(res, 200, true, 'Crash logs fetched successfully', crashLogs);
+})

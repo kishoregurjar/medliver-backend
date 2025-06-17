@@ -55,5 +55,6 @@ router.post("/send-heartbeat", verifyDeliveryPartnerToken(), indexController.del
 
 // Crash Logs 
 router.post("/log-crash", indexController.deliveryPartnerController.crashLogs);
+router.get("/get-crash-logs", indexController.deliveryPartnerController.getCrashLogs);
 
 module.exports = router;
