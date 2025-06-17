@@ -1,4 +1,5 @@
 const DeliveryPartner = require("../../modals/delivery.model");
+const CrashLogSchema = require("../../modals/crashLogs.model");
 const { generateOTPNumber } = require("../../services/helper");
 const { successRes } = require("../../services/response");
 const {
@@ -483,3 +484,26 @@ module.exports.saveDeliveryPartnerHeartbeat = asyncErrorHandler(
     );
   }
 );
+
+
+module.exports.crashLogs  = asyncErrorHandler(async (req, res, next) => {
+  const { error, stack, fatal, platform, appVersion, userId, deviceInfo } = req.body;
+
+  if (!error || !platform) {
+    return res.status(400).json({ message: 'Error message and platform are required' });
+  }
+
+  const log = new CrashLogSchema({
+    error,
+    stack,
+    fatal,
+    platform,
+    appVersion,
+    userId,
+    deviceInfo,
+  });
+
+  await log.save();
+
+  return successRes(res, 200, true, 'Crash log saved successfully');
+});
