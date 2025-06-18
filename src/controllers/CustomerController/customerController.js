@@ -123,9 +123,17 @@ module.exports.verifyOtp = asyncErrorHandler(async (req, res, next) => {
   findUser.isVerified = true;
   findUser.otp = null;
   findUser.save({ validateBeforeSave: false });
+
+  const payload = {
+    _id: findUser._id,
+    email: findUser.email,
+  }
+
+  const token = await assignJwt(payload);
   const sanitizedUser = findUser.toObject();
   delete sanitizedUser.password;
   delete sanitizedUser.otp;
+  sanitizedUser.token = token;
   return successRes(
     res,
     200,
@@ -150,6 +158,10 @@ module.exports.loginUser = asyncErrorHandler(async (req, res, next) => {
 
   if (findUser.isVerified == false) {
     return next(new CustomError("User not verified", 301));
+  }
+
+  if (findUser.isBlocked == true) {
+    return next(new CustomError("User is blocked", 400));
   }
 
   let isMatch = await bcrypt.compare(password, findUser.password);
