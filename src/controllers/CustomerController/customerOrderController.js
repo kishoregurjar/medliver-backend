@@ -15,6 +15,7 @@ const getRouteBetweenCoords = require("../../utils/distance.helper");
 const Razorpay = require('razorpay');
 const sendFirebaseNotification = require("../../services/sendNotification");
 const notificationEnum = require("../../services/notificationEnum");
+const { getOrderStatusLabel } = require("../../services/orderStatusEnum");
 
 const instance = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -276,7 +277,12 @@ module.exports.getAllOrders = asyncErrorHandler(async (req, res, next) => {
         item.item_id = item.medicineId._id;
       }
     });
+
+    // Add readable label
+    order._doc.readableStatus = getOrderStatusLabel(order.orderStatus);
+    console.log(order._doc.readableStatus);
   });
+
 
   return successRes(res, 200, true, "Orders fetched successfully", {
     orders,
@@ -290,15 +296,23 @@ module.exports.getAllOrders = asyncErrorHandler(async (req, res, next) => {
 module.exports.getOrderById = asyncErrorHandler(async (req, res, next) => {
   const userId = req.user._id;
   let { orderId } = req.query;
+
   if (!orderId) {
     return next(new CustomError("Order ID is required", 400));
   }
+
   const order = await orderSchema.findOne({ _id: orderId, customerId: userId });
+
   if (!order) {
     return next(new CustomError("Order not found", 404));
   }
-  return successRes(res, 200, true, "Order fetched successfully", { order });
+
+  // 👇 Add readableStatus
+  order._doc.readableStatus = getOrderStatusLabel(order.orderStatus);
+
+  return successRes(res, 200, true, "Order fetched successfully", order);
 });
+
 
 module.exports.cancleOrder = asyncErrorHandler(async (req, res, next) => {
   const userId = req.user._id;
