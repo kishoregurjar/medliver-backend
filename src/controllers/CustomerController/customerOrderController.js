@@ -534,6 +534,7 @@ module.exports.searchOrder = asyncErrorHandler(async (req, res, next) => {
       { paymentStatus: regex },
       { orderType: regex },
       { paymentMethod: regex },
+      { orderNumber: regex },
     ],
   };
 

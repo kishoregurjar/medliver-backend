@@ -611,6 +611,7 @@ module.exports.searchPharmacyOrder = asyncErrorHandler(async (req, res, next) =>
       { paymentStatus: regex },
       { paymentMethod: regex },
       { pharmacyResponseStatus: regex },
+      { orderNumber: regex },
     ],
   };
 

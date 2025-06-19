@@ -265,32 +265,45 @@ module.exports.cancelOrderFromUser = asyncErrorHandler(async (req, res, next) =>
 module.exports.getOrdersPathology = asyncErrorHandler(async (req, res, next) => {
   const customerId = req.user._id;
 
+  // Get page and limit from query, set defaults
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  // Get total count for pagination info
+  const totalOrders = await orderPathologyModel.countDocuments({ customerId });
+
   const orders = await orderPathologyModel.find({ customerId })
     .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit)
     .populate("selectedTests", "name price")
     .populate("pathologyCenterId")
-    .populate("customerId") // optional, for wrapping
-  // assumes addressId is a ref
+    .populate("customerId");
 
-  const formattedOrders = orders.map(order => ({
-    _id: order._id,
-    customer: order.customerId, // already populated
-    pathologyCenter: order.pathologyCenterId,
-    selectedTests: order.selectedTests,
-    isHomeCollection: order.isHomeCollection,
-    orderStatus: order.orderStatus,
-    reportStatus: order.reportStatus,
-    paymentStatus: order.paymentStatus,
-    paymentMethod: order.paymentMethod,
-    pathologyAttempts: order.pathologyAttempts,
-    orderDate: order.orderDate,
-    cancellationReason: order.cancellationReason,
-    // createdAt: order.createdAt,
-    // updatedAt: order.updatedAt,
-  }));
+  // const formattedOrders = orders.map(order => ({
+  //   _id: order._id,
+  //   customer: order.customerId,
+  //   pathologyCenter: order.pathologyCenterId,
+  //   selectedTests: order.selectedTests,
+  //   isHomeCollection: order.isHomeCollection,
+  //   orderStatus: order.orderStatus,
+  //   reportStatus: order.reportStatus,
+  //   paymentStatus: order.paymentStatus,
+  //   paymentMethod: order.paymentMethod,
+  //   pathologyAttempts: order.pathologyAttempts,
+  //   orderDate: order.orderDate,
+  //   cancellationReason: order.cancellationReason,
+  // }));
 
-  return successRes(res, 200, true, "Customer pathology orders fetched successfully", orders);
+  return successRes(res, 200, true, "Customer pathology orders fetched successfully", {
+    orders,
+    totalOrders,
+    currentPage: Number(page),
+    totalPages: Math.ceil(totalOrders / limit),
+  });
 });
+
 
 module.exports.getOrderDetailsPathology = asyncErrorHandler(async (req, res, next) => {
   const customerId = req.user._id;
@@ -353,6 +366,7 @@ module.exports.searchOrdersPathology = asyncErrorHandler(async (req, res, next) 
       { paymentStatus: regex },
       { orderType: regex },      // if you have this field in pathology orders schema
       { paymentMethod: regex },
+      { orderNumber: regex },
     ],
   };
 
