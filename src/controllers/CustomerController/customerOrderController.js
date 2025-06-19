@@ -556,40 +556,54 @@ module.exports.searchOrder = asyncErrorHandler(async (req, res, next) => {
   });
 });
 
-module.exports.getAllPrescriptions = asyncErrorHandler(
-  async (req, res, next) => {
-    const userId = req.user._id;
-    let { page = 1 } = req.query;
-    let limit = 10;
-    page = parseInt(page) || 1;
-    let skip = (page - 1) * limit;
-    const [prescriptions, totalPrescriptions] = await Promise.all([
-      pescriptionSchema.find({ user_id: userId }).skip(skip).limit(limit),
-      pescriptionSchema.countDocuments({ user_id: userId }),
-    ]);
-    return successRes(res, 200, true, "Prescriptions fetched successfully", {
-      prescriptions,
-      totalPrescriptions,
-      currentPage: page,
-      totalPages: Math.ceil(totalPrescriptions / limit),
-    });
-  }
-);
+
+module.exports.getAllPrescriptions = asyncErrorHandler(async (req, res, next) => {
+  const userId = req.user._id;
+  let { page = 1 } = req.query;
+  const limit = 10;
+  page = parseInt(page) || 1;
+  const skip = (page - 1) * limit;
+
+  const [prescriptions, totalPrescriptions] = await Promise.all([
+    pescriptionSchema.find({ user_id: userId }).skip(skip).limit(limit).lean(),
+    pescriptionSchema.countDocuments({ user_id: userId }),
+  ]);
+
+  // Inject readableStatus using utility function
+  const updatedPrescriptions = prescriptions.map((prescription) => ({
+    ...prescription,
+    readableStatus: getOrderStatusLabel(prescription.status),
+  }));
+
+  return successRes(res, 200, true, "Prescriptions fetched successfully", {
+    prescriptions: updatedPrescriptions,
+    totalPrescriptions,
+    currentPage: page,
+    totalPages: Math.ceil(totalPrescriptions / limit),
+  });
+});
 
 module.exports.getPrescriptionDetailsById = asyncErrorHandler(
   async (req, res, next) => {
     const userId = req.user._id;
     const prescriptionId = req.query.prescriptionId;
+
     if (!prescriptionId) {
       return next(new CustomError("Prescription ID is required", 400));
     }
+
     const prescription = await pescriptionSchema.findOne({
       _id: prescriptionId,
       user_id: userId,
-    });
+    }).lean();
+
     if (!prescription) {
       return next(new CustomError("Prescription not found", 404));
     }
+
+    // Inject readableStatus
+    prescription.readableStatus = getOrderStatusLabel(prescription.status);
+
     return successRes(res, 200, true, "Prescription fetched successfully", {
       prescription,
     });
