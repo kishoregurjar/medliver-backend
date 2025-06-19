@@ -27,7 +27,7 @@ module.exports.getAllAssignedOrder = asyncErrorHandler(
 
     const pharmacyId = findPharmacy._id;
     const orders = await ordersModel.find({
-      orderStatus: "pending",
+      orderStatus: "assigned_to_pharmacy",
       assignedPharmacyId: pharmacyId,
     });
 

@@ -179,6 +179,8 @@ module.exports.createOrder = asyncErrorHandler(async (req, res, next) => {
   if (assignedPharmacy) {
     const notificationType = "pharmacy_order_request";
     const role = "pharmacy";
+    newOrder.orderStatus = "assigned_to_pharmacy";
+    await newOrder.save();
 
     const notificationRes = notificationEnum.getNotification(role, notificationType);
 
