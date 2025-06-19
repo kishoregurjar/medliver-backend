@@ -22,10 +22,10 @@ const prescriptionSchema = new mongoose.Schema({
     },
     medicines: [
         {
-          medicineId: { type: mongoose.Schema.Types.ObjectId, ref: 'Medicine', required: true },
-          quantity: { type: Number, required: true },
+            medicineId: { type: mongoose.Schema.Types.ObjectId, ref: 'Medicine', required: true },
+            quantity: { type: Number, required: true },
         }
-      ],
+    ],
     user_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Customer',
@@ -115,6 +115,19 @@ const prescriptionSchema = new mongoose.Schema({
     created_at: {
         type: Date,
         default: Date.now,
+    },
+    paymentStatus: {
+        type: String,
+        enum: ["pending", "paid", "failed"],
+        default: "pending"
+    },
+    paymentMethod: {
+        type: String,
+        enum: ["UPI", "CARD", "WALLET", "COD"],
+    },
+    paymentDate: {
+        type: Date,
+        default: Date.now
     }
 });
 

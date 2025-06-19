@@ -64,6 +64,7 @@ router.post('/verify-payment', validate(verifyRazorpayPaymentValidation), indexC
 router.post('/upload-prescription', verifyUserToken(), uploadPrescription, indexController.customerOrderController.uploadPrescription)
 router.get("/get-all-prescriptions", verifyUserToken(), indexController.customerOrderController.getAllPrescriptions);
 router.get("/get-prescription-details-by-id", validateQuery(getprescriptionByIdValidation), verifyUserToken(), indexController.customerOrderController.getPrescriptionDetailsById);
+router.get('/search-prescription', verifyUserToken(), indexController.customerOrderController.searchPrescription);
 
 /** Map Integration */
 router.post('/search-autocomplete-address', validate(autoCompleteAddressValidation), indexController.commonController.autoCompleteAddress);

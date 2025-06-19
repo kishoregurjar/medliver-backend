@@ -612,3 +612,46 @@ module.exports.getPrescriptionDetailsById = asyncErrorHandler(
     });
   }
 );
+
+module.exports.searchPrescription = asyncErrorHandler(async (req, res, next) => {
+  let { value, page, limit } = req.query;
+
+  if (!value) {
+    return next(new CustomError("Search value is required", 400));
+  }
+
+  page = parseInt(page) || 1;
+  limit = parseInt(limit) || 10;
+  const skip = (page - 1) * limit;
+
+  const regex = new RegExp(value.trim(), "i");
+
+  const searchQuery = {
+    $or: [
+      { status: regex },
+      { paymentStatus: regex },
+      { paymentMethod: regex },
+      { prescriptionNumber: regex },
+    ],
+  };
+
+  const [totalPrescriptions, allPrescriptions] = await Promise.all([
+    pescriptionSchema.countDocuments(searchQuery),
+    pescriptionSchema
+      .find(searchQuery)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit),
+  ]);
+
+  if (allPrescriptions.length === 0) {
+    return successRes(res, 200, false, "No Orders Found", []);
+  }
+
+  return successRes(res, 200, true, "Orders fetched successfully", {
+    prescriptions: allPrescriptions,
+    currentPage: page,
+    totalPages: Math.ceil(totalPrescriptions / limit),
+    totalPrescriptions,
+  });
+});
