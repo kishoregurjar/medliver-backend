@@ -754,6 +754,7 @@ router.get('/get-all-manual-assignment', verifyAdminToken("superadmin"), indexCo
 router.get('/get-all-nearby-pharmacy-to-customer', validateQuery(getNearbyDeliveryToPharmacy), verifyAdminToken("superadmin"), indexController.adminOrderManagementController.getNearByPharmacyToCustomer);
 router.post('/assign-manual-order-to-pharmacy', validate(manuallyAssignOrderToPharmacy), verifyAdminToken("superadmin"), indexController.adminOrderManagementController.manuallyAssignOrderToPhramacy);
 router.get('/get-all-nearby-partner-to-pharmacy', validateQuery(getNearbyDeliveryToPharmacy), verifyAdminToken("superadmin"), indexController.adminOrderManagementController.getNearyByDeliveryToPharmacy);
+router.post('/assign-manual-order-to-partner', verifyAdminToken("superadmin"), indexController.adminOrderManagementController.manuallyAssignOrderToDeliveryPartner);
 
 
 /** Send Global Notification */

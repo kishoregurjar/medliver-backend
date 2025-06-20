@@ -31,9 +31,9 @@ const notificationEnum = {
         }
     },
     delivery: {
-        delivery_order_request: {
-            title: "New Order",
-            message: "You have a new order"
+        delivery_partner_pickup_request: {
+            title: "New Delivery Request",
+            message: "You have a Order Pickup Request"
         }
     },
 

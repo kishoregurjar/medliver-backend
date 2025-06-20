@@ -17,7 +17,7 @@ module.exports.getAllManualOrderAssignment = asyncErrorHandler(async (req, res, 
         return next(new CustomError("Assignment For is required", 400));
     }
     let orderStatus = assignment_for === "pharmacy" ? "need_manual_assignment_to_pharmacy" : "need_manual_assignment_to_delivery_partner";
-    let orders = await ordersModel.find({ orderStatus }).populate('customerId' ,'fullName');
+    let orders = await ordersModel.find({ orderStatus }).populate('customerId', 'fullName');
     return successRes(res, 200, true, "Orders fetched successfully", orders);
 });
 
@@ -193,11 +193,11 @@ module.exports.manuallyAssignOrderToDeliveryPartner = asyncErrorHandler(async (r
     if (!findDeliveryPartner) {
         return next(new CustomError("Delivery Partner not found", 404));
     }
+    if (findDeliveryPartner.isBlocked) {
+        return next(new CustomError("Delivery Partner is blocked", 400));
+    }
     if (findDeliveryPartner.availabilityStatus !== "available") {
         return next(new CustomError("Delivery Partner is not online", 400));
-    }
-    if (findDeliveryPartner.status !== 'active') {
-        return next(new CustomError("Delivery Partner is not active", 400));
     }
     if (!findDeliveryPartner.location?.lat || !findDeliveryPartner.location?.long) {
         return next(new CustomError("Delivery Partner location is not available", 400));
@@ -207,7 +207,7 @@ module.exports.manuallyAssignOrderToDeliveryPartner = asyncErrorHandler(async (r
     }
     let deliveryPartnerDeviceToken = findDeliveryPartner.deviceToken;
     // Assign pharmacy and update status
-    order.assignedDeliveryPartnerId = deliveryPartnerId;
+    order.deliveryPartnerId = deliveryPartnerId;
     order.orderStatus = "assigned_to_delivery_partner";
 
     // Push to pharmacyAttempts
@@ -216,13 +216,15 @@ module.exports.manuallyAssignOrderToDeliveryPartner = asyncErrorHandler(async (r
         status: "pending", // can later be updated by pharmacy
         attemptedAt: new Date()
     });
+    let notificationType = "delivery_partner_pickup_request";
+    let role = 'delivery';
+    let notificiationRes = notificationEnum.getNotification(role, notificationType);
 
-    // Create and send notification
     let newNotification = new notificationModel({
-        title: "New Order",
-        message: "You have a new order",
+        title: notificiationRes.title,
+        message: notificiationRes.message,
         recipientType: "delivery_partner",
-        notificationType: "delivery_partner_order_request",
+        notificationType: notificationType,
         NotificationTypeId: order._id,
         recipientId: deliveryPartnerDeviceToken
     });
@@ -231,8 +233,8 @@ module.exports.manuallyAssignOrderToDeliveryPartner = asyncErrorHandler(async (r
 
     await sendExpoNotification(
         [deliveryPartnerDeviceToken],
-        "New Order",
-        "You have a new order",
+        notificiationRes.title,
+        notificiationRes.message,
         newNotification
     );
 
