@@ -49,11 +49,11 @@ module.exports.createPathologyOrder = asyncErrorHandler(async (req, res, next) =
     availabilityStatus: "available",
     deviceToken: { $ne: null },
     centerCoordinates: { $ne: null },
-    availableTests: {
-      $elemMatch: {
-        testId: { $in: convertedTestIds }
-      }
-    }
+    // availableTests: {
+    //   $elemMatch: {
+    //     testId: { $in: convertedTestIds }
+    //   }
+    // }
   });
 
   console.log(allCenters, "allCenters");
