@@ -220,7 +220,7 @@ module.exports.manuallyAssignOrderToDeliveryPartner = asyncErrorHandler(async (r
         recipientType: "delivery_partner",
         notificationType: notificationType,
         NotificationTypeId: order._id,
-        recipientId: deliveryPartnerDeviceToken
+        recipientId: deliveryPartnerId
     });
 
     await newNotification.save();
