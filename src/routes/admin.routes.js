@@ -790,4 +790,8 @@ router.get("/get-all-special-test-offer", verifyAdminToken("superadmin"), indexC
 router.get("/get-special-test-offer-by-id", verifyAdminToken("superadmin"), indexController.specialTestOfferController.getSpecialTestOfferById);
 router.delete("/delete-special-test-offer", verifyAdminToken("superadmin"), indexController.specialTestOfferController.deleteSpecialTestOffer);
 
+/** Delivery Partner Payment Management */
+
+router.get('/get-all-delivery-partner-payment', verifyAdminToken("superadmin"), indexController.adminPaymentManagementController.getDeliveryPartnerPayment);
+
 module.exports = router;

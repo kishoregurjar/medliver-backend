@@ -5,8 +5,7 @@ const { successRes } = require("../../services/response");
 const CustomError = require("../../utils/customError");
 
 module.exports.getDeliveryPartnerPayment = asyncErrorHandler(async (req, res, next) => {
-    let { paymentStatus, timePeriod } = req.query;
-    let deliveryPartnerId = req.partner._id;
+    let { paymentStatus, timePeriod, deliveryPartnerId } = req.query;
 
     if (!paymentStatus) {
         return next(new CustomError("Payment Status is required", 400));
@@ -32,7 +31,6 @@ module.exports.getDeliveryPartnerPayment = asyncErrorHandler(async (req, res, ne
             filter.createdAt = { $gte: moment(now).subtract(1, 'years').toDate() };
             break;
         case "all":
-            // No date filter needed
             break;
         default:
             return next(new CustomError("Invalid time period", 400));

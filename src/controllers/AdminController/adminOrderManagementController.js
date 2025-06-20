@@ -144,9 +144,6 @@ module.exports.getNearyByDeliveryToPharmacy = asyncErrorHandler(async (req, res,
     if (order.orderStatus !== "need_manual_assignment_to_delivery_partner") {
         return next(new CustomError("This order cannot be assigned manually to a delivery partner", 400));
     }
-
-
-
     const nearByDeliveryPartners = await deliveryModel.find({
         deviceToken: { $ne: null },
         location: { $ne: null },
@@ -165,10 +162,7 @@ module.exports.getNearyByDeliveryToPharmacy = asyncErrorHandler(async (req, res,
             };
         })
     );
-
     sortedPartnerWithDistance.sort((a, b) => a.distanceInKm - b.distanceInKm);
-
-
     return successRes(res, 200, true, "Delivery Partners fetched successfully", sortedPartnerWithDistance);
 
 });
