@@ -66,15 +66,22 @@ module.exports.getStockByPharmacyId = asyncErrorHandler(async (req, res, next) =
 });
 
 module.exports.getAllStock = asyncErrorHandler(async (req, res, next) => {
+  let adminId = req.admin._id;
   let { page, limit } = req.query;
 
+const pharmacy = await Pharmacy.findOne({ adminId });
+  if (!pharmacy) {
+    return next(new CustomError("Pharmacy not found", 404));
+  }
+
+  
   page = parseInt(page) || 1;
   limit = parseInt(limit) || 10;
   const skip = (page - 1) * limit;
 
   const [totalStock, allStock] = await Promise.all([
-    Stock.countDocuments(),
-    Stock.find()
+    Stock.countDocuments({pharmacyId: pharmacy._id}),
+    Stock.find({ pharmacyId: pharmacy._id })
       .populate("medicineId")
       .populate("pharmacyId")
       .sort({ createdAt: -1 })
