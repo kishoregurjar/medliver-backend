@@ -457,7 +457,7 @@ module.exports.uploadPrescription = asyncErrorHandler(async (req, res, next) => 
     notification = new notificationModel({
       title: notificationRes.title,
       message: notificationRes.message,
-      recipientType: "pharmacyOwner",
+      recipientType: "pharmacy",
       notificationType: notificationType,
       NotificationTypeId: prescription._id,
       recipientId: assignedPharmacy._id,
