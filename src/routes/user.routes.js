@@ -29,7 +29,7 @@ router.delete("/delete-address", validateQuery(getOrDeleteCustomerAddress), veri
 router.get('/get-address-by-id', validateQuery(getOrDeleteCustomerAddress), verifyUserToken(), indexController.customerController.getAddressById);
 router.put('/set-default-address', validate(getOrDeleteCustomerAddress), verifyUserToken(), indexController.customerController.setDefaultAddress);
 
-/** Featue and selling and special offer Routes */
+/** Featue and selling and special offer Ro nutes */
 
 router.get("/get-all-feature-product", validateQuery(getAllFeatureProductValidation), indexController.customerSpecialProductController.getAllFeaturedProducts)
 router.get("/get-all-top-selling-product", validateQuery(getAllSellingProductValidation), indexController.customerSpecialProductController.getAllSellingProduct);
