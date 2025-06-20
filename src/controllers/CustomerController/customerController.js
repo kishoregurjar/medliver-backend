@@ -29,31 +29,18 @@ module.exports.registerUser = asyncErrorHandler(async (req, res, next) => {
       return next(new CustomError("All fields are required", 400));
     }
 
-    const findCustomer = await customerModel.findOne({
-      $or: [{ email }, { phoneNumber }],
-    });
-    if (findCustomer) {
-      if (findCustomer.isVerified) {
-        await session.abortTransaction();
-        session.endSession();
-        return successRes(
-          res,
-          200,
-          true,
-          "Customer already register",
-          findCustomer
-        );
-      } else {
-        await session.abortTransaction();
-        session.endSession();
-        return successRes(
-          res,
-          200,
-          true,
-          "Customer not verified",
-          findCustomer
-        );
-      }
+    const existingEmail = await customerModel.findOne({ email });
+    if (existingEmail) {
+      await session.abortTransaction();
+      session.endSession();
+      return next(new CustomError("Email is already registered", 400));
+    }
+
+    const existingPhone = await customerModel.findOne({ phoneNumber });
+    if (existingPhone) {
+      await session.abortTransaction();
+      session.endSession();
+      return next(new CustomError("Phone number is already registered", 400));
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
