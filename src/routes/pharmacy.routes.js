@@ -3,7 +3,7 @@ const indexController = require("../controllers/indexController");
 const { verifyAdminToken } = require('../utils/jsonWebToken');
 const router = express.Router();
 const { uploadLicenceImagePharmacy } = require('../services/multer');
-const { validate, validateQuery, createStockValidation, getStockByPharmacyIdValidation,searchMedicineValidation, getAllStockValidation, deleteStockValidation, updateStockValidation } = require('../middleware/validation');
+const { validate, validateQuery, createStockValidation, getStockByPharmacyIdValidation, searchMedicineValidation, getAllStockValidation, deleteStockValidation, updateStockValidation } = require('../middleware/validation');
 
 /*=======================================StockRoute=================================== */
 
@@ -44,10 +44,13 @@ router.get(
     indexController.medicineController.searchMedicine
 );
 router.get('/search-prescription-by-status', verifyAdminToken("pharmacy"), indexController.pharmacyOrderController.searchPrescriptionsByStatus);
-router.get('/search-orders-by-status',verifyAdminToken("pharmacy"), indexController.pharmacyOrderController.searchOrdersByStatus)
+router.get('/search-orders-by-status', verifyAdminToken("pharmacy"), indexController.pharmacyOrderController.searchOrdersByStatus)
 router.post("/create-invoice-for-prescription", verifyAdminToken('pharmacy'), indexController.pharmacyOrderController.createInvoiceForPrescription);
 
 // Toggle availability status 
 router.put("/change-availability-status", verifyAdminToken('pharmacy'), indexController.pharmacyController.changePharmacyAvailabilityStatus);
+
+/** Payment Management */
+router.get('/get-all-payments', verifyAdminToken("pharmacy"), indexController.pharmacyPaymentController.getAllPayments);
 
 module.exports = router;

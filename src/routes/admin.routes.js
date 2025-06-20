@@ -795,4 +795,9 @@ router.delete("/delete-special-test-offer", verifyAdminToken("superadmin"), inde
 router.get('/get-all-delivery-partner-payment', verifyAdminToken("superadmin"), indexController.adminPaymentManagementController.getDeliveryPartnerPayment);
 router.post('/pay-delivery-partner', verifyAdminToken("superadmin"), indexController.adminPaymentManagementController.payDeliveryPartner);
 
+/** Pharmacy Payment Management */
+
+// router.get('/get-all-pharmacy-payment', verifyAdminToken("superadmin"), indexController.adminPaymentManagementController.);
+router.get('/get-all-pharmacy-payment', verifyAdminToken("superadmin"), indexController.adminPharmacyPayController.getPharmacyAllPayments);
+
 module.exports = router;

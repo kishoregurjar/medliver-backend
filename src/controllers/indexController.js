@@ -43,7 +43,10 @@ const promoBannerController = require('./CommonController/promoBannerController'
 const specialTestOfferController = require('./AdminController/adminTestSpecialOffers');
 const reportManagementController = require('./PathologyOwnerController/reportManagementController');
 const deliveryPartnerPaymentController = require('./DeliveryPartnerController/deliveryPartnerPaymentController');
-const adminPaymentManagementController = require('./AdminController/adminPaymentManagementController');
+const adminPaymentManagementController = require('./AdminController/adminDeliveryPaymentManagementController');
+const adminPharmacyPayController = require('./AdminController/adminPharmacyPayController');
+const pharmacyPaymentController = require('./PharmacyOwnerController/pharmacyPaymentController');
+
 
 
 module.exports = {
@@ -91,5 +94,7 @@ module.exports = {
     specialTestOfferController,
     reportManagementController,
     deliveryPartnerPaymentController,
-    adminPaymentManagementController
+    adminPaymentManagementController,
+    adminPharmacyPayController,
+    pharmacyPaymentController
 }   
