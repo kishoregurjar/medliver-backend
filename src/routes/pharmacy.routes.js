@@ -3,11 +3,7 @@ const indexController = require("../controllers/indexController");
 const { verifyAdminToken } = require('../utils/jsonWebToken');
 const router = express.Router();
 const { uploadLicenceImagePharmacy } = require('../services/multer');
-<<<<<<< Updated upstream
-const { validate, validateQuery, createStockValidation, getStockByPharmacyIdValidation, searchMedicineValidation, getAllStockValidation, deleteStockValidation, updateStockValidation } = require('../middleware/validation');
-=======
 const { validate, validateQuery, getAllApiValidation, createStockValidation, getStockByPharmacyIdValidation,searchMedicineValidation, getAllStockValidation, deleteStockValidation, updateStockValidation } = require('../middleware/validation');
->>>>>>> Stashed changes
 
 /*=======================================StockRoute=================================== */
 
