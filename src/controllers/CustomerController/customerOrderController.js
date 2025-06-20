@@ -376,7 +376,7 @@ module.exports.uploadPrescription = asyncErrorHandler(
 module.exports.uploadPrescription = asyncErrorHandler(async (req, res, next) => {
   const userId = req.user._id;
   const { deliveryAddressId } = req.body;
-
+  console.log("deliveryAddressId", deliveryAddressId);
   if (!req.files || req.files.length === 0) {
     return next(new CustomError("No files uploaded.", 400));
   }
@@ -386,6 +386,7 @@ module.exports.uploadPrescription = asyncErrorHandler(async (req, res, next) => 
     customer_id: userId,
     _id: deliveryAddressId,
   });
+  console.log(findAddress, "findAddress");
   if (!findAddress) {
     return next(new CustomError("Delivery address not found", 404));
   }
