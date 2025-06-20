@@ -15,6 +15,9 @@ const DeliveryPartnerPayment = new mongoose.Schema({
         type: Number,
         required: true,
     },
+    paidAt: {
+        type: Date, // ✅ New field added
+    },
     paymentStatus: {
         type: String,
         enum: ['pending', 'paid',],

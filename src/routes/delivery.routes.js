@@ -39,6 +39,7 @@ router.put('/verify-customer-otp', verifyDeliveryPartnerToken(), indexController
 router.post('/generate-upi-qr-code', verifyDeliveryPartnerToken(), indexController.deliveryOrderController.generateUPIQRCode);
 router.post('/deliver-order', verifyDeliveryPartnerToken(), indexController.deliveryOrderController.deliverOrder);
 router.get('/get-payments', verifyDeliveryPartnerToken(), indexController.deliveryPartnerPaymentController.getDeliveryPartnerPayment);
+router.get('/get-total-earnings', verifyDeliveryPartnerToken(), indexController.deliveryPartnerPaymentController.getTotalEarnings);
 
 // get notification routes
 router.get('/get-notification-by-recipientId', verifyDeliveryPartnerToken(), indexController.commonController.getNotifications);
